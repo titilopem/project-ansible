@@ -1,66 +1,63 @@
 ---
-- name: Install and configure Tomcat
-  hosts: group1
+- name: Update Package Managers, Install Tomcat, and Reload
+  hosts: all
   become: yes
 
-  vars:
-    tomcat_version: "10.1.15"
-    tomcat_download_url: "https://dlcdn.apache.org/tomcat/tomcat-{{ tomcat_version }}/v{{ tomcat_version }}/src/apache-tomcat-{{ tomcat_version }}-src.tar.gz"
-
   tasks:
-    - name: Ensure tomcat user is present
-      user:
+    - name: Check distribution
+      command: "{{ ansible_distribution }}"
+      register: distribution_check
+
+    - name: Update package manager on Ubuntu
+      apt:
+        update_cache: yes
+      when: "'Ubuntu' in distribution_check.stdout"
+
+    - name: Update package manager on Amazon Linux
+      yum:
+        name: '*'
+        state: latest
+      when: "'Amazon' in distribution_check.stdout"
+
+    - name: Update package manager on CentOS
+      yum:
+        name: '*'
+        state: latest
+      when: "'CentOS' in distribution_check.stdout"
+
+    - name: Install Tomcat on Ubuntu
+      apt:
         name: tomcat
-        system: yes
-        shell: /bin/false
+        state: present
+      when: "'Ubuntu' in distribution_check.stdout"
 
-    - name: Set ownership of Tomcat directory
-      file:
-        path: /opt/tomcat
-        state: directory
-        owner: tomcat
-        group: tomcat
+    - name: Install Tomcat on Amazon Linux
+      yum:
+        name: tomcat
+        state: present
+      when: "'Amazon' in distribution_check.stdout"
 
-    - name: Set ownership of Tomcat bin directory
-      file:
-        path: /opt/tomcat/bin
-        state: directory
-        owner: tomcat
-        group: tomcat
+    - name: Install Tomcat on CentOS
+      yum:
+        name: tomcat
+        state: present
+      when: "'CentOS' in distribution_check.stdout"
 
-    - name: Set execute permissions on startup script
-      file:
-        path: /opt/tomcat/bin/startup.sh
-        state: file
-        mode: '0755'
+    - name: Reload Tomcat on Ubuntu
+      service:
+        name: tomcat
+        state: reloaded
+      when: "'Ubuntu' in distribution_check.stdout"
 
-    - name: Download Tomcat
-      get_url:
-        url: "{{ tomcat_download_url }}"
-        dest: "/opt/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
-      register: download_result
+    - name: Reload Tomcat on Amazon Linux
+      service:
+        name: tomcat
+        state: reloaded
+      when: "'Amazon' in distribution_check.stdout"
 
-    - name: Extract Tomcat
-      ansible.builtin.unarchive:
-        src: "/opt/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
-        dest: "/opt/tomcat"
-        remote_src: yes
-
-    - name: Copy Tomcat systemd service file
-      template:
-        src: tomcat.service.j2
-        dest: /etc/systemd/system/tomcat.service
-      notify:
-        - Reload systemd
-        - Restart Tomcat
-
-  handlers:
-    - name: Reload systemd
-      command: systemctl daemon-reload
-      become: yes
-
-    - name: Restart Tomcat
+    - name: Reload Tomcat on CentOS
       systemd:
         name: tomcat
         state: restarted
+      when: "'CentOS' in distribution_check.stdout"
 ...
