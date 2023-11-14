@@ -17,7 +17,7 @@
       when: "'Debian' in ansible_distribution or 'Ubuntu' in ansible_distribution"
 
     - name: Install Git on Amazon Linux
-      yum:
+      dnf:
         name: git
         state: present
       when: "'Amazon' in ansible_distribution"
