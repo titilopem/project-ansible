@@ -1,5 +1,5 @@
 - name: Manage Apache Tomcat
-  hosts: group1
+  hosts: all
   become: true
 
   tasks:
@@ -22,20 +22,32 @@
           tomcat
           {%- endif -%}
 
+    - name: Set Tomcat path based on distribution
+      ansible.builtin.set_fact:
+        tomcat_path: "/opt/{{ tomcat_service_name }}"
+
+    - name: Download Apache Tomcat archive
+      ansible.builtin.get_url:
+        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
+        dest: "/tmp"
+        mode: '0644'
+
+    - name: Extract and move Tomcat contents
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-8.5.72.tar.gz"
+        dest: "{{ tomcat_path }}"
+        remote_src: yes
+
     - name: Reload systemd
-      ansible.builtin.command: "systemctl daemon-reload"
+      ansible.builtin.systemd:
+        daemon_reload: yes
 
     - name: Shutdown Tomcat service if running
-      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && /opt/{{ tomcat_service_name }}/bin/shutdown.sh'"
-      ignore_errors: yes  # Ignoring errors if script is not found or service not running
-
-    - name: Check if shutdown.sh exists
-      ansible.builtin.stat:
-        path: "/opt/{{ tomcat_service_name }}/bin/shutdown.sh"
-      register: shutdown_script
+      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && {{ tomcat_path }}/bin/shutdown.sh'"
+      ignore_errors: yes  # Ignore errors if script is not found or service not running
 
     - name: Start Tomcat service if shutdown.sh exists
-      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && /opt/{{ tomcat_service_name }}/bin/startup.sh'"
-      ignore_errors: yes  # Ignoring errors if script is not found or service not running
-      when: shutdown_script.stat.exists
+      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && {{ tomcat_path }}/bin/startup.sh'"
+      ignore_errors: yes  # Ignore errors if script is not found or service not running
+      when: tomcat_path + '/bin/shutdown.sh' | stat | succeeded
 ...
