@@ -1,134 +1,55 @@
 ---
-- name: Install and Configure Tomcat 10 on Ubuntu, CentOS, and Amazon Linux
+- name: Install and Configure Tomcat on Multiple Operating Systems
   hosts: group1
   become: yes
 
+  vars:
+    tomcat_version: "10.0.23"
+    tomcat_service_name: "tomcat"
+
   tasks:
     - name: Update package system
-      apt:
-        update_cache: yes
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Update package system (CentOS)
-      yum:
-        name: '*'
+      package:
+        name: "*"
         state: latest
-      when: "'CentOS' in ansible_os_family"
+      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
 
-    - name: Update package system (Amazon Linux)
-      dnf:
-        name: '*'
-        state: latest
-      when: "'Amazon' in ansible_os_family"
-
-    - name: Install default available Java (Ubuntu)
-      apt:
-        name: default-jdk
-        state: present
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Install default available Java (CentOS)
-      yum:
+    - name: Install default available Java
+      package:
         name: java-1.8.0-openjdk
         state: present
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Install default available Java (Amazon Linux)
-      dnf:
-        name: java
-        state: present
-      when: "'Amazon' in ansible_distribution"
 
     - name: Install wget
       package:
         name: wget
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Install wget (CentOS)
-      yum:
-        name: wget
         state: present
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Install wget (Amazon Linux)
-      dnf:
-        name: wget
-        state: present
-      when: "'Amazon' in ansible_distribution"
 
     - name: Create a directory for Tomcat installation
       file:
-        path: /usr/local/tomcat
+        path: "/usr/local/tomcat"
         state: directory
 
-    - name: Download Tomcat 10
+    - name: Download Tomcat
       ansible.builtin.get_url:
-        url: "https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
-        dest: "/usr/local/tomcat/apache-tomcat-10.0.23.tar.gz"
+        url: "https://archive.apache.org/dist/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "/usr/local/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
     - name: Extract Tomcat archive
       ansible.builtin.unarchive:
-        src: "/usr/local/tomcat/apache-tomcat-10.0.23.tar.gz"
+        src: "/usr/local/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
         dest: "/usr/local/tomcat/"
         remote_src: yes
       become: yes
 
-    - name: Debug distribution and OS family
-      debug:
-        var: ansible_os_family
-      run_once: yes
-      
-    - name: Debug distribution version
-      debug:
-        var: ansible_distribution_version
-      run_once: yes
-
-    - name: Debug CentOS/Amazon condition
-      debug:
-        var: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family"
-      run_once: yes
-
-    - name: Debug OS family
-      debug:
-        var: ansible_os_family
-
-    - name: Reload systemd on CentOS/RedHat
-      systemd:
-        state: reloaded
-        name: "tomcat"
-      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
-
-    - name: System CTL
-      ansible.builtin.command: "systemctl daemon-reload"
-      become: yes
-
-    - name: Reload systemd on CentOS/RedHat
-      systemd:
-        state: reloaded
-        name: "tomcat"
-      when: "'CentOS' in ansible_distribution or 'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
-
-    - name: Reload systemd on Amazon Linux
+    - name: Reload systemd
       systemd:
         state: restarted
-        name: "apache-tomcat-10.0.23"
-      when: "'Amazon' in ansible_distribution_file_variety"
+        name: "{{ tomcat_service_name }}"
+      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Ubuntu' in ansible_os_family or 'Debian' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
 
-    - name: Reload systemd on Ubuntu
+    - name: Start Tomcat
       systemd:
-        state: restarted
-        name: "tomcat9"
-      when: "'Debian' in ansible_os_family or 'Debian' in ansible_distribution_file_variety"
-
-    - name: Start Tomcat (CentOS / Amazon)
-      systemd:
-        name: "apache-tomcat-10.0.23"
+        name: "{{ tomcat_service_name }}"
         state: started
-      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety 'CentOS' in ansible_distribution_file_variety"
-      
-    - name: Start Tomcat (Ubuntu)
-      systemd:
-        name: "tomcat9"
-        state: started
-      when: "'Debian' in ansible_os_family or 'Debian' in ansible_distribution_file_variety"
+      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Ubuntu' in ansible_os_family or 'Debian' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
 ...
