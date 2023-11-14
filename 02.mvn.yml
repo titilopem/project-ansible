@@ -1,6 +1,6 @@
 ---
 - name: Install Maven on CentOS
-  hosts: n3c
+  hosts: n5c
   become: yes
 
   tasks:
