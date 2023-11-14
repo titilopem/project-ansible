@@ -106,6 +106,12 @@
 
     - name: Reload systemd on CentOS/RedHat
       systemd:
+        state: reloaded
+        name: "tomcat"
+      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
+
+    - name: Reload systemd on CentOS/RedHat
+      systemd:
         state: restarted
         name: "tomcat"
       when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
