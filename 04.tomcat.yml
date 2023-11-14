@@ -1,63 +1,39 @@
 ---
 - name: Update Package Managers, Install Tomcat, and Reload
-  hosts: all
+  hosts: group1
   become: yes
 
   tasks:
-    - name: Check distribution
-      command: "{{ ansible_distribution }}"
-      register: distribution_check
+    - name: Gather Facts about the distribution
+      setup:
+      register: distribution_facts
 
     - name: Update package manager on Ubuntu
       apt:
         update_cache: yes
-      when: "'Ubuntu' in distribution_check.stdout"
+      when: "'Ubuntu' in distribution_facts.ansible_facts.distribution"
 
     - name: Update package manager on Amazon Linux
       yum:
         name: '*'
         state: latest
-      when: "'Amazon' in distribution_check.stdout"
+      when: "'Amazon' in distribution_facts.ansible_facts.distribution"
 
     - name: Update package manager on CentOS
       yum:
         name: '*'
         state: latest
-      when: "'CentOS' in distribution_check.stdout"
+      when: "'CentOS' in distribution_facts.ansible_facts.distribution"
 
-    - name: Install Tomcat on Ubuntu
-      apt:
+    - name: Install Tomcat
+      package:
         name: tomcat
         state: present
-      when: "'Ubuntu' in distribution_check.stdout"
+      when: "'Ubuntu' in distribution_facts.ansible_facts.distribution or 'Amazon' in distribution_facts.ansible_facts.distribution or 'CentOS' in distribution_facts.ansible_facts.distribution"
 
-    - name: Install Tomcat on Amazon Linux
-      yum:
-        name: tomcat
-        state: present
-      when: "'Amazon' in distribution_check.stdout"
-
-    - name: Install Tomcat on CentOS
-      yum:
-        name: tomcat
-        state: present
-      when: "'CentOS' in distribution_check.stdout"
-
-    - name: Reload Tomcat on Ubuntu
-      service:
-        name: tomcat
-        state: reloaded
-      when: "'Ubuntu' in distribution_check.stdout"
-
-    - name: Reload Tomcat on Amazon Linux
-      service:
-        name: tomcat
-        state: reloaded
-      when: "'Amazon' in distribution_check.stdout"
-
-    - name: Reload Tomcat on CentOS
+    - name: Reload Tomcat
       systemd:
         name: tomcat
         state: restarted
-      when: "'CentOS' in distribution_check.stdout"
+      when: "'Ubuntu' in distribution_facts.ansible_facts.distribution or 'Amazon' in distribution_facts.ansible_facts.distribution or 'CentOS' in distribution_facts.ansible_facts.distribution"
 ...
