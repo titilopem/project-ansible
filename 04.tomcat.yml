@@ -30,19 +30,18 @@
         owner: tomcat
         group: tomcat
 
-    - name: Reload init.d configuration
+    - name: Reload and restart Tomcat service
       ansible.builtin.command:
-        cmd: "service tomcat reload"
+        cmd: "systemctl daemon-reload && systemctl restart tomcat"
       ignore_errors: yes
 
-    - name: Shutdown Tomcat service
-      ansible.builtin.service:
-        name: tomcat
-        state: stopped
-      ignore_errors: yes
+    - name: Shutdown Tomcat service (fallback for non-systemd systems)
+      ansible.builtin.command:
+        cmd: "/opt/tomcat/bin/shutdown.sh"
+      when: "'Active: active' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
 
-    - name: Start Tomcat service
-      ansible.builtin.service:
-        name: tomcat
-        state: started
+    - name: Start Tomcat service (fallback for non-systemd systems)
+      ansible.builtin.command:
+        cmd: "/opt/tomcat/bin/startup.sh"
+      when: "'Active: inactive' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
 ...
