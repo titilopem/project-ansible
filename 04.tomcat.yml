@@ -30,12 +30,8 @@
         owner: tomcat
         group: tomcat
 
-    - name: Reload systemd configuration
-      ansible.builtin.command:
-        cmd: "systemctl daemon-reload"
-
     - name: Start Tomcat service if it's inactive
-      ansible.builtin.systemd:
-        name: "/opt/tomcat"
+      ansible.builtin.service:
+        name: tomcat
         state: started
 ...
