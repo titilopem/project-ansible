@@ -82,8 +82,8 @@
       systemd:
         name: "tomcat"
         state: started
-      when: "'CentOS' in ansible_os_family
-
+      when: "'CentOS' in ansible_os_family"
+      
     - name: Start Tomcat (Ubuntu)
       systemd:
         name: "tomcat9"
