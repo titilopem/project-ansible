@@ -28,7 +28,7 @@
       when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 
     - name: Check Java version
-      command: java -version
+      command: "/usr/bin/java -version"
       register: java_version_output
       changed_when: false
       failed_when: "'openjdk version' not in java_version_output.stdout"
