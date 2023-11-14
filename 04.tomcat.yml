@@ -34,15 +34,20 @@
       ansible.builtin.command:
         cmd: "systemctl daemon-reload"
 
+    - name: Detect Tomcat service name based on distribution
+      set_fact:
+        tomcat_service_name: "{{ 'tomcat' }}"
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Amazon'  # Adjust for other distributions
+
     - name: Check Tomcat service status
       ansible.builtin.command:
-        cmd: "systemctl is-active tomcat"
+        cmd: "systemctl is-active {{ tomcat_service_name }}"
       register: tomcat_status
       ignore_errors: true
 
     - name: Start Tomcat service if it's inactive
       ansible.builtin.systemd:
-        name: tomcat
+        name: "{{ tomcat_service_name }}"
         state: started
       when: tomcat_status.rc == 3
 ...
