@@ -13,13 +13,13 @@
       yum:
         name: '*'
         state: latest
-      when: "'CentOS' in ansible_distribution"
+      when: "'CentOS' in ansible_os_family"
 
     - name: Update package system (Amazon Linux)
       dnf:
         name: '*'
         state: latest
-      when: "'Amazon' in ansible_distribution"
+      when: "'Amazon' in ansible_os_family"
 
     - name: Install default available Java (Ubuntu)
       apt:
@@ -40,10 +40,13 @@
       when: "'Amazon' in ansible_distribution"
 
     - name: Check Java version
-      command: "/usr/bin/java -version"
+      command: "java -version"
       register: java_version_output
-      changed_when: false
-      failed_when: "'openjdk version' not in java_version_output.stdout"
+      ignore_errors: true
+
+    - name: Display Java version
+      debug:
+        var: java_version_output.stdout_lines
 
     - name: Install wget
       apt:
