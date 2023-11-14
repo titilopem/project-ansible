@@ -112,7 +112,7 @@
     - name: Reload systemd on Amazon Linux
       systemd:
         state: reloaded
-      when: 'Amazon' in ansible_distribution_file_variety"
+      when: "'Amazon' in ansible_distribution_file_variety"
 
     - name: Reload systemd on Ubuntu
       systemd:
