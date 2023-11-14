@@ -18,7 +18,7 @@
         group: tomcat
 
     - name: Download and extract Tomcat
-      ansible.builtin.get_url:
+      get_url:
         url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
         dest: "/opt/tomcat/apache-tomcat.tar.gz"
 
@@ -30,7 +30,18 @@
         owner: tomcat
         group: tomcat
 
-    - name: Start Tomcat service if it's inactive
+    - name: Reload init.d configuration
+      ansible.builtin.command:
+        cmd: "service tomcat reload"
+      ignore_errors: yes
+
+    - name: Shutdown Tomcat service
+      ansible.builtin.service:
+        name: tomcat
+        state: stopped
+      ignore_errors: yes
+
+    - name: Start Tomcat service
       ansible.builtin.service:
         name: tomcat
         state: started
