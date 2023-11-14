@@ -82,7 +82,12 @@
       debug:
         var: ansible_distribution_version
       run_once: yes
-      
+
+    - name: Debug CentOS/Amazon condition
+      debug:
+        var: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family"
+      run_once: yes
+
     - name: Start Tomcat (CentOS / Amazon)
       systemd:
         name: "tomcat"
