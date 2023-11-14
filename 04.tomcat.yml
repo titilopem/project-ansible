@@ -73,15 +73,21 @@
         remote_src: yes
       become: yes
 
-    - name: Start Tomcat
+    - name: Start Tomcat (CentOS)
       systemd:
         name: "tomcat"
         state: started
-      when: "'Amazon' in ansible_os_family or 'CentOS' in ansible_os_family"
+      when: "'CentOS' in ansible_os_family"
 
     - name: Start Tomcat (Ubuntu)
       systemd:
-        name: "tomcat9"
+        name: "tomcat"
         state: started
       when: "'Ubuntu' in ansible_os_family"
+
+    - name: Start Tomcat (Amazon Linux)
+      systemd:
+        name: "tomcat"
+        state: started
+      when: "'Amazon' in ansible_os_family"
 ...
