@@ -1,87 +1,65 @@
 ---
-- name: Install Apache Tomcat 9.0.82 Deployer using Ansible
-  hosts: group1
-  become: true
+- name: Install Apache Tomcat
+  hosts: all
+  become: yes
   vars:
-    tomcat_version: "9.0.82"
-    tomcat_install_path: "/opt/tomcat{{ tomcat_version }}"
-    tomcat_url: "https://dlcdn.apache.org/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}-deployer.tar.gz"
-    tomcat_service_file: "/etc/systemd/system/tomcat.service"
+    tomcat_version: "8.5.72"
+    tomcat_download_url: "https://archive.apache.org/dist/tomcat/tomcat-8/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+    tomcat_install_dir: "/opt/tomcat"
 
   tasks:
-    - name: Update the System Packages on Ubuntu
-      ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
-      when: ansible_distribution == 'Ubuntu'
+    - name: Update package cache
+      package_facts:
+        manager: auto
 
-    - name: Install Update on Amazon Linux
-      ansible.builtin.yum:
-        name: update
-      when: ansible_distribution == 'Amazon'
-
-    - name: Install Update on Debian
-      ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
-      when: ansible_distribution == 'Debian'
-
-    - name: Install JAVA
-      ansible.builtin.package:
-        name: "{{ 'openjdk-11-jdk' if ansible_distribution in ['Debian', 'Ubuntu'] else 'java-11-amazon-corretto-headless' }}"
+    - name: Install required packages
+      package:
+        name: "{{ item }}"
         state: present
+      loop:
+        - openjdk-8-jre
+        - libtcnative-1
 
-    - name: Create a Tomcat User
-      ansible.builtin.user:
-        name: tomcat
+    - name: Download Apache Tomcat archive
+      get_url:
+        url: "{{ tomcat_download_url }}"
+        dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
-    - name: Create a Tomcat Group
-      ansible.builtin.group:
-        name: tomcat
-
-    - name: Create a Tomcat Directory
-      ansible.builtin.file:
-        path: "{{ tomcat_install_path }}"
-        owner: tomcat
-        group: tomcat
-        mode: 755
-        recurse: yes
-        state: directory
-
-    - name: Download Tomcat9 Deployer archive
-      ansible.builtin.get_url:
-        url: "{{ tomcat_url }}"
-        dest: "/tmp/apache-tomcat-{{ tomcat_version }}-deployer.tar.gz"
-        mode: '0755'
-
-    - name: Unarchive Tomcat9 Deployer
+    - name: Extract Apache Tomcat archive
       ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-{{ tomcat_version }}-deployer.tar.gz"
-        dest: "{{ tomcat_install_path }}"
+        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "{{ tomcat_install_dir }}"
         remote_src: yes
-        extra_opts: ['--strip-components=1']
-        creates: "{{ tomcat_install_path }}/bin/catalina.sh"
 
-    - name: Change ownership of Tomcat directory
+    - name: Set ownership and permissions
       ansible.builtin.file:
-        path: "{{ tomcat_install_path }}"
-        owner: tomcat
-        group: tomcat
-        mode: "u+rwx,g+rx,o=rx"
-        recurse: yes
+        path: "{{ tomcat_install_dir }}"
         state: directory
+        owner: root
+        group: root
+        mode: '0755'
+        recurse: yes
 
-    - name: Copy Tomcat service from local to remote
-      ansible.builtin.copy:
-        src: /local/path/to/tomcat.service
-        dest: "{{ tomcat_service_file }}"
-        mode: 0755
-      when: ansible_distribution in ['Ubuntu', 'Amazon', 'Debian']
+    - name: Start Apache Tomcat
+      ansible.builtin.shell:
+        cmd: "{{ tomcat_install_dir }}/bin/startup.sh"
+        executable: /bin/bash
+      environment:
+        CATALINA_HOME: "{{ tomcat_install_dir }}"
+      async: 120
+      poll: 0
 
-    - name: Start and Enable Tomcat on server
-      ansible.builtin.systemd:
+    - name: Add Tomcat startup script to rc.local
+      lineinfile:
+        dest: /etc/rc.local
+        line: "{{ tomcat_install_dir }}/bin/startup.sh"
+        create: yes
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+
+    - name: Enable Tomcat service on Ubuntu
+      systemd:
         name: tomcat
-        state: started
         enabled: yes
-        daemon_reload: yes
+        state: started
+      when: ansible_distribution == 'Ubuntu'
 ...
