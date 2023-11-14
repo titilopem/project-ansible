@@ -30,15 +30,12 @@
         owner: tomcat
         group: tomcat
 
-    - name: Reload systemd configuration and restart Tomcat service
-      shell:
-        cmd: "systemctl daemon-reload && systemctl restart tomcat"
-      when: "'Active: active' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
+    - name: Reload and restart Tomcat service
+      command: "systemctl daemon-reload"
 
-    - name: Start Tomcat service if not running
-      systemd:
-        name: tomcat
-        state: started
-        enabled: yes
-      when: "'Active: inactive' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
+    - name: shutdown Tomcat service
+      command: "/opt/tomcat/bin/shutdown.sh"
+
+    - name: startup Tomcat service
+      command: "/opt/tomcat/bin/startup.sh"
 ...
