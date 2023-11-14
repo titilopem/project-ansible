@@ -73,11 +73,16 @@
         remote_src: yes
       become: yes
 
-    - name: Debug distribution and service names
+    - name: Debug distribution and OS family
       debug:
-        var: ansible_distribution + '-' + ansible_distribution_version + '-' + ansible_os_family
+        var: ansible_os_family
       run_once: yes
-
+      
+    - name: Debug distribution version
+      debug:
+        var: ansible_distribution_version
+      run_once: yes
+      
     - name: Start Tomcat (CentOS / Amazon)
       systemd:
         name: "tomcat"
