@@ -1,3 +1,4 @@
+---
 - name: Install and Configure Tomcat 10 on Ubuntu, CentOS, and Amazon Linux
   hosts: group1
   become: yes
@@ -30,13 +31,13 @@
       yum:
         name: java-1.8.0-openjdk
         state: present
-      when: "'CentOS' in ansible_os_family"
+      when: "'CentOS' in ansible_distribution"
 
     - name: Install default available Java (Amazon Linux)
       dnf:
-        name: java-1.8.0-openjdk
+        name: java
         state: present
-      when: "'Amazon' in ansible_os_family"
+      when: "'Amazon' in ansible_distribution"
 
     - name: Install wget
       package:
@@ -47,13 +48,13 @@
       yum:
         name: wget
         state: present
-      when: "'CentOS' in ansible_os_family"
+      when: "'CentOS' in ansible_distribution"
 
     - name: Install wget (Amazon Linux)
       dnf:
         name: wget
         state: present
-      when: "'Amazon' in ansible_os_family"
+      when: "'Amazon' in ansible_distribution"
 
     - name: Create a directory for Tomcat installation
       file:
@@ -76,7 +77,7 @@
       debug:
         var: ansible_os_family
       run_once: yes
-
+      
     - name: Debug distribution version
       debug:
         var: ansible_distribution_version
@@ -91,25 +92,42 @@
       debug:
         var: ansible_os_family
 
-    - name: Start Tomcat (CentOS / RedHat)
+    - name: Reload systemd on CentOS/RedHat
+      systemd:
+        state: reloaded
+        name: "tomcat"
+      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
+
+    - name: Reload systemd on CentOS/RedHat
+      systemd:
+        state: restarted
+        name: "tomcat"
+      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
+
+    - name: System CTL
+      ansible.builtin.command: "systemctl daemon-reload"
+
+    - name: Reload systemd on Amazon Linux
+      systemd:
+        state: restarted
+        name: "tomcat"
+      when: "'Amazon' in ansible_distribution_file_variety"
+
+    - name: Reload systemd on Ubuntu
+      systemd:
+        state: restarted
+        name: "tomcat9"
+      when: "'Debian' in ansible_os_family"
+
+    - name: Start Tomcat (CentOS / Amazon)
       systemd:
         name: "tomcat"
         state: started
-      when: "'CentOS' in ansible_distribution_file_variety or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
-
+      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
+      
     - name: Start Tomcat (Ubuntu)
       systemd:
         name: "tomcat9"
         state: started
       when: "'Debian' in ansible_os_family"
-
-    - name: Reload systemd
-      systemd:
-        state: restarted
-        name: "tomcat"
-      when: "'CentOS' in ansible_distribution_file_variety or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
-
-    - name: System CTL
-      ansible.builtin.command: "systemctl daemon-reload"
-      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
 ...
