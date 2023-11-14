@@ -40,5 +40,5 @@
         name: tomcat
         state: started
         enabled: yes
-      when: "'Active
+      when: "'Active: inactive' in (ansible.builtin.shell('systemctl status tomcat').stdout | default(''))"
 ...
