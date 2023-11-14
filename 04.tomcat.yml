@@ -16,20 +16,18 @@
       when: not tomcat_archive.stat.exists
 
     - name: Extract and move Tomcat contents
-      ansible.builtin.block:
-        name: Extract and move Tomcat
-        tasks:
-          - ansible.builtin.unarchive:
-              src: "/opt/apache-tomcat-8.5.72.tar.gz"
-              dest: "/opt/"
-              remote_src: yes
-            args:
-              creates: "/opt/apache-tomcat-8.5.72/"  # Skip if directory already present
+      ansible.builtin.unarchive:
+        src: "/opt/apache-tomcat-8.5.72.tar.gz"
+        dest: "/opt/"
+        remote_src: yes
+      when: not tomcat_archive.stat.exists
 
-          - ansible.builtin.shell: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
-            args:
-              creates: "/opt/tomcat/bin/startup.sh"  # Skip if files are already present
+    - name: Move Tomcat contents to /opt/tomcat
+      ansible.builtin.shell: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
+      args:
+        creates: "/opt/tomcat/bin/startup.sh"  # Skip if files are already present
 
+    # The rest of your tasks remain unchanged
     - name: Set environment variables
       ansible.builtin.lineinfile:
         path: "/etc/environment"
