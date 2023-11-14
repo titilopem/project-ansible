@@ -3,6 +3,10 @@
   hosts: group1
   become: yes
 
+  vars:
+    tomcat_version: "10.1.15"
+    tomcat_download_url: "https://dlcdn.apache.org/tomcat/tomcat-{{ tomcat_version }}/v{{ tomcat_version }}/src/apache-tomcat-{{ tomcat_version }}-src.tar.gz"
+
   tasks:
     - name: Ensure tomcat user is present
       user:
@@ -39,9 +43,8 @@
     - name: Extract Tomcat
       ansible.builtin.unarchive:
         src: "/opt/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
-        dest: /opt/tomcat
+        dest: "/opt/tomcat"
         remote_src: yes
-      when: download_result.changed
 
     - name: Copy Tomcat systemd service file
       template:
