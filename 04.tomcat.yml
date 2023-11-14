@@ -1,18 +1,16 @@
 ---
 - name: Install and configure Tomcat
   hosts: group1
-  become: true
-  gather_facts: true
+  become: yes
 
   tasks:
     - name: Ensure tomcat user is present
       user:
         name: tomcat
-        system: true
+        system: yes
         shell: /bin/false
 
     - name: Set ownership of Tomcat directory
-      become_user: tomcat
       file:
         path: /opt/tomcat
         state: directory
@@ -20,7 +18,6 @@
         group: tomcat
 
     - name: Set ownership of Tomcat bin directory
-      become_user: tomcat
       file:
         path: /opt/tomcat/bin
         state: directory
@@ -28,7 +25,6 @@
         group: tomcat
 
     - name: Set execute permissions on startup script
-      become_user: tomcat
       file:
         path: /opt/tomcat/bin/startup.sh
         state: file
@@ -36,35 +32,24 @@
 
     - name: Download and extract Tomcat
       get_url:
-        url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.15/src/apache-tomcat-10.1.15-src.tar.gz"
-        dest: "/tmp/apache-tomcat-10.1.15-src.tar.gz"
-        mode: '0644'
+        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.15/src/apache-tomcat-10.1.15-src.tar.gz
+        dest: /opt/tomcat/apache-tomcat.tar.gz
 
     - name: Extract Tomcat
-      become_user: tomcat
-      unarchive:
-        src: "/tmp/apache-tomcat-10.1.15-src.tar.gz"
-        dest: "/opt/tomcat"
+      ansible.builtin.unarchive:
+        src: /opt/tomcat/apache-tomcat.tar.gz
+        dest: /opt/tomcat
         remote_src: yes
-        owner: tomcat
-        group: tomcat
 
     - name: Copy Tomcat systemd service file
-      become: true
-      copy:
-        src: "/etc/systemd/system/tomcat.service"
-        dest: "/etc/systemd/system/tomcat.service"
-        owner: root
-        group: root
-        mode: '0644'
+      template:
+        src: tomcat.service.j2
+        dest: /etc/systemd/system/tomcat.service
+      notify: Reload systemd
 
-    - name: Reload systemd to pick up new unit files
-      become: true
+  handlers:
+    - name: Reload systemd
       systemd:
         name: tomcat
         state: restarted
-        daemon_reload: yes
-
-  vars:
-    tomcat_version: "10.1.15"  # Adjust to the desired Tomcat version
 ...
