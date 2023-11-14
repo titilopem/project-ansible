@@ -8,22 +8,15 @@
       yum:
         name:
           - java-11-openjdk
-          - java-11-openjdk-devel
         state: present
+      when: "'CentOS' in ansible_distribution"
 
-    - name: Set Java 11 as the default Java version
-      alternatives:
-        name: java
-        path: /usr/lib/jvm/java-11-openjdk/bin/java
-
-    - name: Set Java 11 compiler as the default
-      alternatives:
-        name: javac
-        path: /usr/lib/jvm/java-11-openjdk/bin/javac
+    - name: Set Java 11 as the default Java version (CentOS)
+      command: alternatives --install /usr/bin/java java /usr/lib/jvm/java-11-openjdk-<arch>/bin/java 1
+      args:
+        creates: /usr/bin/java
+      when: "'CentOS' in ansible_distribution"
 
     - name: Display Java version
       command: java -version
-
-    - name: Display Java compiler version
-      command: javac -version
 ...
