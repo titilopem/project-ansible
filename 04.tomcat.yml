@@ -1,6 +1,6 @@
 ---
 - name: Update Package Managers, Install Tomcat, and Reload
-  hosts: all
+  hosts: group1
   become: yes
 
   tasks:
