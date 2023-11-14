@@ -1,0 +1,22 @@
+# ansible install http server
+---
+- name: Install HTTP server
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Install HTTPD
+    yum:
+     name: httpd
+     state: present
+     
+  - name: Start httpd
+    service:
+     name: httpd
+     state: started
+
+  - name: Enable httpd
+    service:
+     name: httpd
+     enabled: yes
+...
