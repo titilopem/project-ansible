@@ -116,6 +116,9 @@
         name: "tomcat"
       when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
 
+    - name: System CTL
+      ansible.builtin.command: "systemctl daemon-reload"
+
     - name: Reload systemd on Amazon Linux
       systemd:
         state: restarted
