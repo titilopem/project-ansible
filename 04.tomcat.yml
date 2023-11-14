@@ -30,22 +30,24 @@
         state: file
         mode: '0755'
 
-    - name: Download and extract Tomcat
+    - name: Download Tomcat
       get_url:
-        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.15/src/apache-tomcat-10.1.15-src.tar.gz
-        dest: /opt/tomcat/apache-tomcat.tar.gz
+        url: "{{ tomcat_download_url }}"
+        dest: "/opt/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
+      register: download_result
 
     - name: Extract Tomcat
       ansible.builtin.unarchive:
-        src: /opt/tomcat/apache-tomcat.tar.gz
+        src: "/opt/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
         dest: /opt/tomcat
         remote_src: yes
+      when: download_result.changed
 
     - name: Copy Tomcat systemd service file
       template:
         src: tomcat.service.j2
         dest: /etc/systemd/system/tomcat.service
-      notify: 
+      notify:
         - Reload systemd
         - Restart Tomcat
 
@@ -58,5 +60,4 @@
       systemd:
         name: tomcat
         state: restarted
-
 ...
