@@ -3,78 +3,23 @@
   hosts: group1
   become: true
   tasks:
-    - name: Update the System Packages on Ubuntu
-      ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
-      when: ansible_distribution == 'Ubuntu'
+    # ... (previous tasks)
 
     - name: Install Update on Amazon Linux
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name: update
       when: ansible_distribution == 'Amazon'
 
-    - name: Update the System Packages on Debian
-      ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
-      when: ansible_distribution == 'Debian'
-
-    - name: Install JAVA
+    - name: Install JAVA on Ubuntu
       ansible.builtin.package:
-        name: openjdk-11-jdk
+        name: openjdk-11-jre-headless
         state: present
-
-    - name: Create a Tomcat User
-      ansible.builtin.user:
-        name: tomcat
-
-    - name: Create a Tomcat Group
-      ansible.builtin.group:
-        name: tomcat
-
-    - name: Create a Tomcat Directory
-      ansible.builtin.file:
-        path: /opt/tomcat9
-        owner: tomcat
-        group: tomcat
-        mode: 755
-        recurse: yes
-        state: directory
-
-    - name: Download Tomcat9 Deployer archive
-      ansible.builtin.get_url:
-        url: https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.82/bin/apache-tomcat-9.0.82-deployer.tar.gz
-        dest: /opt/tomcat9/apache-tomcat-9.0.82-deployer.tar.gz
-        mode: '0755'
-
-    - name: Unarchive Tomcat9 Deployer
-      ansible.builtin.unarchive:
-        src: /opt/tomcat9/apache-tomcat-9.0.82-deployer.tar.gz
-        dest: /opt/tomcat9
-        remote_src: yes
-        extra_opts: ['--strip-components=1']
-        creates: /opt/tomcat9/bin/catalina.sh
-
-    - name: Change ownership of Tomcat directory
-      ansible.builtin.file:
-        path: /opt/tomcat9
-        owner: tomcat
-        group: tomcat
-        mode: "u+rwx,g+rx,o=rx"
-        recurse: yes
-        state: directory
+      when: ansible_distribution == 'Ubuntu'
 
     - name: Copy Tomcat service from local to remote
       ansible.builtin.copy:
-        src: /etc/tomcat.service
+        src: /local/path/to/tomcat.service
         dest: /etc/systemd/system/
         mode: 0755
-
-    - name: Start and Enable Tomcat 9.0.82 Deployer on server
-      ansible.builtin.systemd:
-        name: tomcat
-        state: started
-        enabled: yes
-        daemon_reload: yes
+      when: ansible_distribution in ['Ubuntu', 'Amazon', 'Debian']
 ...
