@@ -78,21 +78,15 @@
         var: ansible_distribution + '-' + ansible_distribution_version + '-' + ansible_os_family
       run_once: yes
 
-    - name: Start Tomcat (CentOS)
+    - name: Start Tomcat (CentOS / Amazon)
       systemd:
         name: "tomcat"
         state: started
-      when: "'CentOS' in ansible_os_family"
+      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family"
       
     - name: Start Tomcat (Ubuntu)
       systemd:
         name: "tomcat9"
         state: started
       when: "'Ubuntu' in ansible_os_family"
-
-    - name: Start Tomcat (Amazon Linux)
-      systemd:
-        name: "tomcat"
-        state: started
-      when: "'Amazon' in ansible_os_family"
 ...
