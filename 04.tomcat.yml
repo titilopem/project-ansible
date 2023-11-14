@@ -35,7 +35,5 @@
         cmd: "systemctl daemon-reload"
 
     - name: Start Tomcat service if it's inactive
-      ansible.builtin.systemd:
-        name: tomcat
-        state: started
+      command: "/opt/tomcat/bin/startup.sh"
 ...
