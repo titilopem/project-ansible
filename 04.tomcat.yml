@@ -1,5 +1,5 @@
 ---
-- hosts: group1
+- hosts: all
   become: true
   tasks:
     - name: Add Tomcat user
@@ -9,31 +9,24 @@
         shell: /bin/nologin
         createhome: false
 
-    - name: Download and extract Tomcat
-      get_url:
-        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
-        dest: /opt/tomcat/apache-tomcat.tar.gz
-
     - name: Create Tomcat directory
-      unarchive:
-        src: /opt/tomcat/apache-tomcat.tar.gz
-        dest: /opt/tomcat
-        remote_src: true
-        owner: tomcat
-        group: tomcat
-
-    - name: Set permissions on Tomcat directory
-      file:
+      ansible.builtin.file:
         path: /opt/tomcat
         state: directory
         mode: 0750
-        recurse: yes
         owner: tomcat
         group: tomcat
 
-    - name: Start and enable Tomcat
-      systemd:
-        name: tomcat
-        enabled: yes
-        state: started
+    - name: Download and extract Tomcat
+      ansible.builtin.get_url:
+        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
+        dest: "/opt/tomcat/apache-tomcat.tar.gz"
+
+    - name: Extract Tomcat archive
+      ansible.builtin.unarchive:
+        src: "/opt/tomcat/apache-tomcat.tar.gz"
+        dest: "/opt/tomcat/"
+        remote_src: true
+        owner: tomcat
+        group: tomcat
 ...
