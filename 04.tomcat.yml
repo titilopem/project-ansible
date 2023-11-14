@@ -88,6 +88,10 @@
         var: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family"
       run_once: yes
 
+    - name: Debug OS family
+      debug:
+        var: ansible_os_family
+
     - name: Start Tomcat (CentOS / Amazon)
       systemd:
         name: "tomcat"
