@@ -1,6 +1,6 @@
 ---
 - name: Manage Apache Tomcat
-  hosts: your_target_hosts
+  hosts: group1
   become: true
 
   tasks:
