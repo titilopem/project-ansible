@@ -27,6 +27,13 @@
       args:
         creates: "/opt/tomcat/bin/startup.sh"  # Skip if files are already present
 
+    # Set JAVA_HOME
+    - name: Set JAVA_HOME
+      ansible.builtin.lineinfile:
+        path: "/etc/environment"
+        line: "JAVA_HOME=/path/to/your/java_home"  # Replace with the correct path
+        create: yes
+
     # The rest of your tasks remain unchanged
     - name: Set environment variables
       ansible.builtin.lineinfile:
