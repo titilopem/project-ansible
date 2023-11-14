@@ -1,51 +1,42 @@
 ---
-- hosts: group1
+- name: Manage Apache Tomcat
+  hosts: your_target_hosts
   become: true
+
   tasks:
-    - name: Add Tomcat user
-      user:
-        name: tomcat
-        home: /opt/tomcat
-        shell: /bin/nologin
-        createhome: false
+    - name: Check if Apache Tomcat archive already exists
+      stat:
+        path: "/opt/apache-tomcat-8.5.72.tar.gz"
+      register: tomcat_archive
 
-    - name: Create Tomcat directory
-      file:
-        path: /opt/tomcat
-        state: directory
-        mode: 0750
-        owner: tomcat
-        group: tomcat
-
-    - name: Download and extract Tomcat
+    - name: Download Apache Tomcat 8.5.72 if not present
       get_url:
         url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
-        dest: "/opt/tomcat/apache-tomcat.tar.gz"
+        dest: "/opt/apache-tomcat-8.5.72.tar.gz"
+      when: not tomcat_archive.stat.exists
 
-    - name: Extract Tomcat archive
-      ansible.builtin.unarchive:
-        src: "/opt/tomcat/apache-tomcat.tar.gz"
-        dest: "/opt/tomcat/"
-        remote_src: true
-        owner: tomcat
-        group: tomcat
+    - name: Extract the Tomcat archive
+      command: "tar xvf /opt/apache-tomcat-8.5.72.tar.gz -C /opt/"
+      args:
+        creates: /opt/apache-tomcat-8.5.72/  # Skip extraction if directory already present
 
-    - name: Reload and restart Tomcat service
-      ansible.builtin.shell:
-        cmd: "systemctl daemon-reload && systemctl restart tomcat"
-      changed_when: false
+    - name: Move Tomcat contents to /opt/tomcat
+      command: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
+      args:
+        creates: /opt/tomcat/bin/startup.sh  # Skip if files are already present
 
-    - name: Shutdown Tomcat service (fallback for non-systemd systems)
-      ansible.builtin.shell:
-        cmd: "/opt/tomcat/bin/shutdown.sh"
-      when: "'Active: active' in (result.stdout | default(''))"
-      changed_when: false
-      register: result
+    - name: Set environment variables
+      lineinfile:
+        path: "/etc/environment"
+        line: "CATALINA_HOME=/opt/tomcat"
+        create: yes
 
-    - name: Start Tomcat service (fallback for non-systemd systems)
-      ansible.builtin.shell:
-        cmd: "/opt/tomcat/bin/startup.sh"
-      when: "'Active: inactive' in (result.stdout | default(''))"
-      changed_when: false
-      register: result
+    - name: System CTL
+      command: "systemctl daemon-reload"
+
+    - name: Shutdown Tomcat service
+      command: "/opt/tomcat/bin/shutdown.sh"
+
+    - name: Start Tomcat service
+      command: "/opt/tomcat/bin/startup.sh"
 ...
