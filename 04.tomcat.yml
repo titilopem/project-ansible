@@ -26,9 +26,7 @@
       ansible.builtin.command: "systemctl daemon-reload"
 
     - name: Shutdown Tomcat service
-      ansible.builtin.command: "/opt/tomcat/bin/shutdown.sh"
-      args:
-        executable: "{{ java_home_path }}/bin/bash"  # Specify the bash executable with JAVA_HOME
+      ansible.builtin.command: "/bin/bash -c 'source /etc/environment && /opt/tomcat/bin/shutdown.sh'"
       ignore_errors: yes  # Ignoring errors as the service might not be running
 
     - name: Start Tomcat service
