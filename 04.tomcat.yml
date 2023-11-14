@@ -1,27 +1,17 @@
 ---
-- hosts: all
+- hosts: group1
   become: true
-  vars:
-    java_package:
-      - java-11-openjdk   # Java 11 package name for CentOS and Amazon Linux
-      - openjdk-11-jdk    # Java 11 package name for Debian and Ubuntu
-
   tasks:
     - name: Add Tomcat user
-      user:
+      ansible.builtin.user:
         name: tomcat
         home: /opt/tomcat
         shell: /bin/nologin
         createhome: false
 
-    - name: Check if Java is installed
-      stat:
-        path: /path/to/java/bin/java  # Adjust the path to the java executable
-      register: java_installed
-
     - name: Download and extract Tomcat
       get_url:
-        url: "https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.82/src/apache-tomcat-9.0.82-src.tar.gz"
+        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
         dest: /opt/tomcat/apache-tomcat.tar.gz
 
     - name: Create Tomcat directory
