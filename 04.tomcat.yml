@@ -9,23 +9,35 @@
         update_cache: yes
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Update package system
+    - name: Update package system (CentOS)
+      yum:
+        name: '*'
+        state: latest
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Update package system (Amazon Linux)
       dnf:
         name: '*'
         state: latest
-      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+      when: "'Amazon' in ansible_distribution"
 
-    - name: Install default available Java
+    - name: Install default available Java (Ubuntu)
       apt:
         name: default-jdk
         state: present
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Install default available Java
+    - name: Install default available Java (CentOS)
+      yum:
+        name: java
+        state: present
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Install default available Java (Amazon Linux)
       dnf:
         name: java
         state: present
-      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+      when: "'Amazon' in ansible_distribution"
 
     - name: Check Java version
       command: "/usr/bin/java -version"
@@ -39,11 +51,17 @@
         state: present
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Install wget
+    - name: Install wget (CentOS)
+      yum:
+        name: wget
+        state: present
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Install wget (Amazon Linux)
       dnf:
         name: wget
         state: present
-      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+      when: "'Amazon' in ansible_distribution"
 
     - name: Create a directory for Tomcat installation
       file:
@@ -67,15 +85,21 @@
       args:
         creates: /usr/local/tomcat
 
-    - name: Start Tomcat
+    - name: Start Tomcat (CentOS)
       systemd:
         name: tomcat
         state: started
-      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+      when: "'CentOS' in ansible_distribution"
 
-    - name: Start Tomcat
+    - name: Start Tomcat (Ubuntu)
       systemd:
         name: tomcat9
         state: started
       when: "'Ubuntu' in ansible_distribution"
+
+    - name: Start Tomcat (Amazon Linux)
+      systemd:
+        name: tomcat
+        state: started
+      when: "'Amazon' in ansible_distribution"
 ...
