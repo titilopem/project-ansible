@@ -1,0 +1,43 @@
+---
+- name: Install Maven on CentOS
+  hosts: n3c
+  become: yes 
+
+  tasks:
+    - name: Install wget (if not already installed)
+      yum:
+        name: wget
+        state: present 
+
+    - name: Download Apache Maven
+      shell: "wget https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz -O /tmp/apache-maven-3.9.5-bin.tar.gz"
+      args:
+        creates: /apache-maven-3.9.5-bin.tar.gz  # Skip download if already present
+
+    - name: Extract Maven archive
+      shell: "tar xzf /tmp/apache-maven-3.9.5-bin.tar.gz -C /opt"
+      args:
+        creates: /opt/apache-maven-3.9.5  # Skip extraction if already present
+
+    - name: Create symbolic link to Maven
+      file:
+        src: /opt/apache-maven-3.9.5
+        dest: /opt/maven
+        state: link
+        force: yes
+
+    - name: Set Maven environment variables
+      lineinfile:
+        path: /etc/profile.d/maven.sh
+        create: yes
+        line: |
+          export MAVEN_HOME=/opt/maven
+          export PATH=${MAVEN_HOME}/bin:${PATH}
+      notify: reload shell environment
+      args:
+        creates: /etc/profile.d/maven.sh  # Skip if already present
+
+  handlers:
+    - name: reload shell environment
+      shell: "exec bash"
+...

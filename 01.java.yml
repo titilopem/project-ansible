@@ -1,0 +1,29 @@
+---
+- name: Install Java 11 on CentOS
+  hosts: all 
+  become: yes
+
+  tasks:
+    - name: Install Java 11
+      yum:
+        name:
+          - java-11-openjdk
+          - java-11-openjdk-devel
+        state: present
+
+    - name: Set Java 11 as the default Java version
+      alternatives:
+        name: java
+        path: /usr/lib/jvm/java-11-openjdk/bin/java
+
+    - name: Set Java 11 compiler as the default
+      alternatives:
+        name: javac
+        path: /usr/lib/jvm/java-11-openjdk/bin/javac
+
+    - name: Display Java version
+      command: java -version
+
+    - name: Display Java compiler version
+      command: javac -version
+...
