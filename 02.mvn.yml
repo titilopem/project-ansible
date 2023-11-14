@@ -40,10 +40,4 @@
     - name: Reload shell environment
       command: ". /etc/profile.d/maven.sh"
       become: yes
-
-      - name: restart maven service
-        service:
-         name: maven
-         state: restarted
-         become: yes
 ...
