@@ -1,63 +1,70 @@
 ---
 - name: Install and configure Tomcat
   hosts: group1
-  become: yes
-
-  vars:
-    tomcat_user: tomcat
-    tomcat_group: tomcat
-    tomcat_home: /opt/tomcat
-    tomcat_bin: "{{ tomcat_home }}/bin/startup.sh"
-    tomcat_service_src: /path/to/your/tomcat.service
-    tomcat_service_dest: /etc/systemd/system/tomcat.service
+  become: true
+  gather_facts: true
 
   tasks:
     - name: Ensure tomcat user is present
       user:
-        name: "{{ tomcat_user }}"
-        system: yes
-        shell: /bin/bash
-        home: "{{ tomcat_home }}"
+        name: tomcat
+        system: true
+        shell: /bin/false
 
     - name: Set ownership of Tomcat directory
+      become_user: tomcat
       file:
-        path: "{{ tomcat_home }}"
+        path: /opt/tomcat
         state: directory
-        owner: "{{ tomcat_user }}"
-        group: "{{ tomcat_group }}"
-        recurse: yes
+        owner: tomcat
+        group: tomcat
 
     - name: Set ownership of Tomcat bin directory
+      become_user: tomcat
       file:
-        path: "{{ tomcat_home }}/bin"
+        path: /opt/tomcat/bin
         state: directory
-        owner: "{{ tomcat_user }}"
-        group: "{{ tomcat_group }}"
-        recurse: yes
+        owner: tomcat
+        group: tomcat
 
     - name: Set execute permissions on startup script
+      become_user: tomcat
       file:
-        path: "{{ tomcat_bin }}"
+        path: /opt/tomcat/bin/startup.sh
         state: file
         mode: '0755'
-        owner: "{{ tomcat_user }}"
-        group: "{{ tomcat_group }}"
+
+    - name: Download and extract Tomcat
+      get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.15/src/apache-tomcat-10.1.15-src.tar.gz"
+        dest: "/tmp/apache-tomcat-10.1.15-src.tar.gz"
+        mode: '0644'
+
+    - name: Extract Tomcat
+      become_user: tomcat
+      unarchive:
+        src: "/tmp/apache-tomcat-10.1.15-src.tar.gz"
+        dest: "/opt/tomcat"
+        remote_src: yes
+        owner: tomcat
+        group: tomcat
 
     - name: Copy Tomcat systemd service file
+      become: true
       copy:
-        src: "{{ tomcat_service_src }}"
-        dest: "{{ tomcat_service_dest }}"
+        src: "/etc/systemd/system/tomcat.service"
+        dest: "/etc/systemd/system/tomcat.service"
         owner: root
         group: root
         mode: '0644'
 
-    - name: Reload systemd after updating service file
-      systemd:
-        daemon_reload: yes
-
-    - name: Start Tomcat service
+    - name: Reload systemd to pick up new unit files
+      become: true
       systemd:
         name: tomcat
-        state: started
-        enabled: yes
+        state: restarted
+        daemon_reload: yes
+
+  vars:
+    tomcat_version: "10.1.15"  # Adjust to the desired Tomcat version
 ...
