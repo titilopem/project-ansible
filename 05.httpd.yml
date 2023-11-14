@@ -1,0 +1,91 @@
+
+
+
+
+
+
+
+[centos@ip-172-31-45-247 ~]$ cd ansible-work/
+[centos@ip-172-31-45-247 ansible-work]$ ls
+01-single-play.yml  05-food.yml            09-static.yml     13-php-app.yml      dynamic.j2  maintenance.html
+02-multi-play.yml   06-maintenance.yml     10-dynamic.yml    14-angular-app.yml  hosts1.ini  php
+03-httpd.yml        07-ubuntu.yml          11-variables.yml  angular             hosts2.ini  README.md
+04-ecomm.yml        08-multi-platform.yml  12-html-app.yml   apache              html        static.html
+[centos@ip-172-31-45-247 ansible-work]$ vi 08-multi-platform.yml 
+[centos@ip-172-31-45-247 ansible-work]$ clear
+
+[centos@ip-172-31-45-247 ansible-work]$ vi 08-multi-platform.yml 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  - name: Install Apache2
+    apt:
+     name: apache2
+     state: present
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Start apache2
+    service:
+     name: apache2
+     state: started
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Enable apache2
+    service:
+     name: apache2
+     enabled: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Install HTTPD
+    yum:
+     name: httpd
+     state: present
+    when: ansible_distribution == "CentOS"
+
+  - name: Start httpd
+    service:
+     name: httpd
+     state: started
+    when: ansible_distribution == "CentOS"
+
+  - name: Enable httpd
+    service:
+     name: httpd
+     enabled: yes
+    when: ansible_distribution == "CentOS"
+
+  - command: apt-get update
+    when: ansible_distribution == "Debian"
+
+  - name: Install Apache2
+    apt:
+     name: apache2
+     state: present
+    when: ansible_distribution == "Debian"
+
+  - name: Start apache2
+    service:
+     name: apache2
+     state: started
+    when: ansible_distribution == "Debian"
+
+  - name: Enable apache2
+    service:
+     name: apache2
+     enabled: yes
+    when: ansible_distribution == "Debian"
+...
+
