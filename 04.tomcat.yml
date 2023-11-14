@@ -73,6 +73,11 @@
         remote_src: yes
       become: yes
 
+    - name: Debug distribution and service names
+      debug:
+        var: ansible_distribution + '-' + ansible_distribution_version + '-' + ansible_os_family
+      run_once: yes
+
     - name: Start Tomcat (CentOS)
       systemd:
         name: "tomcat"
@@ -81,7 +86,7 @@
 
     - name: Start Tomcat (Ubuntu)
       systemd:
-        name: "tomcat"
+        name: "tomcat9"
         state: started
       when: "'Ubuntu' in ansible_os_family"
 
