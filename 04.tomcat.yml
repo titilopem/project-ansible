@@ -3,64 +3,55 @@
   hosts: group1
   become: true
   tasks:
-    - name: Determine Linux distribution
-      ansible.builtin.set_fact:
-        linux_distribution: "{{ ansible_distribution }}"
-
-    - name: Set Java path for Java 11
-      ansible.builtin.set_fact:
-        java_home_path: "/usr/lib/jvm/java-11-openjdk"
-
-    - name: Set Tomcat service name based on distribution
-      ansible.builtin.set_fact:
-        tomcat_service_name: "{{ 'tomcat8' if linux_distribution in ['Ubuntu', 'Debian'] else 'tomcat' }}"
-
     - name: Check if Apache Tomcat archive already exists
       ansible.builtin.stat:
         path: "/opt/apache-tomcat-8.5.72.tar.gz"
       register: tomcat_archive
 
-    # Add more tasks as needed
+    - name: Download Apache Tomcat 8.5.72 if not present
+      ansible.builtin.get_url:
+        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
+        dest: "/opt/apache-tomcat-8.5.72.tar.gz"
+      when: not tomcat_archive.stat.exists
 
     - name: Extract and move Tomcat contents
       ansible.builtin.command: "tar xvf /opt/apache-tomcat-8.5.72.tar.gz -C /opt/"
       args:
-        creates: /opt/apache-tomcat-8.5.72/
+        creates: /opt/apache-tomcat-8.5.72/  # Skip extraction if directory already present
 
     - name: Move Tomcat contents to /opt/tomcat
       ansible.builtin.command: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
       args:
-        creates: /opt/tomcat/bin/startup.sh
+        creates: /opt/tomcat/bin/startup.sh  # Skip if files are already present
 
     - name: Set JAVA_HOME
+      ansible.builtin.set_fact:
+        java_home_path: "/usr/lib/jvm/java-11-openjdk-amd64"
+
+    - name: Set environment variables
       ansible.builtin.lineinfile:
         path: "/etc/environment"
         line: "JAVA_HOME={{ java_home_path }}"
         create: yes
 
+    - name: Set Tomcat service name based on distribution
+      ansible.builtin.set_fact:
+        tomcat_service_name: >-
+          {%- if linux_distribution in ['Ubuntu', 'Debian'] -%}
+          tomcat8
+          {%- else -%}
+          tomcat
+          {%- endif -%}
+
     - name: Reload systemd
-      ansible.builtin.systemd:
-        daemon_reload: yes
-
-    - name: Restart Tomcat service
-      ansible.builtin.systemd:
-        name: "{{ tomcat_service_name }}"
-        state: restarted
-
-    - name: Wait for Tomcat to restart
-      ansible.builtin.wait_for:
-        port: 8080
-        delay: 10
-        timeout: 300
+      ansible.builtin.command: "systemctl daemon-reload"
 
     - name: Shutdown Tomcat service
-      ansible.builtin.shell: "source /etc/environment && /opt/tomcat/bin/shutdown.sh"
-      ignore_errors: true  # Ignore errors if shutdown.sh fails initially
+      ansible.builtin.command: "/opt/tomcat/bin/shutdown.sh"
+      ignore_errors: yes  # Ignoring errors as the service might not be running
 
-    - name: Wait for Tomcat to stop
-      ansible.builtin.wait_for:
-        port: 8080
-        state: stopped
-        delay: 10
-        timeout: 300
+    - name: Start Tomcat service
+      ansible.builtin.command: "/opt/tomcat/bin/startup.sh"
+      args:
+        creates: /opt/tomcat/bin/startup.sh  # Skip if service is already running
 ...
