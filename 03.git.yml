@@ -25,23 +25,17 @@
     - name: Reload systemd
       ansible.builtin.command: "systemctl daemon-reload"
 
+    - name: Shutdown Tomcat service if running
+      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && /opt/{{ tomcat_service_name }}/bin/shutdown.sh'"
+      ignore_errors: yes  # Ignoring errors if script is not found or service not running
+
     - name: Check if shutdown.sh exists
       ansible.builtin.stat:
-        path: "/opt/tomcat/bin/shutdown.sh"
+        path: "/opt/{{ tomcat_service_name }}/bin/shutdown.sh"
       register: shutdown_script
 
-    - name: Shutdown Tomcat service
-      ansible.builtin.command: "/bin/bash -c 'source /etc/environment && /opt/tomcat/bin/shutdown.sh'"
+    - name: Start Tomcat service if shutdown.sh exists
+      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && /opt/{{ tomcat_service_name }}/bin/startup.sh'"
       ignore_errors: yes  # Ignoring errors if script is not found or service not running
       when: shutdown_script.stat.exists
-
-    - name: Check if startup.sh exists
-      ansible.builtin.stat:
-        path: "/opt/tomcat/bin/startup.sh"
-      register: startup_script
-
-    - name: Start Tomcat service
-      ansible.builtin.command: "/bin/bash -c 'source /etc/environment && /opt/tomcat/bin/startup.sh'"
-      ignore_errors: yes  # Ignoring errors if script is not found or service not running
-      when: startup_script.stat.exists
 ...
