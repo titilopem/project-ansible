@@ -37,7 +37,7 @@
     - name: Set Tomcat service name based on distribution
       ansible.builtin.set_fact:
         tomcat_service_name: >-
-          {%- if linux_distribution in ['Ubuntu', 'Debian'] -%}
+          {%- if ansible_distribution in ['Ubuntu', 'Debian'] -%}
           tomcat8
           {%- else -%}
           tomcat
