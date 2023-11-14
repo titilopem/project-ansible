@@ -1,35 +1,29 @@
+#Install HTTP
 
+---
+- name: Install HTTP server
+  hosts: all
+  become: yes
 
+  tasks:
 
+  - name: Install HTTPD
+    dnf:
+     name: httpd
+     state: present
+    when: ansible_distribution == "Amazon"
 
+  - name: Start httpd
+    service:
+     name: httpd
+     state: started
+    when: ansible_distribution == "Amazon"
 
-
-
-[centos@ip-172-31-45-247 ~]$ cd ansible-work/
-[centos@ip-172-31-45-247 ansible-work]$ ls
-01-single-play.yml  05-food.yml            09-static.yml     13-php-app.yml      dynamic.j2  maintenance.html
-02-multi-play.yml   06-maintenance.yml     10-dynamic.yml    14-angular-app.yml  hosts1.ini  php
-03-httpd.yml        07-ubuntu.yml          11-variables.yml  angular             hosts2.ini  README.md
-04-ecomm.yml        08-multi-platform.yml  12-html-app.yml   apache              html        static.html
-[centos@ip-172-31-45-247 ansible-work]$ vi 08-multi-platform.yml 
-[centos@ip-172-31-45-247 ansible-work]$ clear
-
-[centos@ip-172-31-45-247 ansible-work]$ vi 08-multi-platform.yml 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  - name: Enable httpd
+    service:
+     name: httpd
+     enabled: yes
+    when: ansible_distribution == "Amazon"
 
   - name: Install Apache2
     apt:
@@ -88,4 +82,3 @@
      enabled: yes
     when: ansible_distribution == "Debian"
 ...
-
