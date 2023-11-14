@@ -1,9 +1,16 @@
 ---
 - name: Manage Apache Tomcat
-  hosts: group1
+  hosts: all
   become: true
-
   tasks:
+    - name: Determine Linux distribution
+      ansible.builtin.set_fact:
+        linux_distribution: "{{ ansible_distribution }}"
+
+    - name: Set Java path for Java 11
+      ansible.builtin.set_fact:
+        java_home_path: "/usr/lib/jvm/java-11-openjdk"
+
     - name: Check if Apache Tomcat archive already exists
       ansible.builtin.stat:
         path: "/opt/apache-tomcat-8.5.72.tar.gz"
@@ -15,30 +22,22 @@
         dest: "/opt/apache-tomcat-8.5.72.tar.gz"
       when: not tomcat_archive.stat.exists
 
+    # Add more tasks as needed
+
     - name: Extract and move Tomcat contents
-      ansible.builtin.unarchive:
-        src: "/opt/apache-tomcat-8.5.72.tar.gz"
-        dest: "/opt/"
-        remote_src: yes
-      when: not tomcat_archive.stat.exists
+      ansible.builtin.command: "tar xvf /opt/apache-tomcat-8.5.72.tar.gz -C /opt/"
+      args:
+        creates: /opt/apache-tomcat-8.5.72/
 
     - name: Move Tomcat contents to /opt/tomcat
-      ansible.builtin.shell: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
+      ansible.builtin.command: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
       args:
-        creates: "/opt/tomcat/bin/startup.sh"  # Skip if files are already present
+        creates: /opt/tomcat/bin/startup.sh
 
-    # Set JAVA_HOME
     - name: Set JAVA_HOME
       ansible.builtin.lineinfile:
         path: "/etc/environment"
-        line: "JAVA_HOME=/path/to/your/java_home"  # Replace with the correct path
-        create: yes
-
-    # The rest of your tasks remain unchanged
-    - name: Set environment variables
-      ansible.builtin.lineinfile:
-        path: "/etc/environment"
-        line: "CATALINA_HOME=/opt/tomcat"
+        line: "JAVA_HOME={{ java_home_path }}"
         create: yes
 
     - name: Reload systemd
@@ -46,8 +45,8 @@
         daemon_reload: yes
 
     - name: Shutdown Tomcat service
-      ansible.builtin.shell: "/opt/tomcat/bin/shutdown.sh"
+      ansible.builtin.command: "/opt/tomcat/bin/shutdown.sh"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: "/opt/tomcat/bin/startup.sh"
+      ansible.builtin.command: "/opt/tomcat/bin/startup.sh"
 ...
