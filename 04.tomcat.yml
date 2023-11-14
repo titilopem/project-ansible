@@ -34,9 +34,15 @@
       ansible.builtin.command:
         cmd: "systemctl daemon-reload"
 
-    - name: Start Tomcat service if shutdown was successful
+    - name: Check Tomcat service status
+      ansible.builtin.command:
+        cmd: "systemctl is-active tomcat"
+      register: tomcat_status
+      ignore_errors: true
+
+    - name: Start Tomcat service if it's inactive
       ansible.builtin.systemd:
         name: tomcat
         state: started
-      when: "'Active: inactive' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
+      when: tomcat_status.rc == 3
 ...
