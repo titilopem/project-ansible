@@ -78,7 +78,7 @@
         var: ansible_distribution + '-' + ansible_distribution_version + '-' + ansible_os_family
       run_once: yes
 
-     - name: Start Tomcat (CentOS)
+    - name: Start Tomcat (CentOS)
       systemd:
         name: "tomcat"
         state: started
