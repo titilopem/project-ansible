@@ -1,29 +1,8 @@
----
 - name: Manage Apache Tomcat
-  hosts: group1
+  hosts: all
   become: true
+
   tasks:
-    - name: Check if Apache Tomcat archive already exists
-      ansible.builtin.stat:
-        path: "/opt/apache-tomcat-8.5.72.tar.gz"
-      register: tomcat_archive
-
-    - name: Download Apache Tomcat 8.5.72 if not present
-      ansible.builtin.get_url:
-        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
-        dest: "/opt/apache-tomcat-8.5.72.tar.gz"
-      when: not tomcat_archive.stat.exists
-
-    - name: Extract and move Tomcat contents
-      ansible.builtin.command: "tar xvf /opt/apache-tomcat-8.5.72.tar.gz -C /opt/"
-      args:
-        creates: /opt/apache-tomcat-8.5.72/  # Skip extraction if directory already present
-
-    - name: Move Tomcat contents to /opt/tomcat
-      ansible.builtin.command: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
-      args:
-        creates: /opt/tomcat/bin/startup.sh  # Skip if files are already present
-
     - name: Set JAVA_HOME
       ansible.builtin.set_fact:
         java_home_path: "/usr/lib/jvm/java-11-openjdk-amd64"
@@ -48,6 +27,8 @@
 
     - name: Shutdown Tomcat service
       ansible.builtin.command: "/opt/tomcat/bin/shutdown.sh"
+      args:
+        executable: "{{ java_home_path }}/bin/bash"  # Specify the bash executable with JAVA_HOME
       ignore_errors: yes  # Ignoring errors as the service might not be running
 
     - name: Start Tomcat service
