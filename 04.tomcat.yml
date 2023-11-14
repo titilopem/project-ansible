@@ -50,5 +50,4 @@
         name: "{{ tomcat_service_name }}"
         state: started
       when: tomcat_status is defined and ('inactive' in tomcat_status.stdout | default(''))
-
 ...
