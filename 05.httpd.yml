@@ -1,12 +1,11 @@
 ---
 - name: Update Package Managers, Install Tomcat, and Reload
-  hosts: group1
+  hosts: all
   become: yes
 
   tasks:
     - name: Gather Facts about the distribution
       setup:
-      register: distribution_facts
 
     - name: Update package manager cache
       package_facts:
@@ -24,5 +23,5 @@
       systemd:
         name: tomcat
         state: restarted
-      when: distribution_facts is defined and ('Ubuntu' in distribution_facts.ansible_facts.distribution or 'Amazon' in distribution_facts.ansible_facts.distribution or 'CentOS' in distribution_facts.ansible_facts.distribution)
+      when: "'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 ...
