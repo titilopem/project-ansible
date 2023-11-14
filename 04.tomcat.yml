@@ -1,34 +1,81 @@
 ---
-- name: Update Package Managers, Install Tomcat, and Reload
+- name: Install and Configure Tomcat 10 on Ubuntu, CentOS, and Amazon Linux
   hosts: group1
   become: yes
 
   tasks:
-    - name: Update package manager cache
-      package_facts:
-      run_once: yes
+    - name: Update package system
+      apt:
+        update_cache: yes
+      when: "'Ubuntu' in ansible_distribution"
 
-    - name: Install Tomcat on Ubuntu
-      package:
-        name: default-jdk, tomcat9  # Adjust the package names for Ubuntu
+    - name: Update package system
+      dnf:
+        name: '*'
+        state: latest
+      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+
+    - name: Install default available Java
+      apt:
+        name: default-jdk
         state: present
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Install Tomcat on Amazon Linux or CentOS
+    - name: Install default available Java
       dnf:
-        name: java, tomcat  # Adjust the package names for CentOS/Amazon Linux
+        name: java
         state: present
       when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 
-    - name: Reload Tomcat on Ubuntu
+    - name: Check Java version
+      command: java -version
+      register: java_version_output
+      changed_when: false
+      failed_when: "'openjdk version' not in java_version_output.stdout"
+
+    - name: Install wget
+      apt:
+        name: wget
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Install wget
+      dnf:
+        name: wget
+        state: present
+      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+
+    - name: Create a directory for Tomcat installation
+      file:
+        path: /usr/tmp
+        state: directory
+
+    - name: Download Tomcat 10
+      shell: "wget https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
+      args:
+        chdir: /usr/tmp
+      changed_when: false
+
+    - name: Extract Tomcat archive
+      shell: "tar -xvf apache-tomcat-10*.tar.gz"
+      args:
+        chdir: /usr/tmp
+      changed_when: false
+
+    - name: Move Tomcat files to installation directory
+      command: "mv /usr/tmp/apache-tomcat-10.0.23 /usr/local/tomcat"
+      args:
+        creates: /usr/local/tomcat
+
+    - name: Start Tomcat
+      systemd:
+        name: tomcat
+        state: started
+      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+
+    - name: Start Tomcat
       systemd:
         name: tomcat9
-        state: restarted
+        state: started
       when: "'Ubuntu' in ansible_distribution"
-    
-    - name: Reload Tomcat on Amazon Linux or CentOS
-      systemd:
-        name: tomcat  # Adjust the service name for Amazon Linux/CentOS
-        state: restarted
-      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 ...
