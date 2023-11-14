@@ -34,19 +34,6 @@
       ansible.builtin.command:
         cmd: "systemctl daemon-reload"
 
-    - name: Shutdown Tomcat service
-      ansible.builtin.command:
-        cmd: "/opt/tomcat/bin/shutdown.sh"
-        async: 600
-        poll: 0
-        ignore_errors: yes
-
-    - name: Wait for Tomcat to shut down
-      wait_for:
-        port: 8080
-        state: absent
-      delegate_to: localhost
-
     - name: Start Tomcat service if shutdown was successful
       ansible.builtin.shell:
         cmd: "/opt/tomcat/bin/startup.sh"
