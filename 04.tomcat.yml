@@ -5,6 +5,17 @@
   become: true
 
   tasks:
+    - name: Download Apache Tomcat
+      ansible.builtin.get_url:
+        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
+        dest: "/tmp/apache-tomcat-8.5.72.tar.gz"
+
+    - name: Extract Apache Tomcat
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-8.5.72.tar.gz"
+        dest: "/opt/"
+        remote_src: yes
+
     - name: Set JAVA_HOME
       ansible.builtin.set_fact:
         java_home_path: "/usr/lib/jvm/java-11-openjdk-amd64"
@@ -34,5 +45,5 @@
     - name: Start Tomcat service
       ansible.builtin.command: "/opt/tomcat/bin/startup.sh"
       args:
-        creates: /opt/tomcat/bin/startup.sh  # Skip if the service is already running
+        creates: "/opt/tomcat/bin/startup.sh"  # Skip if the service is already running
 ...
