@@ -10,13 +10,14 @@
 
     - name: Install Tomcat on Ubuntu
       package:
-        name: default-jdk tomcat9  # Adjust the package names for Ubuntu
+        name: default-jdk, tomcat9  # Adjust the package names for Ubuntu
         state: present
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Install Tomcat on Amazon Linux or CentOS
-      dnf:
-        name: tomcat  # Adjust the package name for Amazon Linux
+      # Use 'yum' for Amazon Linux
+      yum:
+        name: java, tomcat  # Adjust the package names for Amazon Linux
         state: present
       when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 
