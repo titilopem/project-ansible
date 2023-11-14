@@ -29,7 +29,7 @@
     
     - name: Reload Tomcat on Amazon Linux or CentOS
       systemd:
-        name: tomcat  # Adjust the service name for Amazon Linux
+        name: tomcat  # Adjust the service name for Amazon Linux/CentOS
         state: restarted
       when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 ...
