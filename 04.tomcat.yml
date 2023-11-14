@@ -1,6 +1,6 @@
 ---
 - name: Update Package Managers, Install Tomcat, and Reload
-  hosts: group1
+  hosts: all
   become: yes
 
   tasks:
@@ -13,8 +13,8 @@
         name: "{{ item.pkg }}"
         state: present
       loop:
-        - { pkg: 'tomcat', when: ansible_distribution == 'Ubuntu' }
-        - { pkg: 'tomcat', when: ansible_distribution == 'Amazon' or ansible_distribution == 'CentOS' }
+        - { pkg: 'tomcat', when: "'Ubuntu' in ansible_distribution" }
+        - { pkg: 'tomcat', when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution" }
 
     - name: Reload Tomcat
       systemd:
