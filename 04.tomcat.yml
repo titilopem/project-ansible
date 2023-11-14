@@ -30,7 +30,14 @@
         owner: tomcat
         group: tomcat
 
-    - name: Reload systemd configuration
+    - name: Reload systemd configuration and restart Tomcat service
       shell:
-        command: "systemctl daemon-reload && systemctl restart tomcat"
+        cmd: "systemctl daemon-reload && systemctl restart tomcat"
+      when: "'tomcat' in ansible_services"
+
+    - name: Start Tomcat service if not running
+      systemd:
+        name: tomcat
+        state: started
+        enabled: yes
 ...
