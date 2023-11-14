@@ -68,41 +68,30 @@
 
     - name: Create a directory for Tomcat installation
       file:
-        path: /usr/tmp
+        path: /usr/local/tomcat
         state: directory
 
     - name: Download Tomcat 10
-      shell: "wget https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
-      args:
-        chdir: /usr/tmp
-      changed_when: false
+      ansible.builtin.get_url:
+       url: "wget https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
+       dest: "/usr/local/tomcat/apache-tomcat-10.0.23.tar.gz"
 
     - name: Extract Tomcat archive
-      shell: "tar -xvf apache-tomcat-10*.tar.gz"
-      args:
-        chdir: /usr/tmp
-      changed_when: false
+      ansible.builtin.unarchive:
+        src: "/usr/local/tomcat/apache-tomcat-10.0.23.tar.gz"
+        dest: "/usr/local/tomcat/"
+        remote_src: yes
+      become: yes
 
-    - name: Move Tomcat files to installation directory
-      command: "mv /usr/tmp/apache-tomcat-10.0.23 /usr/local/tomcat"
-      args:
-        creates: /usr/local/tomcat
-
-    - name: Start Tomcat (CentOS)
+    - name: Start Tomcat
       systemd:
-        name: tomcat
+        name: "tomcat"
         state: started
-      when: "'CentOS' in ansible_distribution"
+      when: "'Amazon' in ansible_os_family or 'CentOS' in ansible_os_family"
 
     - name: Start Tomcat (Ubuntu)
       systemd:
-        name: tomcat9
+        name: "tomcat9"
         state: started
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Start Tomcat (Amazon Linux)
-      systemd:
-        name: tomcat
-        state: started
-      when: "'Amazon' in ansible_distribution"
+      when: "'Ubuntu' in ansible_os_family"
 ...
