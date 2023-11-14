@@ -1,61 +1,61 @@
 ---
-- name: Install and Configure Tomcat on Multiple Operating Systems
+- name: Install and Configure Tomcat 10 on Multiple Operating Systems
   hosts: group1
   become: yes
 
-  vars:
-    tomcat_version: "10.0.23"
-    tomcat_service_name: "tomcat"
-
   tasks:
-    - name: Update package system
-      package:
-        name: "*"
-        state: latest
-      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
+    - name: Update package system (Ubuntu)
+      apt:
+        update_cache: yes
+      when: "'Ubuntu' in ansible_distribution"
 
-    - name: Update package system (Python 3)
+    - name: Update package system (CentOS)
       dnf:
-        name: "*"
+        name: '*'
         state: latest
-      when: "'Fedora' in ansible_distribution"
+      when: "'CentOS' in ansible_os_family"
 
-    - name: Install default available Java
-      package:
+    - name: Install default available Java (Ubuntu)
+      apt:
+        name: default-jdk
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Install OpenJDK on CentOS
+      dnf:
         name: java-1.8.0-openjdk
         state: present
+      when: "'CentOS' in ansible_distribution"
 
     - name: Install wget
       package:
         name: wget
-        state: present
+      when: "'Ubuntu' in ansible_distribution or 'CentOS' in ansible_os_family"
 
     - name: Create a directory for Tomcat installation
       file:
-        path: "/usr/local/tomcat"
+        path: /usr/local/tomcat
         state: directory
 
-    - name: Download Tomcat
+    - name: Download Tomcat 10
       ansible.builtin.get_url:
-        url: "https://archive.apache.org/dist/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
-        dest: "/usr/local/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+        dest: "/usr/local/tomcat/apache-tomcat-10.1.16.tar.gz"
 
     - name: Extract Tomcat archive
       ansible.builtin.unarchive:
-        src: "/usr/local/tomcat/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        src: "/usr/local/tomcat/apache-tomcat-10.1.16.tar.gz"
         dest: "/usr/local/tomcat/"
         remote_src: yes
       become: yes
 
-    - name: Reload systemd
-      systemd:
-        state: restarted
-        name: "{{ tomcat_service_name }}"
-      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Ubuntu' in ansible_os_family or 'Debian' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
+    - name: System CTL Reload
+      ansible.builtin.command: "systemctl daemon-reload"
+      become: yes
 
     - name: Start Tomcat
       systemd:
-        name: "{{ tomcat_service_name }}"
+        name: "tomcat"
         state: started
-      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Ubuntu' in ansible_os_family or 'Debian' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
+      become: yes
 ...
