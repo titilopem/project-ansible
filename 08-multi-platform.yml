@@ -1,0 +1,84 @@
+#Install HTTP
+
+---
+- name: Install HTTP server
+  hosts: all
+  become: yes
+
+  tasks:
+
+  - name: Install HTTPD
+    dnf:
+     name: httpd
+     state: present
+    when: ansible_distribution == "Amazon"
+
+  - name: Start httpd
+    service:
+     name: httpd
+     state: started
+    when: ansible_distribution == "Amazon"
+
+  - name: Enable httpd
+    service:
+     name: httpd
+     enabled: yes
+    when: ansible_distribution == "Amazon"
+
+  - name: Install Apache2
+    apt:
+     name: apache2
+     state: present
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Start apache2
+    service:
+     name: apache2
+     state: started
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Enable apache2
+    service:
+     name: apache2
+     enabled: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Install HTTPD
+    yum:
+     name: httpd
+     state: present
+    when: ansible_distribution == "CentOS"
+
+  - name: Start httpd
+    service:
+     name: httpd
+     state: started
+    when: ansible_distribution == "CentOS"
+
+  - name: Enable httpd
+    service:
+     name: httpd
+     enabled: yes
+    when: ansible_distribution == "CentOS"
+
+  - command: apt-get update
+    when: ansible_distribution == "Debian"
+
+  - name: Install Apache2
+    apt:
+     name: apache2
+     state: present
+    when: ansible_distribution == "Debian"
+
+  - name: Start apache2
+    service:
+     name: apache2
+     state: started
+    when: ansible_distribution == "Debian"
+
+  - name: Enable apache2
+    service:
+     name: apache2
+     enabled: yes
+    when: ansible_distribution == "Debian"
+...
