@@ -51,8 +51,7 @@
     - name: Reload systemd
       command: systemctl daemon-reload
       become: yes
-      ignore_errors: yes
-      
+
     - name: Restart Tomcat
       systemd:
         name: tomcat
