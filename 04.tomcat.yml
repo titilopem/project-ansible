@@ -1,6 +1,6 @@
 ---
 - name: Manage Apache Tomcat
-  hosts: group1
+  hosts: your_target_hosts
   become: true
 
   tasks:
@@ -16,7 +16,10 @@
       when: not tomcat_archive.stat.exists
 
     - name: Extract the Tomcat archive
-      command: "tar xvf /opt/apache-tomcat-8.5.72.tar.gz -C /opt/"
+      ansible.builtin.unarchive:
+        src: "/opt/apache-tomcat-8.5.72.tar.gz"
+        dest: "/opt/"
+        remote_src: yes
       args:
         creates: /opt/apache-tomcat-8.5.72/  # Skip extraction if directory already present
 
