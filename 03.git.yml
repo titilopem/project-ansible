@@ -1,53 +1,92 @@
-- name: Manage Apache Tomcat
-  hosts: all
-  become: true
+---
+- name: Install Apache Tomcat
+  hosts: group1
+  become: yes
 
   tasks:
-    - name: Set JAVA_HOME
-      ansible.builtin.set_fact:
-        java_home_path: "/usr/lib/jvm/java-11-openjdk-amd64"
+    - name: Install necessary packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - java  # Install Java as Tomcat requires it
+        - tar   # Required for extracting tar.gz files
+      when: ansible_os_family == "Debian"
 
-    - name: Set environment variables
-      ansible.builtin.lineinfile:
-        path: "/etc/environment"
-        line: "JAVA_HOME={{ java_home_path }}"
-        create: yes
+    - name: Install necessary packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - java-1.8.0-openjdk  # Install Java as Tomcat requires it
+        - tar   # Required for extracting tar.gz files
+      when: ansible_os_family == "RedHat"
 
-    - name: Set Tomcat service name based on distribution
-      ansible.builtin.set_fact:
-        tomcat_service_name: >-
-          {%- if ansible_distribution in ['Ubuntu', 'Debian'] -%}
-          tomcat8
-          {%- else -%}
-          tomcat
-          {%- endif -%}
+    - name: Create Tomcat group
+      ansible.builtin.group:
+        name: tomcat
 
-    - name: Set Tomcat path based on distribution
-      ansible.builtin.set_fact:
-        tomcat_path: "/opt/{{ tomcat_service_name }}"
+    - name: Create Tomcat user
+      ansible.builtin.user:
+        name: tomcat
+        group: tomcat
+        home: /opt/tomcat
+        shell: /bin/nologin
 
-    - name: Download Apache Tomcat archive
+    - name: Download Apache Tomcat
       ansible.builtin.get_url:
         url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
-        dest: "/tmp"
-        mode: '0644'
+        dest: /tmp/apache-tomcat-8.5.72.tar.gz
 
-    - name: Extract and move Tomcat contents
+    - name: Extract Apache Tomcat
       ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-8.5.72.tar.gz"
-        dest: "{{ tomcat_path }}"
+        src: /tmp/apache-tomcat-8.5.72.tar.gz
+        dest: /opt/
         remote_src: yes
+      notify: Reload Tomcat
 
-    - name: Reload systemd
+    - name: Set ownership and permissions
+      ansible.builtin.file:
+        path: /opt/tomcat
+        state: directory
+        owner: tomcat
+        group: tomcat
+        recurse: yes
+
+    - name: Configure Tomcat systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/tomcat.service
+        content: |
+          [Unit]
+          Description=Apache Tomcat Web Application Container
+          After=syslog.target network.target
+
+          [Service]
+          Type=forking
+          Environment=JAVA_HOME=/usr/lib/jvm/default-java
+          Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
+          Environment=CATALINA_HOME=/opt/tomcat
+          Environment=CATALINA_BASE=/opt/tomcat
+          Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'
+          Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
+
+          ExecStart=/opt/tomcat/bin/startup.sh
+          ExecStop=/opt/tomcat/bin/shutdown.sh
+
+          User=tomcat
+          Group=tomcat
+          UMask=0007
+          RestartSec=10
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+
+      notify: Reload Tomcat
+
+  handlers:
+    - name: Reload Tomcat
       ansible.builtin.systemd:
-        daemon_reload: yes
-
-    - name: Shutdown Tomcat service if running
-      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && {{ tomcat_path }}/bin/shutdown.sh'"
-      ignore_errors: yes  # Ignore errors if script is not found or service not running
-
-    - name: Start Tomcat service if shutdown.sh exists
-      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && {{ tomcat_path }}/bin/startup.sh'"
-      ignore_errors: yes  # Ignore errors if script is not found or service not running
-      when: tomcat_path + '/bin/shutdown.sh' | stat | succeeded
+        name: tomcat
+        state: restarted
 ...
