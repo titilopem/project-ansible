@@ -1,49 +1,78 @@
-# Manage Apache Tomcat
 ---
-- name: Manage Apache Tomcat
+- name: Install Apache Tomcat10 using ansible
   hosts: group1
   become: true
-
   tasks:
-    - name: Download Apache Tomcat
+    - name: Update the System Packages
+      ansible.builtin.package:
+        name: update_cache
+        cache_valid_time: 3600
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install Update on Amazon Linux
+      ansible.builtin.yum:
+        name: update
+      when: ansible_distribution == 'Amazon'
+
+    - name: Update the System Packages on Debian
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+      when: ansible_distribution == 'Debian'
+
+    - name: Install JAVA
+      ansible.builtin.package:
+        name: default-jdk
+        state: present
+
+    - name: Create a Tomcat User
+      ansible.builtin.user:
+        name: tomcat
+
+    - name: Create a Tomcat Group
+      ansible.builtin.group:
+        name: tomcat
+
+    - name: Create a Tomcat Directory
+      ansible.builtin.file:
+        path: /opt/tomcat10
+        owner: tomcat
+        group: tomcat
+        mode: 755
+        recurse: yes
+        state: directory
+
+    - name: Download & Unarchive Tomcat10
       ansible.builtin.get_url:
-        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
-        dest: "/tmp/apache-tomcat-8.5.72.tar.gz"
-
-    - name: Extract Apache Tomcat
+        url: https://mirrors.estointernet.in/apache/tomcat/tomcat-10/v10.0.4/bin/apache-tomcat-10.0.4.tar.gz
+        dest: /opt/tomcat10
+        mode: '0755'
       ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-8.5.72.tar.gz"
-        dest: "/opt/"
+        src: /opt/tomcat10/apache-tomcat-10.0.4.tar.gz
+        dest: /opt/tomcat10
         remote_src: yes
+        extra_opts: ['--strip-components=1']
+        creates: /opt/tomcat10/bin/catalina.sh
 
-    - name: Set JAVA_HOME
-      ansible.builtin.set_fact:
-        java_home_path: "/usr/lib/jvm/java-11-openjdk-amd64"
+    - name: Change ownership of Tomcat directory
+      ansible.builtin.file:
+        path: /opt/tomcat10
+        owner: tomcat
+        group: tomcat
+        mode: "u+rwx,g+rx,o=rx"
+        recurse: yes
+        state: directory
 
-    - name: Set environment variables
-      ansible.builtin.lineinfile:
-        path: "/etc/environment"
-        line: "JAVA_HOME={{ java_home_path }}"
-        create: yes
+    - name: Copy Tomcat service from local to remote
+      ansible.builtin.copy:
+        src: /etc/tomcat.service
+        dest: /etc/systemd/system/
+        mode: 0755
 
-    - name: Set Tomcat service name based on distribution
-      ansible.builtin.set_fact:
-        tomcat_service_name: >-
-          {%- if ansible_distribution in ['Ubuntu', 'Debian'] -%}
-          tomcat8
-          {%- else -%}
-          tomcat
-          {%- endif -%}
-
-    - name: Reload systemd
-      ansible.builtin.command: "systemctl daemon-reload"
-
-    - name: Shutdown Tomcat service
-      ansible.builtin.command: "/bin/bash -c 'source /etc/environment && /opt/tomcat/bin/shutdown.sh'"
-      ignore_errors: yes  # Ignoring errors as the service might not be running
-
-    - name: Start Tomcat service
-      ansible.builtin.command: "/opt/tomcat/bin/startup.sh"
-      args:
-        creates: "/opt/tomcat/bin/startup.sh"  # Skip if the service is already running
+    - name: Start and Enable Tomcat 10 on server
+      ansible.builtin.systemd:
+        name: tomcat
+        state: started
+        enabled: yes
+        daemon_reload: yes
 ...
