@@ -5,24 +5,25 @@
 
   tasks:
     - name: Update package system
-      apt:
-        update_cache: yes
+      package:
+        name: "*"
+        state: latest
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Update package system (CentOS)
       yum:
-        name: '*'
+        name: "*"
         state: latest
-      when: "'CentOS' in ansible_os_family"
+      when: "'CentOS' in ansible_distribution"
 
     - name: Update package system (Amazon Linux)
-      dnf:
-        name: '*'
+      yum:
+        name: "*"
         state: latest
-      when: "'Amazon' in ansible_os_family"
+      when: "'Amazon' in ansible_distribution"
 
-    - name: Install default available Java (Ubuntu)
-      apt:
+    - name: Install default available Java
+      package:
         name: default-jdk
         state: present
       when: "'Ubuntu' in ansible_distribution"
@@ -34,75 +35,47 @@
       when: "'CentOS' in ansible_distribution"
 
     - name: Install default available Java (Amazon Linux)
-      dnf:
+      yum:
         name: java
         state: present
       when: "'Amazon' in ansible_distribution"
 
-    - name: Check Java version
+    - name: Download and extract Apache Tomcat
+      ansible.builtin.get_url:
+        url: "https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
+        dest: "/tmp/apache-tomcat-10.0.23.tar.gz"
+      delegate_to: localhost
+
+    - name: Extract Tomcat
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-10.0.23.tar.gz"
+        dest: "/usr/local/"
+        remote_src: yes
+      become: yes
+
+    - name: Move Tomcat directory
+      command: "mv /usr/local/apache-tomcat-10.0.23 /usr/local/tomcat"
+      become: yes
+
+    - name: Start Tomcat
+      command: "/usr/local/tomcat/bin/startup.sh"
+      become: yes
+      ignore_errors: yes
+
+    - name: Display Java version
       command: "java -version"
       register: java_version_output
       ignore_errors: true
 
-    - name: Display Java version
+    - name: Display Tomcat version
+      command: "/usr/local/tomcat/bin/version.sh"
+      register: tomcat_version_output
+      ignore_errors: true
+
+    - name: Debug Information
       debug:
-        var: java_version_output.stdout_lines
-
-    - name: Install wget
-      apt:
-        name: wget
-        state: present
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Install wget (CentOS)
-      yum:
-        name: wget
-        state: present
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Install wget (Amazon Linux)
-      dnf:
-        name: wget
-        state: present
-      when: "'Amazon' in ansible_distribution"
-
-    - name: Create a directory for Tomcat installation
-      file:
-        path: /usr/tmp
-        state: directory
-
-    - name: Download Tomcat 10
-      shell: "wget https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
-      args:
-        chdir: /usr/tmp
-      changed_when: false
-
-    - name: Extract Tomcat archive
-      shell: "tar -xvf apache-tomcat-10*.tar.gz"
-      args:
-        chdir: /usr/tmp
-      changed_when: false
-
-    - name: Move Tomcat files to installation directory
-      command: "mv /usr/tmp/apache-tomcat-10.0.23 /usr/local/tomcat"
-      args:
-        creates: /usr/local/tomcat
-
-    - name: Start Tomcat (CentOS)
-      systemd:
-        name: tomcat
-        state: started
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Start Tomcat (Ubuntu)
-      systemd:
-        name: tomcat9
-        state: started
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Start Tomcat (Amazon Linux)
-      systemd:
-        name: tomcat
-        state: started
-      when: "'Amazon' in ansible_distribution"
+        var: item.stdout_lines
+      loop:
+        - "{{ java_version_output.stdout_lines }}"
+        - "{{ tomcat_version_output.stdout_lines }}"
 ...
