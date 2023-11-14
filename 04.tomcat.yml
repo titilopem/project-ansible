@@ -7,35 +7,46 @@
       get_url:
         url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.15/src/apache-tomcat-10.1.15-src.tar.gz
         dest: /opt
+      register: download_result
 
     - name: Extract the binaries
       unarchive:
-        src: /opt/apache-tomcat-10.1.15-src.tar.gz
+        src: "/opt/{{ download_result.url | basename }}"
         dest: /opt
         remote_src: yes
 
     - name: Rename the apache-tomcat-10.1.15-src directory
       command:
-        chdir: /opt
-        cmd: mv apache-tomcat-10.1.15-src tomcat
+        cmd: mv "/opt/apache-tomcat-10.1.15-src" "/opt/tomcat"
+      args:
+        creates: /opt/tomcat  # Skip if directory is already renamed
 
     - name: Create tomcat group
       group:
         name: tomcat
-        system: yes
         state: present
+        system: yes
 
     - name: Create tomcat user
       user:
         name: tomcat
         group: tomcat
-        password: pa$$w0rd
+        password: pa$$w0rd  # Replace with a secure password
         home: /opt/tomcat
-        shell: "/bin/bash"
+        shell: /bin/bash
+        system: yes
+      become: true
 
     - name: Change owner & group of tomcat directory
       file:
         path: /opt/tomcat
+        owner: tomcat
+        group: tomcat
+        recurse: yes
+
+    - name: Change owner & group of tomcat bin directory
+      file:
+        path: /opt/tomcat/bin
         owner: tomcat
         group: tomcat
         recurse: yes
@@ -52,6 +63,7 @@
           [Unit]
           Description=Tomcat 10
           After=network.target
+          
           [Service]
           Type=forking
           User=tomcat
@@ -64,6 +76,7 @@
           Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
           ExecStart=/opt/tomcat/bin/startup.sh
           ExecStop=/opt/tomcat/bin/shutdown.sh
+          
           [Install]
           WantedBy=multi-user.target
 
