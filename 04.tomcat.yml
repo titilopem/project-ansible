@@ -1,22 +1,23 @@
+---
 - name: Tomcat 10 installation
   hosts: group1
   become: true
   tasks:
     - name: Download tomcat 10 binaries
       get_url:
-        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.7/bin/apache-tomcat-10.1.7.tar.gz
+        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.15/src/apache-tomcat-10.1.15-src.tar.gz
         dest: /opt
 
     - name: Extract the binaries
       unarchive:
-        src: /opt/apache-tomcat-10.1.7.tar.gz
+        src: /opt/apache-tomcat-10.1.15-src.tar.gz
         dest: /opt
         remote_src: yes
 
-    - name: Rename the apache-tomcat-10.1.7 directory
+    - name: Rename the apache-tomcat-10.1.15-src directory
       command:
         chdir: /opt
-        cmd: mv apache-tomcat-10.1.7 tomcat
+        cmd: mv apache-tomcat-10.1.15-src tomcat
 
     - name: Create tomcat group
       group:
