@@ -95,13 +95,13 @@
     - name: Reload systemd on CentOS/RedHat
       systemd:
         state: reloaded
-        name: "apache-tomcat"
+        name: "apache-tomcat-10.0.23"
       when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
 
     - name: Reload systemd on CentOS/RedHat
       systemd:
         state: restarted
-        name: "tomcat9"
+        name: "apache-tomcat-10.0.23"
       when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
 
     - name: System CTL
@@ -111,7 +111,7 @@
     - name: Reload systemd on Amazon Linux
       systemd:
         state: restarted
-        name: "tomcat"
+        name: "apache-tomcat-10.0.23"
       when: "'Amazon' in ansible_distribution_file_variety"
 
     - name: Reload systemd on Ubuntu
@@ -122,13 +122,13 @@
 
     - name: Start Tomcat (CentOS / Amazon)
       systemd:
-        name: "tomcat"
+        name: "apache-tomcat-10.0.23"
         state: started
-      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
+      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety 'CentOS' in ansible_distribution_file_variety"
       
     - name: Start Tomcat (Ubuntu)
       systemd:
         name: "tomcat9"
         state: started
-      when: "'Debian' in ansible_os_family"
+      when: "'Debian' in ansible_os_family or 'Debian' in ansible_distribution_file_variety"
 ...
