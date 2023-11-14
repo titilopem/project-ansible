@@ -1,34 +1,39 @@
 ---
 - name: Install Maven on CentOS
   hosts: n3c
-  become: yes 
+  become: yes
 
   tasks:
     - name: Install wget (if not already installed)
       yum:
         name: wget
-        state: present 
+        state: present
 
     - name: Download Apache Maven
-      shell: "wget https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz -O /tmp/apache-maven-3.9.5-bin.tar.gz"
+      get_url:
+        url: "https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz"
+        dest: "/tmp/apache-maven-3.9.5-bin.tar.gz"
+        mode: '0644'
+        checksum: 'sha256:your_sha256_sum'  # Optional for checksum verification
       args:
-        creates: /apache-maven-3.9.5-bin.tar.gz  # Skip download if already present
+        creates: "/tmp/apache-maven-3.9.5-bin.tar.gz"
 
     - name: Extract Maven archive
-      shell: "tar xzf /tmp/apache-maven-3.9.5-bin.tar.gz -C /opt"
-      args:
-        creates: /opt/apache-maven-3.9.5  # Skip extraction if already present
+      unarchive:
+        src: "/tmp/apache-maven-3.9.5-bin.tar.gz"
+        dest: "/opt"
+        remote_src: yes
 
     - name: Create symbolic link to Maven
       file:
-        src: /opt/apache-maven-3.9.5
-        dest: /opt/maven
+        src: "/opt/apache-maven-3.9.5"
+        dest: "/opt/maven"
         state: link
         force: yes
 
     - name: Set Maven environment variables
       lineinfile:
-        path: /etc/profile.d/maven.sh
+        path: "/etc/profile.d/maven.sh"
         create: yes
         line: |
           export MAVEN_HOME=/opt/maven
@@ -37,5 +42,5 @@
 
   handlers:
     - name: reload shell environment
-      shell: "exec bash"
+      command: "exec bash"
 ...
