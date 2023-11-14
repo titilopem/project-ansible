@@ -1,5 +1,5 @@
 ---
-- name: Install Apache Tomcat
+- name: Manage Apache Tomcat
   hosts: group1
   become: yes
 
@@ -9,8 +9,8 @@
         name: "{{ item }}"
         state: present
       loop:
-        - java  # Install Java as Tomcat requires it
-        - tar   # Required for extracting tar.gz files
+        - java
+        - tar
       when: ansible_os_family == "Debian"
 
     - name: Install necessary packages
@@ -18,8 +18,8 @@
         name: "{{ item }}"
         state: present
       loop:
-        - java-1.8.0-openjdk  # Install Java as Tomcat requires it
-        - tar   # Required for extracting tar.gz files
+        - java-1.8.0-openjdk
+        - tar
       when: ansible_os_family == "RedHat"
 
     - name: Create Tomcat group
@@ -43,11 +43,25 @@
         src: /tmp/apache-tomcat-8.5.72.tar.gz
         dest: /opt/
         remote_src: yes
-      notify: Reload Tomcat
 
-    - name: Set ownership and permissions
+    - name: Set ownership and permissions for Tomcat directory
       ansible.builtin.file:
         path: /opt/tomcat
+        state: directory
+        owner: tomcat
+        group: tomcat
+        recurse: yes
+
+    - name: Set executable permissions for Tomcat scripts
+      ansible.builtin.file:
+        path: /opt/tomcat/bin
+        state: directory
+        recurse: yes
+        mode: '0755'
+
+    - name: Set ownership and permissions for Tomcat scripts
+      ansible.builtin.file:
+        path: /opt/tomcat/bin
         state: directory
         owner: tomcat
         group: tomcat
