@@ -33,7 +33,7 @@
     - name: Reload and restart Tomcat service
       ansible.builtin.shell:
         cmd: "systemctl daemon-reload && systemctl restart tomcat"
-      ignore_errors: yes
+      when: "'Active: active' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
 
     - name: Shutdown Tomcat service (fallback for non-systemd systems)
       ansible.builtin.shell:
