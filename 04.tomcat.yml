@@ -103,4 +103,19 @@
         name: "tomcat9"
         state: started
       when: "'Debian' in ansible_os_family"
+
+    - name: Reload systemd on CentOS/RedHat
+      systemd:
+        state: reloaded
+      when: "'CentOS' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
+
+    - name: Reload systemd on Amazon Linux
+      systemd:
+        state: reloaded
+      when: 'Amazon' in ansible_distribution_file_variety"
+
+    - name: Reload systemd on Ubuntu
+      systemd:
+        state: reloaded
+      when: "'Debian' in ansible_os_family"
 ...
