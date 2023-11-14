@@ -1,39 +1,24 @@
 ---
 - name: Update Package Managers, Install Tomcat, and Reload
-  hosts: group1
+  hosts: all
   become: yes
 
   tasks:
-    - name: Gather Facts about the distribution
-      setup:
-      register: distribution_facts
-
-    - name: Update package manager on Ubuntu
-      apt:
-        update_cache: yes
-      when: "'Ubuntu' in distribution_facts.ansible_facts.distribution"
-
-    - name: Update package manager on Amazon Linux
-      yum:
-        name: '*'
-        state: latest
-      when: "'Amazon' in distribution_facts.ansible_facts.distribution"
-
-    - name: Update package manager on CentOS
-      yum:
-        name: '*'
-        state: latest
-      when: "'CentOS' in distribution_facts.ansible_facts.distribution"
+    - name: Update package manager cache
+      package_facts:
+      run_once: yes
 
     - name: Install Tomcat
       package:
-        name: tomcat
+        name: "{{ item.pkg }}"
         state: present
-      when: "'Ubuntu' in distribution_facts.ansible_facts.distribution or 'Amazon' in distribution_facts.ansible_facts.distribution or 'CentOS' in distribution_facts.ansible_facts.distribution"
+      loop:
+        - { pkg: 'tomcat', when: ansible_distribution == 'Ubuntu' }
+        - { pkg: 'tomcat', when: ansible_distribution == 'Amazon' or ansible_distribution == 'CentOS' }
 
     - name: Reload Tomcat
       systemd:
         name: tomcat
         state: restarted
-      when: "'Ubuntu' in distribution_facts.ansible_facts.distribution or 'Amazon' in distribution_facts.ansible_facts.distribution or 'CentOS' in distribution_facts.ansible_facts.distribution"
+      when: "'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 ...
