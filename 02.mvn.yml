@@ -38,6 +38,6 @@
 
   handlers:
     - name: Reload shell environment
-      command: ". /etc/profile.d/maven.sh"
+      command: bash -c "source /etc/profile.d/maven.sh"
       become: yes
 ...
