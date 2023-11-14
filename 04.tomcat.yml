@@ -91,11 +91,11 @@
       debug:
         var: ansible_os_family
 
-    - name: Start Tomcat
+    - name: Start Tomcat (CentOS / RedHat)
       systemd:
         name: "tomcat"
         state: started
-      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
+      when: "'CentOS' in ansible_distribution_file_variety or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
 
     - name: Start Tomcat (Ubuntu)
       systemd:
@@ -107,7 +107,7 @@
       systemd:
         state: restarted
         name: "tomcat"
-      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
+      when: "'CentOS' in ansible_distribution_file_variety or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
 
     - name: System CTL
       ansible.builtin.command: "systemctl daemon-reload"
