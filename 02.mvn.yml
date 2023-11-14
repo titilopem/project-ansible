@@ -10,37 +10,34 @@
         state: present
 
     - name: Download Apache Maven
-      ansible.builtin.get_url:
-        url: "https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz"
-        dest: "/tmp/apache-maven-3.9.5-bin.tar.gz"
+      command: "wget https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz -O /tmp/apache-maven-3.9.5-bin.tar.gz"
       args:
         creates: "/tmp/apache-maven-3.9.5-bin.tar.gz"
 
     - name: Extract Maven archive
-      ansible.builtin.unarchive:
+      unarchive:
         src: "/tmp/apache-maven-3.9.5-bin.tar.gz"
         dest: "/opt"
         remote_src: yes
 
     - name: Create symbolic link to Maven
-      ansible.builtin.file:
+      file:
         src: "/opt/apache-maven-3.9.5"
         dest: "/opt/maven"
         state: link
         force: yes
 
     - name: Set Maven environment variables
-      ansible.builtin.lineinfile:
+      lineinfile:
         path: "/etc/profile.d/maven.sh"
         create: yes
         line: |
           export MAVEN_HOME=/opt/maven
           export PATH=${MAVEN_HOME}/bin:${PATH}
-      notify: Reload shell environment
+      notify: Reload shell environment  # Ensure the name matches the handler name
 
   handlers:
     - name: Reload shell environment
-      systemd:
-        name: 'systemd-user-sessions'
-        state: reloaded
+      shell: 
+       cmd: "systemctl --user daemon-reload && systemctl --user restart"
 ...
