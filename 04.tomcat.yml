@@ -31,8 +31,6 @@
         group: tomcat
 
     - name: Reload systemd configuration
-      systemd:
-        name: {{ tomcat_service_name }}
-        state: restarted
-        daemon_reload: yes
+      shell:
+        command: "systemctl daemon-reload && systemctl restart tomcat"
 ...
