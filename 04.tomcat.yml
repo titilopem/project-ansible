@@ -1,19 +1,26 @@
 ---
 - name: Manage Apache Tomcat
-  hosts: group1
+  hosts: your_target_hosts
   become: true
 
   tasks:
     - name: Check if Apache Tomcat archive already exists
-      stat:
+      ansible.builtin.stat:
         path: "/opt/apache-tomcat-8.5.72.tar.gz"
       register: tomcat_archive
 
     - name: Download Apache Tomcat 8.5.72 if not present
-      get_url:
+      ansible.builtin.get_url:
         url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
         dest: "/opt/apache-tomcat-8.5.72.tar.gz"
       when: not tomcat_archive.stat.exists
+
+    - name: Stash current working directory
+      ansible.builtin.stash:
+        name: original_workdir
+
+    - name: Change working directory to /opt/
+      ansible.builtin.command: "cd /opt/"
 
     - name: Extract the Tomcat archive
       ansible.builtin.unarchive:
@@ -24,22 +31,26 @@
         creates: /opt/apache-tomcat-8.5.72/  # Skip extraction if directory already present
 
     - name: Move Tomcat contents to /opt/tomcat
-      command: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
+      ansible.builtin.shell: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
       args:
         creates: /opt/tomcat/bin/startup.sh  # Skip if files are already present
 
     - name: Set environment variables
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "/etc/environment"
         line: "CATALINA_HOME=/opt/tomcat"
         create: yes
 
     - name: System CTL
-      command: "systemctl daemon-reload"
+      ansible.builtin.command: "systemctl daemon-reload"
 
     - name: Shutdown Tomcat service
-      command: "/opt/tomcat/bin/shutdown.sh"
+      ansible.builtin.command: "/opt/tomcat/bin/shutdown.sh"
 
     - name: Start Tomcat service
-      command: "/opt/tomcat/bin/startup.sh"
+      ansible.builtin.command: "/opt/tomcat/bin/startup.sh"
+
+    - name: Unstash original working directory
+      ansible.builtin.unstash:
+        name: original_workdir
 ...
