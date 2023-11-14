@@ -1,5 +1,5 @@
 - name: Manage Apache Tomcat
-  hosts: all
+  hosts: group1
   become: true
 
   tasks:
