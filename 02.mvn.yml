@@ -36,7 +36,6 @@
           export PATH=${MAVEN_HOME}/bin:${PATH}
       notify: reload shell environment
 
-  handlers:
     - name: reload shell environment
       command: "source /etc/profile.d/maven.sh"
 ...
