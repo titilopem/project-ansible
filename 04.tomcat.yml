@@ -11,16 +11,14 @@
       ansible.builtin.set_fact:
         java_home_path: "/usr/lib/jvm/java-11-openjdk"
 
+    - name: Set Tomcat service name based on distribution
+      ansible.builtin.set_fact:
+        tomcat_service_name: "{{ 'tomcat8' if linux_distribution in ['Ubuntu', 'Debian'] else 'tomcat' }}"
+
     - name: Check if Apache Tomcat archive already exists
       ansible.builtin.stat:
         path: "/opt/apache-tomcat-8.5.72.tar.gz"
       register: tomcat_archive
-
-    - name: Download Apache Tomcat 8.5.72 if not present
-      ansible.builtin.get_url:
-        url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
-        dest: "/opt/apache-tomcat-8.5.72.tar.gz"
-      when: not tomcat_archive.stat.exists
 
     # Add more tasks as needed
 
@@ -46,7 +44,7 @@
 
     - name: Restart Tomcat service
       ansible.builtin.systemd:
-        name: tomcat
+        name: "{{ tomcat_service_name }}"
         state: restarted
 
     - name: Wait for Tomcat to restart
