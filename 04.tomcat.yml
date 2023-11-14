@@ -33,20 +33,19 @@
     - name: Reload and restart Tomcat service
       ansible.builtin.shell:
         cmd: "systemctl daemon-reload && systemctl restart tomcat"
-      failed_when: false
-      ignore_errors: true
+      changed_when: false
 
     - name: Shutdown Tomcat service (fallback for non-systemd systems)
       ansible.builtin.shell:
         cmd: "/opt/tomcat/bin/shutdown.sh"
-      when: "'Active: active' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
-      failed_when: false
-      ignore_errors: true
+      when: "'Active: active' in (result.stdout | default(''))"
+      changed_when: false
+      register: result
 
     - name: Start Tomcat service (fallback for non-systemd systems)
       ansible.builtin.shell:
         cmd: "/opt/tomcat/bin/startup.sh"
-      when: "'Active: inactive' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
-      failed_when: false
-      ignore_errors: true
+      when: "'Active: inactive' in (result.stdout | default(''))"
+      changed_when: false
+      register: result
 ...
