@@ -15,8 +15,7 @@
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Install Tomcat on Amazon Linux or CentOS
-      # Use 'dnf' for CentOS/Amazon Linux
-      dnf:
+      yum:
         name: java, tomcat  # Adjust the package names for CentOS/Amazon Linux
         state: present
       when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
