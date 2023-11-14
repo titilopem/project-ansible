@@ -38,5 +38,5 @@
 
   handlers:
     - name: reload shell environment
-      command: "exec bash"
+      command: "source /etc/profile.d/maven.sh"
 ...
