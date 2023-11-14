@@ -49,5 +49,5 @@
       ansible.builtin.systemd:
         name: "{{ tomcat_service_name }}"
         state: started
-      when: tomcat_status.rc == 3
+      when: tomcat_status is defined and tomcat_status.rc == 3
 ...
