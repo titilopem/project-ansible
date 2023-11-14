@@ -39,19 +39,9 @@
         state: present
       when: "'Amazon' in ansible_distribution"
 
-    - name: Check Java version
-      command: "java -version"
-      register: java_version_output
-      ignore_errors: true
-
-    - name: Display Java version
-      debug:
-        var: java_version_output.stdout_lines
-
     - name: Install wget
-      apt:
+      package:
         name: wget
-        state: present
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Install wget (CentOS)
@@ -73,8 +63,8 @@
 
     - name: Download Tomcat 10
       ansible.builtin.get_url:
-       url: "wget https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
-       dest: "/usr/local/tomcat/apache-tomcat-10.0.23.tar.gz"
+        url: "https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin/apache-tomcat-10.0.23.tar.gz"
+        dest: "/usr/local/tomcat/apache-tomcat-10.0.23.tar.gz"
 
     - name: Extract Tomcat archive
       ansible.builtin.unarchive:
