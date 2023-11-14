@@ -8,15 +8,19 @@
       package_facts:
       run_once: yes
 
-    - name: Install Tomcat
+    - name: Install Tomcat on Ubuntu
       package:
-        name: "{{ item.pkg }}"
+        name: tomcat
         state: present
-      loop:
-        - { pkg: 'tomcat', when: "'Ubuntu' in ansible_distribution" }
-        - { pkg: 'tomcat', when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution", pkg_manager: 'yum' }
+      when: "'Ubuntu' in ansible_distribution"
 
-    - name: Reload Tomcat
+    - name: Install Tomcat on Amazon Linux or CentOS
+      package:
+        name: tomcat
+        state: present
+      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+
+    - name: Reload Tomcat on Ubuntu, Amazon Linux, or CentOS
       systemd:
         name: tomcat
         state: restarted
