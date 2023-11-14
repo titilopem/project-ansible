@@ -16,7 +16,7 @@
       when: ansible_distribution == 'Ubuntu'
 
     - name: Install Update on Amazon Linux
-      ansible.builtin.dnf:
+      ansible.builtin.yum:
         name: update
       when: ansible_distribution == 'Amazon'
 
@@ -28,7 +28,7 @@
 
     - name: Install JAVA
       ansible.builtin.package:
-        name: openjdk-11-jre-headless
+        name: "{{ 'openjdk-11-jdk' if ansible_distribution in ['Debian', 'Ubuntu'] else 'java-11-amazon-corretto-headless' }}"
         state: present
 
     - name: Create a Tomcat User
@@ -51,9 +51,15 @@
     - name: Download Tomcat9 Deployer archive
       ansible.builtin.get_url:
         url: "{{ tomcat_url }}"
-        dest: "{{ tomcat_install_path }}"
+        dest: "/tmp/apache-tomcat-{{ tomcat_version }}-deployer.tar.gz"
         mode: '0755'
-      args:
+
+    - name: Unarchive Tomcat9 Deployer
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-{{ tomcat_version }}-deployer.tar.gz"
+        dest: "{{ tomcat_install_path }}"
+        remote_src: yes
+        extra_opts: ['--strip-components=1']
         creates: "{{ tomcat_install_path }}/bin/catalina.sh"
 
     - name: Change ownership of Tomcat directory
