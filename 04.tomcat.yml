@@ -80,6 +80,9 @@
           [Install]
           WantedBy=multi-user.target
 
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
+
     - name: Start tomcat Service
       service:
         name: tomcat
