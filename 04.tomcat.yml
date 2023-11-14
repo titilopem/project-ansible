@@ -23,7 +23,7 @@
         dest: "/opt/tomcat/apache-tomcat.tar.gz"
 
     - name: Extract Tomcat archive
-      unarchive:
+      ansible.builtin.unarchive:
         src: "/opt/tomcat/apache-tomcat.tar.gz"
         dest: "/opt/tomcat/"
         remote_src: true
@@ -31,13 +31,15 @@
         group: tomcat
 
     - name: Reload systemd configuration
-      command: "systemctl daemon-reload"
+      ansible.builtin.command:
+        cmd: "systemctl daemon-reload"
 
     - name: Shutdown Tomcat service
-      command: "/opt/tomcat/bin/shutdown.sh"
-      async: 600
-      poll: 0
-      ignore_errors: yes
+      ansible.builtin.command:
+        cmd: "/opt/tomcat/bin/shutdown.sh"
+        async: 600
+        poll: 0
+        ignore_errors: yes
 
     - name: Wait for Tomcat to shut down
       wait_for:
@@ -45,6 +47,8 @@
         state: absent
       delegate_to: localhost
 
-    - name: Start Tomcat service
-      command: "/opt/tomcat/bin/startup.sh"
+    - name: Start Tomcat service if shutdown was successful
+      ansible.builtin.shell:
+        cmd: "/opt/tomcat/bin/startup.sh"
+      when: "'Active: inactive' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
 ...
