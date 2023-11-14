@@ -1,6 +1,6 @@
 ---
 - name: Manage Apache Tomcat
-  hosts: all
+  hosts: group1
   become: true
   tasks:
     - name: Determine Linux distribution
@@ -44,9 +44,25 @@
       ansible.builtin.systemd:
         daemon_reload: yes
 
-    - name: Shutdown Tomcat service
-      ansible.builtin.command: "/opt/tomcat/bin/shutdown.sh"
+    - name: Restart Tomcat service
+      ansible.builtin.systemd:
+        name: tomcat
+        state: restarted
 
-    - name: Start Tomcat service
-      ansible.builtin.command: "/opt/tomcat/bin/startup.sh"
+    - name: Wait for Tomcat to restart
+      ansible.builtin.wait_for:
+        port: 8080
+        delay: 10
+        timeout: 300
+
+    - name: Shutdown Tomcat service
+      ansible.builtin.shell: "source /etc/environment && /opt/tomcat/bin/shutdown.sh"
+      ignore_errors: true  # Ignore errors if shutdown.sh fails initially
+
+    - name: Wait for Tomcat to stop
+      ansible.builtin.wait_for:
+        port: 8080
+        state: stopped
+        delay: 10
+        timeout: 300
 ...
