@@ -44,6 +44,21 @@
         dest: /opt/
         remote_src: yes
 
+    - name: Ensure Tomcat scripts are present
+      ansible.builtin.stat:
+        path: /opt/tomcat/bin/{{ item }}
+      loop:
+        - shutdown.sh
+        - startup.sh
+      register: tomcat_scripts
+
+    - name: Download Tomcat scripts if not present
+      ansible.builtin.get_url:
+        url: "https://raw.githubusercontent.com/apache/tomcat/master/bin/{{ item.item }}"
+        dest: "/opt/tomcat/bin/{{ item.item }}"
+      when: not item.stat.exists
+      loop: "{{ tomcat_scripts.results }}"
+
     - name: Set ownership and permissions for Tomcat directory
       ansible.builtin.file:
         path: /opt/tomcat
