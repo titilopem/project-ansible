@@ -21,9 +21,15 @@
         state: present
       when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 
-    - name: Reload Tomcat on Ubuntu, Amazon Linux, or CentOS
+    - name: Reload Tomcat on Ubuntu
       systemd:
-        name: tomcat9  # Adjust the service name for Ubuntu
+        name: tomcat9
         state: restarted
-      when: "'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+      when: "'Ubuntu' in ansible_distribution"
+    
+    - name: Reload Tomcat on Amazon Linux or CentOS
+      systemd:
+        name: tomcat  # Adjust the service name for Amazon Linux
+        state: restarted
+      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
 ...
