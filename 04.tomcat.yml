@@ -15,25 +15,20 @@
         dest: "/opt/apache-tomcat-8.5.72.tar.gz"
       when: not tomcat_archive.stat.exists
 
-    - name: Stash current working directory
-      ansible.builtin.stash:
-        name: original_workdir
+    - name: Extract and move Tomcat contents
+      ansible.builtin.block:
+        name: Extract and move Tomcat
+        tasks:
+          - ansible.builtin.unarchive:
+              src: "/opt/apache-tomcat-8.5.72.tar.gz"
+              dest: "/opt/"
+              remote_src: yes
+            args:
+              creates: "/opt/apache-tomcat-8.5.72/"  # Skip if directory already present
 
-    - name: Change working directory to /opt/
-      ansible.builtin.command: "cd /opt/"
-
-    - name: Extract the Tomcat archive
-      ansible.builtin.unarchive:
-        src: "/opt/apache-tomcat-8.5.72.tar.gz"
-        dest: "/opt/"
-        remote_src: yes
-      args:
-        creates: /opt/apache-tomcat-8.5.72/  # Skip extraction if directory already present
-
-    - name: Move Tomcat contents to /opt/tomcat
-      ansible.builtin.shell: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
-      args:
-        creates: /opt/tomcat/bin/startup.sh  # Skip if files are already present
+          - ansible.builtin.shell: "mv /opt/apache-tomcat-8.5.72/* /opt/tomcat/"
+            args:
+              creates: "/opt/tomcat/bin/startup.sh"  # Skip if files are already present
 
     - name: Set environment variables
       ansible.builtin.lineinfile:
@@ -41,16 +36,13 @@
         line: "CATALINA_HOME=/opt/tomcat"
         create: yes
 
-    - name: System CTL
-      ansible.builtin.command: "systemctl daemon-reload"
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
 
     - name: Shutdown Tomcat service
-      ansible.builtin.command: "/opt/tomcat/bin/shutdown.sh"
+      ansible.builtin.shell: "/opt/tomcat/bin/shutdown.sh"
 
     - name: Start Tomcat service
-      ansible.builtin.command: "/opt/tomcat/bin/startup.sh"
-
-    - name: Unstash original working directory
-      ansible.builtin.unstash:
-        name: original_workdir
+      ansible.builtin.shell: "/opt/tomcat/bin/startup.sh"
 ...
