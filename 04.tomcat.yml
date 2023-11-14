@@ -1,65 +1,74 @@
----
-- name: Install Apache Tomcat
+- name: Tomcat 10 installation
   hosts: group1
-  become: yes
-  vars:
-    tomcat_version: "8.5.72"
-    tomcat_download_url: "https://archive.apache.org/dist/tomcat/tomcat-8/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
-    tomcat_install_dir: "/opt/tomcat"
-
+  become: true
   tasks:
-    - name: Update package cache
-      package_facts:
-        manager: auto
-
-    - name: Install required packages
-      package:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - "{{ 'java-1.8.0-openjdk' if (ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2') else omit }}"
-        - "{{ 'libtcnative' if (ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2') else 'tomcat-native' }}"  # Updated package name
-
-    - name: Download Apache Tomcat archive
+    - name: Download tomcat 10 binaries
       get_url:
-        url: "{{ tomcat_download_url }}"
-        dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.7/bin/apache-tomcat-10.1.7.tar.gz
+        dest: /opt
 
-    - name: Extract Apache Tomcat archive
-      ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
-        dest: "{{ tomcat_install_dir }}"
+    - name: Extract the binaries
+      unarchive:
+        src: /opt/apache-tomcat-10.1.7.tar.gz
+        dest: /opt
         remote_src: yes
 
-    - name: Set ownership and permissions
-      ansible.builtin.file:
-        path: "{{ tomcat_install_dir }}"
-        state: directory
-        owner: root
-        group: root
-        mode: '0755'
+    - name: Rename the apache-tomcat-10.1.7 directory
+      command:
+        chdir: /opt
+        cmd: mv apache-tomcat-10.1.7 tomcat
+
+    - name: Create tomcat group
+      group:
+        name: tomcat
+        system: yes
+        state: present
+
+    - name: Create tomcat user
+      user:
+        name: tomcat
+        group: tomcat
+        password: pa$$w0rd
+        home: /opt/tomcat
+        shell: "/bin/bash"
+
+    - name: Change owner & group of tomcat directory
+      file:
+        path: /opt/tomcat
+        owner: tomcat
+        group: tomcat
         recurse: yes
 
-    - name: Start Apache Tomcat
-      ansible.builtin.shell:
-        cmd: "{{ tomcat_install_dir }}/bin/startup.sh"
-        executable: /bin/bash
-      environment:
-        CATALINA_HOME: "{{ tomcat_install_dir }}"
-      async: 120
-      poll: 0
+    - name: Create empty Tomcat service file /etc/systemd/system/tomcat.service
+      file:
+        path: /etc/systemd/system/tomcat.service
+        state: touch
 
-    - name: Add Tomcat startup script to rc.local
-      lineinfile:
-        dest: /etc/rc.local
-        line: "{{ tomcat_install_dir }}/bin/startup.sh"
-        create: yes
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+    - name: Add tomcat service details in /etc/systemd/system/tomcat.service
+      blockinfile:
+        path: /etc/systemd/system/tomcat.service
+        block: |
+          [Unit]
+          Description=Tomcat 10
+          After=network.target
+          [Service]
+          Type=forking
+          User=tomcat
+          Group=tomcat
+          Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
+          Environment="JAVA_OPTS=-Djava.security.egd=file:///dev/urandom"
+          Environment="CATALINA_BASE=/opt/tomcat"
+          Environment="CATALINA_HOME=/opt/tomcat"
+          Environment="CATALINA_PID=/opt/tomcat/temp/tomcat.pid"
+          Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+          ExecStart=/opt/tomcat/bin/startup.sh
+          ExecStop=/opt/tomcat/bin/shutdown.sh
+          [Install]
+          WantedBy=multi-user.target
 
-    - name: Enable Tomcat service on Ubuntu
-      systemd:
+    - name: Start tomcat Service
+      service:
         name: tomcat
-        enabled: yes
         state: started
-      when: ansible_distribution == 'Ubuntu'
+        enabled: yes
 ...
