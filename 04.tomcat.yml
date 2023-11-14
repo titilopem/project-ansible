@@ -33,12 +33,12 @@
     - name: Reload systemd configuration and restart Tomcat service
       shell:
         cmd: "systemctl daemon-reload && systemctl restart tomcat"
-      when: "'Active: active' in (ansible.builtin.shell('systemctl status tomcat').stdout | default(''))"
+      when: "'Active: active' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
 
     - name: Start Tomcat service if not running
       systemd:
         name: tomcat
         state: started
         enabled: yes
-      when: "'Active: inactive' in (ansible.builtin.shell('systemctl status tomcat').stdout | default(''))"
+      when: "'Active: inactive' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
 ...
