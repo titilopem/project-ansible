@@ -30,12 +30,21 @@
         owner: tomcat
         group: tomcat
 
-    - name: Reload and restart Tomcat service
+    - name: Reload systemd configuration
       command: "systemctl daemon-reload"
 
-    - name: shutdown Tomcat service
+    - name: Shutdown Tomcat service
       command: "/opt/tomcat/bin/shutdown.sh"
+      async: 600
+      poll: 0
+      ignore_errors: yes
 
-    - name: startup Tomcat service
+    - name: Wait for Tomcat to shut down
+      wait_for:
+        port: 8080
+        state: absent
+      delegate_to: localhost
+
+    - name: Start Tomcat service
       command: "/opt/tomcat/bin/startup.sh"
 ...
