@@ -102,5 +102,5 @@
       systemd:
         name: "tomcat9"
         state: started
-      when: "'Ubuntu' in ansible_os_family"
+      when: "'Debian' in ansible_os_family"
 ...
