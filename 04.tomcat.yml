@@ -1,6 +1,6 @@
 ---
 - name: Install Apache Tomcat
-  hosts: all
+  hosts: group1
   become: yes
   vars:
     tomcat_version: "8.5.72"
@@ -17,8 +17,8 @@
         name: "{{ item }}"
         state: present
       loop:
-        - openjdk-8-jre
-        - libtcnative-1
+        - "{{ 'java-1.8.0-openjdk' if ansible_distribution == 'Amazon' else 'openjdk-8-jre' }}"
+        - libtcnative
 
     - name: Download Apache Tomcat archive
       get_url:
