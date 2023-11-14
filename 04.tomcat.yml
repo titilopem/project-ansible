@@ -14,7 +14,7 @@
         state: present
       loop:
         - { pkg: 'tomcat', when: "'Ubuntu' in ansible_distribution" }
-        - { pkg: 'tomcat', when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution", 'pkg_manager': 'yum' }
+        - { pkg: 'tomcat', when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution", pkg_manager: 'yum' }
 
     - name: Reload Tomcat
       systemd:
