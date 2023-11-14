@@ -34,8 +34,6 @@
           export MAVEN_HOME=/opt/maven
           export PATH=${MAVEN_HOME}/bin:${PATH}
       notify: reload shell environment
-      args:
-        creates: /etc/profile.d/maven.sh  # Skip if already present
 
   handlers:
     - name: reload shell environment
