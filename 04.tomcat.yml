@@ -1,3 +1,5 @@
+# Manage Apache Tomcat
+---
 - name: Manage Apache Tomcat
   hosts: group1
   become: true
@@ -32,5 +34,5 @@
     - name: Start Tomcat service
       ansible.builtin.command: "/opt/tomcat/bin/startup.sh"
       args:
-        creates: /opt/tomcat/bin/startup.sh  # Skip if service is already running
+        creates: /opt/tomcat/bin/startup.sh  # Skip if the service is already running
 ...
