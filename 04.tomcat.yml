@@ -18,7 +18,7 @@
         state: present
       loop:
         - "{{ 'java-1.8.0-openjdk' if (ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2') else omit }}"
-        - libtcnative
+        - "{{ 'libtcnative' if (ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2') else 'tomcat-native' }}"  # Updated package name
 
     - name: Download Apache Tomcat archive
       get_url:
