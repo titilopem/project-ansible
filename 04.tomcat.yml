@@ -96,7 +96,7 @@
       systemd:
         name: "tomcat"
         state: started
-      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety"
+      when: "'CentOS' in ansible_os_family or 'Amazon' in ansible_os_family or 'RedHat' in ansible_distribution_file_variety or 'Amazon' in ansible_distribution_file_variety"
       
     - name: Start Tomcat (Ubuntu)
       systemd:
