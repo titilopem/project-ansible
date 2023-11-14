@@ -39,5 +39,5 @@
   handlers:
     - name: Reload shell environment
       shell: 
-       cmd: "systemctl --user daemon-reload && systemctl --user restart"
+       cmd: ". /etc/profile.d/maven.sh"
 ...
