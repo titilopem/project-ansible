@@ -18,7 +18,7 @@
         group: tomcat
 
     - name: Download and extract Tomcat
-      get_url:
+      ansible.builtin.get_url:
         url: "https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.72/bin/apache-tomcat-8.5.72.tar.gz"
         dest: "/opt/tomcat/apache-tomcat.tar.gz"
 
@@ -35,7 +35,8 @@
         cmd: "systemctl daemon-reload"
 
     - name: Start Tomcat service if shutdown was successful
-      ansible.builtin.shell:
-        cmd: "/opt/tomcat/bin/startup.sh"
+      ansible.builtin.systemd:
+        name: tomcat
+        state: started
       when: "'Active: inactive' in (ansible.builtin.command('systemctl status tomcat').stdout | default(''))"
 ...
