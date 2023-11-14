@@ -4,9 +4,6 @@
   become: yes
 
   tasks:
-    - name: Gather Facts about the distribution
-      setup:
-
     - name: Update package manager cache
       package_facts:
       run_once: yes
