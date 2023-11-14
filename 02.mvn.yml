@@ -38,6 +38,12 @@
 
   handlers:
     - name: Reload shell environment
-      shell: 
-       cmd: ". /etc/profile.d/maven.sh"
+      command: ". /etc/profile.d/maven.sh"
+      become: yes
+
+      - name: restart maven service
+        service:
+         name: maven
+         state: restarted
+         become: yes
 ...
