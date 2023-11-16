@@ -4,16 +4,14 @@
   gather_facts: true
   tasks:
     - name: Check Tomcat Version
-      shell: |
-        catalina.sh version | grep "Server version"
+      shell: catalina.sh version 2>&1 | grep "Server version"
       register: tomcat_version
       changed_when: false
       ignore_errors: yes
       when: "'RedHat' in ansible_os_family or 'Amazon' in ansible_os_family"
 
     - name: Check Tomcat Version on Ubuntu
-      shell: |
-        /etc/init.d/tomcat9 version | grep "Server version"
+      command: /etc/init.d/tomcat9 version 2>&1 | grep "Server version"
       register: tomcat_version
       changed_when: false
       ignore_errors: yes
@@ -21,17 +19,17 @@
 
     - name: Display Tomcat Version
       debug:
-        var: tomcat_version.stdout_lines
+        var: tomcat_version.stderr_lines
       when: tomcat_version.rc == 0
 
     - name: Check Java Version
-      command: java -version
+      command: java -version 2>&1
       register: java_version
       changed_when: false
       ignore_errors: yes
 
     - name: Display Java Version
       debug:
-        var: java_version.stdout_lines
+        var: java_version.stderr_lines
       when: java_version.rc == 0
 ...
