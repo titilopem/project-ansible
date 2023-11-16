@@ -4,25 +4,20 @@
   become: yes
 
   tasks:
-    - name: Update package system (Ubuntu)
-      apt:
-        update_cache: yes
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Update package system (CentOS)
-      dnf:
+    - name: Update package system
+      package:
         name: '*'
         state: latest
-      when: "'CentOS' in ansible_os_family"
+      when: "'Ubuntu' in ansible_distribution or 'CentOS' in ansible_os_family"
 
-    - name: Install default available Java (Ubuntu)
-      apt:
+    - name: Install default available Java
+      package:
         name: default-jdk
         state: present
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Install OpenJDK on CentOS
-      dnf:
+      package:
         name: java-11-openjdk
         state: present
       when: "'CentOS' in ansible_distribution"
