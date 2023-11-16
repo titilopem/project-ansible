@@ -20,7 +20,7 @@
     - name: Display Tomcat Version
       debug:
         var: tomcat_version.stderr_lines
-      when: tomcat_version.rc == 0
+      when: tomcat_version.rc != 0
 
     - name: Check Java Version
       command: java -version 2>&1
