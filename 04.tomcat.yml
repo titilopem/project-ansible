@@ -49,7 +49,7 @@
         remote_src: yes
       become: yes
 
-- name: Set Tomcat environment variables
+    - name: Set Tomcat environment variables
       lineinfile:
         path: "/etc/environment"
         line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"  # Adjust the path based on your Tomcat version
