@@ -3,8 +3,8 @@
   hosts: all
   gather_facts: true
   tasks:
-    - name: Check Tomcat Version
-      shell: catalina.sh version 2>&1 | grep "Server version"
+    - name: Check Tomcat Version (CentOS)
+      command: catalina.sh version 2>&1 | grep "Server version"
       register: tomcat_version
       changed_when: false
       ignore_errors: yes
