@@ -70,4 +70,9 @@
         nohup $JAVA_HOME/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       when: "'systemd' not in ansible_playbook_python | lower"
       become: yes
+
+    - name: Print Tomcat status
+      ansible.builtin.debug:
+        msg: "{{ tomcat_status.stdout }}"
+      when: tomcat_status is succeeded
 ...
