@@ -25,23 +25,11 @@
             state: present
           when: "'Amazon' in ansible_distribution"
 
-        - name: Set Java 11 as the default Java version
-          command: "{{ item }}"
-          loop:
-            - "update-alternatives --set java /usr/lib/jvm/java-11-openjdk-{{ ansible_architecture }}/bin/java"
-            - "update-java-alternatives --set java-11-openjdk-{{ ansible_architecture }}"
-            - "alternatives --set java /usr/lib/jvm/java-11-amazon-corretto/bin/java"
-          when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution"
-
         - name: Display Java version
           command: java -version
       tags: java
 
-- name: Install Apache Tomcat
-  hosts: group1
-  become: true
-  tasks:
-    - name: Update package cache
+    - name: Install wget
       package:
         name: wget
         state: present
