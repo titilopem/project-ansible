@@ -9,61 +9,26 @@
     tomcat_url: "https://archive.apache.org/dist/tomcat/tomcat-10/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
   tasks:
-    - name: Update package cache on CentOS/RHEL
+    - name: Debug - Print Distribution Information
+      debug:
+        var: ansible_distribution
+
+    - name: Debug - Print Distribution Version
+      debug:
+        var: ansible_distribution_version
+
+    - name: Update package cache
       package_facts:
         manager: auto
 
-    - name: Install Java on CentOS/RHEL
+    - name: Install Java
       become: true
-      command: "{{ java_package }}"
-      args:
-        creates: "/usr/bin/java"
-      when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
+      block:
+        - name: Install Java on CentOS/RHEL
+          command: "{{ java_package }}"
+          args:
+            creates: "/usr/bin/java"
+          when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
 
-    - name: Install Java on Ubuntu
-      become: true
-      apt:
-       name: "{{ java_package }}"
-       state: present
-      when: "'ubuntu' in ansible_distribution"
-
-    - name: Download Apache Tomcat
-      get_url:
-        url: "{{ tomcat_url }}"
-        dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
-
-    - name: Extract Tomcat archive
-      ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
-        dest: "{{ tomcat_install_dir }}"
-        remote_src: true
-
-    - name: Set Tomcat environment variables
-      lineinfile:
-        dest: "{{ tomcat_install_dir }}/bin/setenv.sh"
-        line: "export CATALINA_HOME={{ tomcat_install_dir }}"
-        create: yes
-
-    - name: Set JAVA_HOME in Tomcat systemd service file on Ubuntu
-      lineinfile:
-        dest: "/etc/systemd/system/tomcat.service"
-        line: "Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
-        create: yes
-      when: "'ubuntu' in ansible_distribution"
-
-    - name: Set JAVA_HOME in Tomcat systemd service file on CentOS/RHEL
-      lineinfile:
-        dest: "/etc/systemd/system/tomcat.service"
-        line: "Environment=JAVA_HOME={{ ansible_env.JAVA_HOME }}"
-        create: yes
-      when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
-
-    - name: Reload systemd for changes to take effect
-      systemd:
-        name: "{{ item }}"
-        state: restarted
-        daemon_reload: yes
-        loop:
-          - "tomcat"
-          - "tomcat9"
+        - name
 ...
