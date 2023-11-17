@@ -74,9 +74,9 @@
 
     - name: Start Tomcat service
       ansible.builtin.shell: |
-        . /etc/environment
-        export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}
-        nohup /opt/apache-tomcat-10.1.16/bin/startup.sh
+         . /etc/environment
+         export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}
+         nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       when: "'systemd' not in ansible_playbook_python | lower"
       become: true
       
