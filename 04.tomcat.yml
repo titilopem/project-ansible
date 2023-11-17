@@ -42,12 +42,19 @@
         line: "CATALINA_HOME={{ tomcat_install_dir }}"
         state: present
 
-    - name: Set JAVA_HOME
+    - name: Set JAVA_HOME on Ubuntu
       lineinfile:
         dest: "/etc/environment"
         line: "JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
         state: present
       when: "'ubuntu' in ansible_distribution"
+
+    - name: Set JAVA_HOME on CentOS/RHEL
+      lineinfile:
+        dest: "/etc/environment"
+        line: "JAVA_HOME={{ ansible_env.JAVA_HOME }}"
+        state: present
+      when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
 
     - name: Systemd - Daemon reload on CentOS/RHEL
       systemd:
