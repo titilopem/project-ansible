@@ -1,4 +1,29 @@
 ---
+- name: Install Java 11
+  hosts: group1
+  become: yes
+  tasks:
+    - name: Install Java 11 on CentOS
+      yum:
+        name: java-11-openjdk
+        state: present
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Install Java 11 on Ubuntu
+      apt:
+        name: openjdk-11-jdk
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Set Java 11 as the default Java version (CentOS)
+      command: alternatives --install /usr/bin/java java /usr/lib/jvm/java-11-openjdk-{{ ansible_architecture }}/bin/java 1
+      args:
+        creates: /usr/bin/java
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Display Java version
+      command: java -version
+
 - name: Install Apache Tomcat and Java
   hosts: group1
   become: true
@@ -82,6 +107,6 @@
 
     - name: Print Tomcat status
       ansible.builtin.debug:
-        msg: "{{ 'failed' if ansible_run_status.rc != 0 else 'succeeded' }}"
-      when: ansible_run_status.rc != 0
+        msg: "{{ 'failed' if rc != 0 else 'succeeded' }}"
+      when: rc != 0
 ...
