@@ -39,6 +39,7 @@
 
     - name: Install Apache Tomcat
       hosts: group1
+      become: true
       tasks:
         - name: Update package cache
           package:
