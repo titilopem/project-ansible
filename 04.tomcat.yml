@@ -1,3 +1,4 @@
+#install
 ---
 - name: Install Apache Tomcat and Java
   hosts: group1
