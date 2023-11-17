@@ -70,24 +70,4 @@
         nohup $JAVA_HOME/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       when: "'systemd' not in ansible_playbook_python | lower"
       become: yes
-
-    - name: Wait for Tomcat to start
-      ansible.builtin.wait_for:
-        host: 127.0.0.1
-        port: 8080
-        timeout: 180
-      when: "'systemd' not in ansible_playbook_python | lower"
-      become: yes
-
-    - name: Check Tomcat status
-      ansible.builtin.systemd:
-        name: tomcat
-        state: started
-      register: tomcat_status
-      ignore_errors: True
-
-    - name: Print Tomcat status
-      ansible.builtin.debug:
-        msg: "{{ tomcat_status.stdout }}"
-      when: tomcat_status is succeeded
 ...
