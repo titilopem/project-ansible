@@ -44,10 +44,10 @@
         - name: Set Java Home (CentOS and Ubuntu)
           lineinfile:
             dest: /etc/environment
-            line: 'export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/usr/lib/jvm/java-11-amazon-corretto' if 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution else '/opt/java' }}'
+            line: 'export JAVA_HOME={{ "/usr/lib/jvm/java-11-openjdk-amd64" if "Ubuntu" in ansible_distribution else "/usr/lib/jvm/java-11" if "CentOS" in ansible_distribution else "/usr/lib/jvm/java-11-amazon-corretto" if "Amazon" in ansible_distribution or "amzn" in ansible_distribution else "/opt/java" }}'
             create: yes
-          notify: reload environment
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+      notify: reload environment
+  when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
 
     - name: Download Apache Tomcat
       block:
