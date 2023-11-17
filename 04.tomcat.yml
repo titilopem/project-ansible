@@ -1,6 +1,6 @@
 ---
 - name: Install Java and Apache Tomcat
-  hosts: all
+  hosts: group1
   become: true
   vars:
     java_package: "java-11-openjdk"
