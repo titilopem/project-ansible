@@ -1,6 +1,6 @@
 ---
 - name: Install Java 11
-  hosts: group1
+  hosts: all
   become: yes
   tasks:
     - name: Install Java 11 on CentOS
@@ -16,10 +16,16 @@
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Set Java 11 as the default Java version (CentOS)
-      command: alternatives --install /usr/bin/java java /usr/lib/jvm/java-11-openjdk-{{ ansible_architecture }}/bin/java 1
+      command: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-{{ ansible_architecture }}/bin/java
       args:
         creates: /usr/bin/java
       when: "'CentOS' in ansible_distribution"
+
+    - name: Set Java 11 as the default Java version (Ubuntu)
+      command: update-java-alternatives --set java-11-openjdk-{{ ansible_architecture }}
+      args:
+        creates: /usr/bin/java
+      when: "'Ubuntu' in ansible_distribution"
 
     - name: Display Java version
       command: java -version
@@ -59,19 +65,25 @@
         name: wget
       when: ansible_distribution in ['Ubuntu', 'CentOS']
 
-    - name: Create a directory for Tomcat installation
+    - name: Create a directory for Java installation
       file:
-        path: /opt
+        path: "/opt/java"
         state: directory
+
+    - name: Set Java Home environment variable
+      lineinfile:
+        path: "/etc/environment"
+        line: "export JAVA_HOME=/opt/java"
+      become: true
 
     - name: Download Apache Tomcat
       ansible.builtin.get_url:
         url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
+        dest: "/opt/apache-tomcat-10.1.16.tar.gz"
 
     - name: Extract Tomcat archive
       ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
+        src: "/opt/apache-tomcat-10.1.16.tar.gz"
         dest: "/opt"
         remote_src: yes
 
@@ -79,17 +91,6 @@
       lineinfile:
         path: "/etc/environment"
         line: "export CATALINA_HOME=/opt/apache-tomcat-10.1.16"
-      become: true
-
-    - name: Set Java Home environment variable
-      lineinfile:
-        path: "/etc/environment"
-        line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}"
-      become: true
-
-    - name: Print JAVA_HOME
-      debug:
-        msg: "JAVA_HOME is set to {{ lookup('env', 'JAVA_HOME') }}"
       become: true
 
     - name: System CTL - Daemon reload
@@ -102,15 +103,15 @@
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: |
-         . /etc/environment
-         export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}
-         nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
-      when: "'systemd' not in ansible_playbook_python | lower"
+      ansible.builtin.shell: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/startup.sh"
       become: true
 
     - name: Print Tomcat status
-      ansible.builtin.debug:
-        msg: "{{ 'failed' if rc != 0 else 'succeeded' }}"
-      when: rc != 0
+      ansible.builtin.shell: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/version.sh"
+      register: tomcat_status
+
+    - name: Print Tomcat status output
+      debug:
+        var: tomcat_status.stdout_lines
+      when: tomcat_status.rc != 0
 ...
