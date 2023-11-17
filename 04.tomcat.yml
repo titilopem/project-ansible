@@ -15,6 +15,12 @@
         state: present
       when: "'Ubuntu' in ansible_distribution"
 
+    - name: Install Java 11 on Amazon Linux
+      yum:
+        name: java-11-amazon-corretto
+        state: present
+      when: "'Amazon' in ansible_distribution"
+
     - name: Set Java 11 as the default Java version (CentOS)
       command: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-{{ ansible_architecture }}/bin/java
       args:
@@ -26,6 +32,12 @@
       args:
         creates: /usr/bin/java
       when: "'Ubuntu' in ansible_distribution"
+
+    - name: Set Java 11 as the default Java version (Amazon Linux)
+      command: alternatives --set java /usr/lib/jvm/java-11-amazon-corretto/bin/java
+      args:
+        creates: /usr/bin/java
+      when: "'Amazon' in ansible_distribution"
 
     - name: Display Java version
       command: java -version
@@ -48,6 +60,11 @@
         update_cache: yes
       when: ansible_distribution == "CentOS"
 
+    - name: Update package cache on Amazon Linux
+      yum:
+        update_cache: yes
+      when: "'Amazon' in ansible_distribution"
+
     - name: Install default available Java on Ubuntu
       apt:
         name: default-jdk
@@ -60,10 +77,16 @@
         state: present
       when: ansible_distribution == "CentOS"
 
+    - name: Install Amazon Corretto on Amazon Linux
+      yum:
+        name: java-11-amazon-corretto
+        state: present
+      when: "'Amazon' in ansible_distribution"
+
     - name: Install wget
       package:
         name: wget
-      when: ansible_distribution in ['Ubuntu', 'CentOS']
+      when: ansible_distribution in ['Ubuntu', 'CentOS', 'Amazon']
 
     - name: Create a directory for Java installation
       file:
@@ -73,7 +96,7 @@
     - name: Set Java Home environment variable
       lineinfile:
         path: "/etc/environment"
-        line: "export JAVA_HOME=/opt/java"
+        line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' if ansible_distribution == 'CentOS' else '/usr/lib/jvm/java-11-amazon-corretto' if ansible_distribution == 'Amazon' else '/opt/java' }}"
       become: true
 
     - name: Download Apache Tomcat
@@ -107,7 +130,7 @@
       become: true
 
     - name: Print Tomcat status
-      ansible.builtin.shell: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/version.sh"
+      ansible.builtin.shell: "export JAVA_HOME=/opt/java && /opt/apache-tomcat-10.1.16/bin/version.sh"
       register: tomcat_status
 
     - name: Print Tomcat status output
