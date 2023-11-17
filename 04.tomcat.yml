@@ -4,7 +4,7 @@
   become: true
 
   tasks:
-    - name: Update package cache on CentOS/RHEL
+    - name: Update package cache
       package:
         name: "*"
         state: latest
@@ -12,11 +12,15 @@
 
     - name: Install java-11-openjdk on CentOS/RHEL and Ubuntu
       package:
-        name: "{{ item }}"
+        name: "openjdk-11-jdk"
         state: present
-      loop:
-        - openjdk-11-jdk
-      when: ansible_distribution in ['RedHat', 'CentOS', 'Ubuntu'] and ansible_python.version.major == 3
+      when: ansible_pkg_mgr == 'yum' or ansible_pkg_mgr == 'dnf'
+
+    - name: Install java-11-openjdk on Ubuntu
+      package:
+        name: "openjdk-11-jdk"
+        state: present
+      when: ansible_pkg_mgr == 'apt'
 
     - name: Download Apache Tomcat
       get_url:
@@ -35,14 +39,13 @@
         line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
       become: true
 
-    - name: Set JAVA_HOME using set_fact on CentOS/RHEL
-      ansible.builtin.set_fact:
-        JAVA_HOME: "/usr/lib/jvm/java-11-openjdk-amd64"
-      when: ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3
+    - name: Set JAVA_HOME using update-alternatives on Ubuntu
+      ansible.builtin.shell: "update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java"
+      when: ansible_distribution == 'Ubuntu'
 
     - name: Set JAVA_HOME using alternatives on CentOS/RHEL
-      ansible.builtin.shell: "alternatives --set java {{ JAVA_HOME }}/bin/java"
-      when: ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3
+      ansible.builtin.shell: "alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java"
+      when: ansible_distribution in ['RedHat', 'CentOS']
 
     - name: Systemd - Daemon reload on CentOS/RHEL
       ansible.builtin.systemd:
