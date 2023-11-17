@@ -1,75 +1,61 @@
-#install
 ---
-- name: Install Apache Tomcat and Java
+- name: Install Java and Apache Tomcat
   hosts: group1
   become: true
+  vars:
+    java_package: "java-11-openjdk"
+    tomcat_version: "10.1.16"
+    tomcat_install_dir: "/opt/apache-tomcat-{{ tomcat_version }}"
+    tomcat_url: "https://archive.apache.org/dist/tomcat/tomcat-10/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
   tasks:
     - name: Update package cache on CentOS/RHEL
-      ansible.builtin.dnf:
-        update_cache: yes
-      when: ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3
+      package_facts:
+        manager: auto
 
-    - name: Install java-11-openjdk on CentOS/RHEL
-      ansible.builtin.package:
-        name: "java-11-openjdk"
+    - name: Install Java on CentOS/RHEL
+      when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
+      package:
+        name: "{{ java_package }}"
         state: present
-      when: ansible_distribution in ['RedHat', 'CentOS']
 
-    - name: Install java-11-openjdk on Ubuntu
-      ansible.builtin.package:
-        name: "openjdk-11-jdk"
+    - name: Install Java on Ubuntu
+      when: "'ubuntu' in ansible_distribution"
+      apt:
+        name: "{{ java_package }}"
         state: present
-      when: ansible_distribution == 'Ubuntu'
 
     - name: Download Apache Tomcat
       get_url:
-        url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
+        url: "{{ tomcat_url }}"
+        dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
     - name: Extract Tomcat archive
       ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
-        dest: "/opt"
-        remote_src: yes
+        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "{{ tomcat_install_dir }}"
+        remote_src: true
 
     - name: Set Tomcat environment variables
       lineinfile:
-        path: "/etc/environment"
-        line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
-      become: true
+        dest: "{{ tomcat_install_dir }}/bin/setenv.sh"
+        line: "export CATALINA_HOME={{ tomcat_install_dir }}"
+        create: yes
 
-    - name: Set JAVA_HOME on Ubuntu
+    - name: Set JAVA_HOME in Tomcat startup script on Ubuntu
       lineinfile:
-        path: "/etc/environment"
-        line: "JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
-      when: ansible_distribution == 'Ubuntu'
+        dest: "{{ tomcat_install_dir }}/bin/startup.sh"
+        line: "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
+        create: yes
+      when: "'ubuntu' in ansible_distribution"
 
-    - name: Set JAVA_HOME on CentOS/RHEL
+    - name: Set JAVA_HOME in Tomcat startup script on CentOS/RHEL
       lineinfile:
-        path: "/etc/environment"
-        line: "JAVA_HOME=/usr/lib/jvm/java-11"
-      when: ansible_distribution == 'RedHat'
-
-    - name: Systemd - Daemon reload on CentOS/RHEL
-      ansible.builtin.systemd:
-        daemon_reload: yes
-      become: yes
-      when: ansible_distribution in ['RedHat', 'CentOS', 'Ubuntu']
-
-    - name: Debug output for systemd check
-      ansible.builtin.debug:
-        msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
-
-    - name: Debug Java_HOME
-      debug:
-        var: lookup('env', 'JAVA_HOME')
+        dest: "{{ tomcat_install_dir }}/bin/startup.sh"
+        line: "export JAVA_HOME={{ ansible_env.JAVA_HOME }}"
+        create: yes
+      when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
 
     - name: Start Tomcat service
-      become: true
-      command: "/opt/apache-tomcat-10.1.16/bin/startup.sh"
-      environment:
-        JAVA_HOME: "/usr/lib/jvm/java-11-openjdk-amd64"
-      tags:
-        - tomcat
+      command: "{{ tomcat_install_dir }}/bin/startup.sh"
 ...
