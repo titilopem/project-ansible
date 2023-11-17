@@ -61,6 +61,10 @@
       ansible.builtin.debug:
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
+    - name: Debug Java_HOME
+      debug:
+        var: lookup('env', 'JAVA_HOME')
+
     - name: Start Tomcat service
       become: true
       command: "/opt/apache-tomcat-10.1.16/bin/startup.sh"
