@@ -54,13 +54,13 @@
     - name: Set Tomcat environment variables
       lineinfile:
         path: "/etc/environment"
-        line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
+        line: "export CATALINA_HOME=/opt/apache-tomcat-10.1.16"
       become: true
 
     - name: Set Java Home environment variable dynamically
       lineinfile:
         path: "/etc/environment"
-        line: "JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}"
+        line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}"
       become: true
 
     - name: System CTL - Daemon reload
@@ -73,12 +73,12 @@
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: "nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
+      ansible.builtin.shell: "source /etc/environment && nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
       when: "'systemd' not in ansible_playbook_python | lower"
       become: true
 
     - name: Print Tomcat status
       ansible.builtin.debug:
-        msg: "{{ tomcat_status.stdout }}"
-      when: tomcat_status is succeeded
+        msg: "{{ ansible_run_status.stdout }}"
+      when: "'succeeded' in ansible_run_status"
 ...
