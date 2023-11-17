@@ -8,24 +8,24 @@
       package:
         name: '*'
         state: latest
-      when: "'Ubuntu' in ansible_distribution or 'CentOS' in ansible_os_family"
+      when: ansible_distribution in ['Ubuntu', 'CentOS']
 
-    - name: Install default available Java
+    - name: Install default available Java on Ubuntu
       package:
         name: default-jdk
         state: present
-      when: "'Ubuntu' in ansible_distribution"
+      when: ansible_distribution == 'Ubuntu'
 
     - name: Install OpenJDK on CentOS
       package:
         name: java-11-openjdk
         state: present
-      when: "'CentOS' in ansible_distribution"
+      when: ansible_distribution == 'CentOS'
 
     - name: Install wget
       package:
         name: wget
-      when: "'Ubuntu' in ansible_distribution or 'CentOS' in ansible_os_family"
+      when: ansible_distribution in ['Ubuntu', 'CentOS']
 
     - name: Create a directory for Tomcat installation
       file:
@@ -48,19 +48,19 @@
       lineinfile:
         path: "/etc/environment"
         line: "CATALINA_HOME=/usr/local/tomcat/apache-tomcat-10.1.16"
-      become: true
+      become: yes
 
     - name: Set Java Home environment variable dynamically
       lineinfile:
         path: "/etc/environment"
         line: "JAVA_HOME={{ ansible_env.JAVA_HOME }}"
-      become: true
+      become: yes
       when: "'ansible_env' in hostvars[inventory_hostname] and 'JAVA_HOME' in ansible_env"
 
     - name: System CTL - Daemon reload
       ansible.builtin.command: "systemctl daemon-reload"
       become: yes
-      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution"
+      when: ansible_distribution in ['Amazon', 'CentOS']
 
     - name: Debug output for systemd check
       ansible.builtin.debug:
@@ -69,5 +69,5 @@
     - name: Start Tomcat service
       ansible.builtin.shell: "nohup {{ ansible_env.JAVA_HOME }}/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh"
       when: "'systemd' not in ansible_playbook_python | lower"
-      become: true
+      become: yes
 ...
