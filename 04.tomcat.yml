@@ -24,10 +24,9 @@
     - name: Display Java version
       command: java -version
 
-- name: Install Apache Tomcat and Java
+- name: Install Apache Tomcat
   hosts: group1
   become: true
-
   tasks:
     - name: Check the OS Distribution
       debug:
@@ -86,6 +85,11 @@
       lineinfile:
         path: "/etc/environment"
         line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}"
+      become: true
+
+    - name: Print JAVA_HOME
+      debug:
+        msg: "JAVA_HOME is set to {{ lookup('env', 'JAVA_HOME') }}"
       become: true
 
     - name: System CTL - Daemon reload
