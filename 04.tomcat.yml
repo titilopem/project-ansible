@@ -1,63 +1,94 @@
 ---
 - name: Install Java and Apache Tomcat
-  hosts: group1
+  hosts: all
   become: true
   gather_facts: true
-
   tasks:
     - name: Install Java 11 on CentOS
-      ansible.builtin.yum:
-        name: java-11-openjdk
-        state: present
+      block:
+        - name: Install Java (CentOS)
+          yum:
+            name: java-11-openjdk-devel
+            state: present
       when: "'CentOS' in ansible_distribution"
 
     - name: Install Java 11 on Ubuntu
-      ansible.builtin.apt:
-        name: openjdk-11-jdk
-        state: present
+      block:
+        - name: Install Java (Ubuntu)
+          apt:
+            name: openjdk-11-jdk
+            state: present
       when: "'Ubuntu' in ansible_distribution"
 
+    - name: Install Java 11 on Amazon Linux
+      block:
+        - name: Install Java (Amazon Linux)
+          yum:
+            name: java-11-amazon-corretto-devel
+            state: present
+      when: "'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+
     - name: Set Java Home environment variable
-      ansible.builtin.lineinfile:
-        path: "/etc/environment"
-        line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/opt/java' }}"
-      become: true
+      block:
+        - name: Set Java Home (CentOS and Ubuntu)
+          lineinfile:
+            dest: /etc/environment
+            line: 'export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/usr/lib/jvm/java-11-amazon-corretto' if 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution else '/opt/java' }}'
+            create: yes
+          notify: reload environment
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
 
     - name: Download Apache Tomcat
-      ansible.builtin.get_url:
-        url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
+      block:
+        - name: Download Apache Tomcat
+          get_url:
+            url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+            dest: "/opt/"
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
 
     - name: Extract Tomcat archive
-      ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
-        dest: "/opt"
-        remote_src: yes
+      block:
+        - name: Extract Tomcat archive
+          ansible.builtin.unarchive:
+            src: "/opt/apache-tomcat-10.1.16.tar.gz"
+            dest: "/opt/"
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
 
     - name: Set Tomcat environment variables
-      ansible.builtin.lineinfile:
-        path: "/etc/environment"
-        line: "export CATALINA_HOME=/opt/apache-tomcat-10.1.16"
-      become: true
+      block:
+        - name: Set Tomcat environment variables
+          lineinfile:
+            dest: "/opt/apache-tomcat-10.1.16/bin/setenv.sh"
+            line: 'export CATALINA_OPTS="$CATALINA_OPTS -Djava.security.egd=file:/dev/./urandom"'
+            create: yes
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
 
     - name: System CTL - Daemon reload
-      ansible.builtin.command: "systemctl daemon-reload"
-      become: true
-      when: "'systemd' in ansible_service_mgr | lower"
+      block:
+        - name: System CTL - Daemon reload
+          systemd:
+            daemon_reload: yes
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
 
     - name: Debug output for systemd check
-      ansible.builtin.debug:
-        msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
+      debug:
+        msg: "Systemd is not present"
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: |
-         . /etc/environment
-         export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/opt/java' }}
-         nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
-      when: "'systemd' not in ansible_playbook_python | lower"
-      become: true
+      block:
+        - name: Start Tomcat service
+          ansible.builtin.command: "/opt/apache-tomcat-10.1.16/bin/startup.sh"
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
 
     - name: Print Tomcat status
-      ansible.builtin.shell: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/version.sh"
-      ignore_errors: true
+      block:
+        - name: Print Tomcat status
+          ansible.builtin.command: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/version.sh"
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+
+  handlers:
+    - name: reload environment
+      ansible.builtin.command: "source /etc/environment"
+      become: yes
 ...
