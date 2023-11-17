@@ -63,9 +63,8 @@
 
     - name: Start Tomcat service
       become: true
-      service:
-        name: tomcat
-        state: started
+      command:
+        cmd: "/opt/apache-tomcat-10.1.16/bin/startup.sh"
       tags:
         - tomcat
 ...
