@@ -57,7 +57,7 @@
         line: "export CATALINA_HOME=/opt/apache-tomcat-10.1.16"
       become: true
 
-    - name: Set Java Home environment variable dynamically
+    - name: Set Java Home environment variable
       lineinfile:
         path: "/etc/environment"
         line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}"
@@ -73,12 +73,12 @@
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: ". /etc/environment && export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }} && nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
+      ansible.builtin.shell: ". /etc/environment && nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
       when: "'systemd' not in ansible_playbook_python | lower"
       become: true
 
     - name: Print Tomcat status
       ansible.builtin.debug:
-        msg: "{{ ansible_run_status }}"
-      when: "'failed' in ansible_run_status | lower"
+        msg: "{{ 'failed' if 'non-zero return code' in ansible_run_status.stderr else 'succeeded' }}"
+      when: "'non-zero return code' in ansible_run_status.stderr"
 ...
