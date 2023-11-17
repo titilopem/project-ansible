@@ -42,20 +42,23 @@
         line: "export CATALINA_HOME={{ tomcat_install_dir }}"
         create: yes
 
-    - name: Set JAVA_HOME in Tomcat startup script on Ubuntu
+    - name: Set JAVA_HOME in Tomcat systemd service file on Ubuntu
       lineinfile:
-        dest: "{{ tomcat_install_dir }}/bin/startup.sh"
-        line: "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
+        dest: "/etc/systemd/system/tomcat.service"
+        line: "Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
         create: yes
       when: "'ubuntu' in ansible_distribution"
 
-    - name: Set JAVA_HOME in Tomcat startup script on CentOS/RHEL
+    - name: Set JAVA_HOME in Tomcat systemd service file on CentOS/RHEL
       lineinfile:
-        dest: "{{ tomcat_install_dir }}/bin/startup.sh"
-        line: "export JAVA_HOME={{ ansible_env.JAVA_HOME }}"
+        dest: "/etc/systemd/system/tomcat.service"
+        line: "Environment=JAVA_HOME={{ ansible_env.JAVA_HOME }}"
         create: yes
       when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
 
-    - name: Start Tomcat service
-      command: "{{ tomcat_install_dir }}/bin/startup.sh"
+    - name: Reload systemd for changes to take effect
+      systemd:
+        name: tomcat
+        state: restarted
+        daemon_reload: yes
 ...
