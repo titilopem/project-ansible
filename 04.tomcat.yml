@@ -6,59 +6,44 @@
 
   tasks:
     - name: Install Java 11
-      block:
-        - name: Install Java 11 on CentOS
-          yum:
-            name: java-11-openjdk
-            state: present
-          when: "'CentOS' in ansible_distribution"
+      ansible.builtin.include_role:
+        name: geerlingguy.java
+      vars:
+        java_openjdk_packages:
+          - "java-11-openjdk"
 
-        - name: Install Java 11 on Ubuntu
-          apt:
-            name: openjdk-11-jdk
-            state: present
-          when: "'Ubuntu' in ansible_distribution"
-
-        - name: Install Java 11 on Amazon Linux
-          yum:
-            name: java-11-amazon-corretto
-            state: present
-          when: "'Amazon' in ansible_distribution"
-
-        - name: Display Java version
-          command: java -version
-      tags: java
+    - name: Display Java version
+      ansible.builtin.command: java -version
 
     - name: Install wget
-      package:
+      ansible.builtin.package:
         name: wget
-        state: present
-      when: ansible_distribution in ['Ubuntu', 'CentOS', 'Amazon']
+      when: "'Ubuntu' in ansible_distribution or 'CentOS' in ansible_distribution"
 
     - name: Create a directory for Java installation
-      file:
+      ansible.builtin.file:
         path: "/opt/java"
         state: directory
 
     - name: Set Java Home environment variable
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "/etc/environment"
-        line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/usr/lib/jvm/java-11-amazon-corretto' if 'Amazon' in ansible_distribution else '/opt/java' }}"
+        line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/opt/java' }}"
       become: true
 
     - name: Download Apache Tomcat
       ansible.builtin.get_url:
         url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/opt/apache-tomcat-10.1.16.tar.gz"
+        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
 
     - name: Extract Tomcat archive
       ansible.builtin.unarchive:
-        src: "/opt/apache-tomcat-10.1.16.tar.gz"
+        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
         dest: "/opt"
         remote_src: yes
 
     - name: Set Tomcat environment variables
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "/etc/environment"
         line: "export CATALINA_HOME=/opt/apache-tomcat-10.1.16"
       become: true
@@ -66,25 +51,27 @@
     - name: System CTL - Daemon reload
       ansible.builtin.command: "systemctl daemon-reload"
       become: true
-      when: ansible_service_mgr == "systemd"
+      when: "'systemd' in ansible_service_mgr"
 
     - name: Debug output for systemd check
       ansible.builtin.debug:
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: "source /etc/environment && nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &"
+      ansible.builtin.shell: >
+        export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/opt/java' }};
+        nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       become: true
-      async: 0
-      poll: 0
-      tags: tomcat
+      when: "'systemd' not in ansible_playbook_python | lower"
 
     - name: Print Tomcat status
-      ansible.builtin.shell: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/version.sh"
+      ansible.builtin.shell: >
+        export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/opt/java' }};
+        /opt/apache-tomcat-10.1.16/bin/version.sh"
       register: tomcat_status
 
     - name: Print Tomcat status output
-      debug:
+      ansible.builtin.debug:
         var: tomcat_status.stdout_lines
       when: tomcat_status.rc != 0
 ...
