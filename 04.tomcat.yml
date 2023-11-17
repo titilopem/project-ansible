@@ -1,3 +1,4 @@
+---
 - name: Install Apache Tomcat and Java
   hosts: group1
   become: true
@@ -35,6 +36,13 @@
       lineinfile:
         path: "/etc/environment"
         line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
+      become: true
+
+    - name: Set JAVA_HOME environment variable
+      lineinfile:
+        path: "/etc/environment"
+        line: "JAVA_HOME={{ ansible_env.JAVA_HOME | default('/usr/lib/jvm/java-11-openjdk-amd64') }}"
+      become: true
 
     - name: Systemd - Daemon reload
       ansible.builtin.systemd:
