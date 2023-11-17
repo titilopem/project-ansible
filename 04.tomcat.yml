@@ -66,8 +66,6 @@
       command: "/opt/apache-tomcat-10.1.16/bin/startup.sh"
       environment:
         JAVA_HOME: "/usr/lib/jvm/java-11-openjdk-amd64"
-        CATALINA_HOME: "/opt/apache-tomcat-10.1.16"
-        CATALINA_BASE: "/opt/apache-tomcat-10.1.16"
       tags:
         - tomcat
 ...
