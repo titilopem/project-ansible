@@ -63,10 +63,9 @@
     - name: Start Tomcat service
       become: true
       command: >
-        JAVA_HOME={{ ansible_env.JAVA_HOME }}
         nohup /opt/apache-tomcat-10.1.16/bin/startup.sh
-      args:
-        executable: /bin/bash
+      environment:
+        JAVA_HOME: "{{ ansible_env.JAVA_HOME }}"
       tags:
         - tomcat
 ...
