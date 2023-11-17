@@ -45,12 +45,16 @@
         line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
       become: true
 
-    - name: Set JAVA_HOME using update-alternatives on Ubuntu
-      ansible.builtin.shell: "update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java"
+    - name: Set JAVA_HOME on Ubuntu
+      lineinfile:
+        path: "/etc/environment"
+        line: "JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
       when: ansible_distribution == 'Ubuntu'
 
-    - name: Set JAVA_HOME using alternatives on CentOS/RHEL
-      ansible.builtin.shell: "alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java"
+    - name: Set JAVA_HOME on CentOS/RHEL
+      lineinfile:
+        path: "/etc/environment"
+        line: "JAVA_HOME=/usr/lib/jvm/java-11"
       when: ansible_distribution == 'RedHat'
 
     - name: Systemd - Daemon reload on CentOS/RHEL
