@@ -1,5 +1,5 @@
 - name: Install Apache Tomcat and Java
-  hosts: g2
+  hosts: group1
   become: true
 
   tasks:
