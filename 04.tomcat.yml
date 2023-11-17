@@ -1,140 +1,101 @@
 ---
-- name: Install Java 11
-  hosts: group1
-  become: yes
-  tasks:
-    - name: Install Java 11 on CentOS
-      yum:
-        name: java-11-openjdk
-        state: present
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Install Java 11 on Ubuntu
-      apt:
-        name: openjdk-11-jdk
-        state: present
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Install Java 11 on Amazon Linux
-      yum:
-        name: java-11-amazon-corretto
-        state: present
-      when: "'Amazon' in ansible_distribution"
-
-    - name: Set Java 11 as the default Java version (CentOS)
-      command: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-{{ ansible_architecture }}/bin/java
-      args:
-        creates: /usr/bin/java
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Set Java 11 as the default Java version (Ubuntu)
-      command: update-java-alternatives --set java-11-openjdk-{{ ansible_architecture }}
-      args:
-        creates: /usr/bin/java
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Set Java 11 as the default Java version (Amazon Linux)
-      command: alternatives --set java /usr/lib/jvm/java-11-amazon-corretto/bin/java
-      args:
-        creates: /usr/bin/java
-      when: "'Amazon' in ansible_distribution"
-
-    - name: Display Java version
-      command: java -version
-
-- name: Install Apache Tomcat
-  hosts: group1
+- name: Install Java and Apache Tomcat
+  hosts: all
   become: true
+  gather_facts: true
+
   tasks:
-    - name: Check the OS Distribution
-      debug:
-        var: ansible_distribution
+    - name: Install Java 11
+      block:
+        - name: Install Java 11 on CentOS
+          yum:
+            name: java-11-openjdk
+            state: present
+          when: "'CentOS' in ansible_distribution"
 
-    - name: Update package cache on Ubuntu
-      apt:
-        update_cache: yes
-      when: ansible_distribution == "Ubuntu"
+        - name: Install Java 11 on Ubuntu
+          apt:
+            name: openjdk-11-jdk
+            state: present
+          when: "'Ubuntu' in ansible_distribution"
 
-    - name: Update package cache on CentOS
-      yum:
-        update_cache: yes
-      when: ansible_distribution == "CentOS"
+        - name: Install Java 11 on Amazon Linux
+          yum:
+            name: java-11-amazon-corretto
+            state: present
+          when: "'Amazon' in ansible_distribution"
 
-    - name: Update package cache on Amazon Linux
-      yum:
-        update_cache: yes
-      when: "'Amazon' in ansible_distribution"
+        - name: Set Java 11 as the default Java version
+          command: "{{ item }}"
+          loop:
+            - "update-alternatives --set java /usr/lib/jvm/java-11-openjdk-{{ ansible_architecture }}/bin/java"
+            - "update-java-alternatives --set java-11-openjdk-{{ ansible_architecture }}"
+            - "alternatives --set java /usr/lib/jvm/java-11-amazon-corretto/bin/java"
+          when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution"
 
-    - name: Install default available Java on Ubuntu
-      apt:
-        name: default-jdk
-        state: present
-      when: ansible_distribution == "Ubuntu"
+        - name: Display Java version
+          command: java -version
+      tags: java
 
-    - name: Install OpenJDK on CentOS
-      yum:
-        name: java-11-openjdk
-        state: present
-      when: ansible_distribution == "CentOS"
+    - name: Install Apache Tomcat
+      hosts: group1
+      tasks:
+        - name: Update package cache
+          package:
+            name: wget
+            state: present
+          when: ansible_distribution in ['Ubuntu', 'CentOS', 'Amazon']
 
-    - name: Install Amazon Corretto on Amazon Linux
-      yum:
-        name: java-11-amazon-corretto
-        state: present
-      when: "'Amazon' in ansible_distribution"
+        - name: Create a directory for Java installation
+          file:
+            path: "/opt/java"
+            state: directory
 
-    - name: Install wget
-      package:
-        name: wget
-      when: ansible_distribution in ['Ubuntu', 'CentOS', 'Amazon']
+        - name: Set Java Home environment variable
+          lineinfile:
+            path: "/etc/environment"
+            line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/usr/lib/jvm/java-11-amazon-corretto' if 'Amazon' in ansible_distribution else '/opt/java' }}"
+          become: true
 
-    - name: Create a directory for Java installation
-      file:
-        path: "/opt/java"
-        state: directory
+        - name: Download Apache Tomcat
+          ansible.builtin.get_url:
+            url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+            dest: "/opt/apache-tomcat-10.1.16.tar.gz"
 
-    - name: Set Java Home environment variable
-      lineinfile:
-        path: "/etc/environment"
-        line: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' if ansible_distribution == 'CentOS' else '/usr/lib/jvm/java-11-amazon-corretto' if ansible_distribution == 'Amazon' else '/opt/java' }}"
-      become: true
+        - name: Extract Tomcat archive
+          ansible.builtin.unarchive:
+            src: "/opt/apache-tomcat-10.1.16.tar.gz"
+            dest: "/opt"
+            remote_src: yes
 
-    - name: Download Apache Tomcat
-      ansible.builtin.get_url:
-        url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/opt/apache-tomcat-10.1.16.tar.gz"
+        - name: Set Tomcat environment variables
+          lineinfile:
+            path: "/etc/environment"
+            line: "export CATALINA_HOME=/opt/apache-tomcat-10.1.16"
+          become: true
 
-    - name: Extract Tomcat archive
-      ansible.builtin.unarchive:
-        src: "/opt/apache-tomcat-10.1.16.tar.gz"
-        dest: "/opt"
-        remote_src: yes
+        - name: System CTL - Daemon reload
+          ansible.builtin.command: "systemctl daemon-reload"
+          become: true
+          when: ansible_service_mgr == "systemd"
 
-    - name: Set Tomcat environment variables
-      lineinfile:
-        path: "/etc/environment"
-        line: "export CATALINA_HOME=/opt/apache-tomcat-10.1.16"
-      become: true
+        - name: Debug output for systemd check
+          ansible.builtin.debug:
+            msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
-    - name: System CTL - Daemon reload
-      ansible.builtin.command: "systemctl daemon-reload"
-      become: true
-      when: ansible_service_mgr == "systemd"
+        - name: Start Tomcat service
+          ansible.builtin.shell: "source /etc/environment && nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &"
+          become: true
+          async: 0
+          poll: 0
+          tags: tomcat
 
-    - name: Debug output for systemd check
-      ansible.builtin.debug:
-        msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
+        - name: Print Tomcat status
+          ansible.builtin.shell: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/version.sh"
+          register: tomcat_status
 
-    - name: Start Tomcat service
-      ansible.builtin.shell: "export JAVA_HOME=/opt/java && /opt/apache-tomcat-10.1.16/bin/startup.sh"
-      become: true
-
-    - name: Print Tomcat status
-      ansible.builtin.shell: "export JAVA_HOME=/opt/java && /opt/apache-tomcat-10.1.16/bin/version.sh"
-      register: tomcat_status
-
-    - name: Print Tomcat status output
-      debug:
-        var: tomcat_status.stdout_lines
-      when: tomcat_status.rc != 0
+        - name: Print Tomcat status output
+          debug:
+            var: tomcat_status.stdout_lines
+          when: tomcat_status.rc != 0
 ...
