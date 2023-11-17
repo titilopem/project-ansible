@@ -1,4 +1,3 @@
----
 - name: Install and Configure Tomcat 10 on Multiple Operating Systems
   hosts: group1
   become: yes
@@ -66,40 +65,24 @@
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: |
-        export JAVA_HOME=$(grep JAVA_HOME /etc/environment | cut -d'=' -f2)
+      ansible.builtin.shell: >
+        export JAVA_HOME=$(grep JAVA_HOME /etc/environment | cut -d'=' -f2) &&
         nohup $JAVA_HOME/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       when: "'systemd' not in ansible_playbook_python | lower"
       become: yes
 
-    - name: Check Tomcat logs for errors
-      ansible.builtin.command: "tail -n 20 /usr/local/tomcat/apache-tomcat-10.1.16/logs/catalina.out"
-      register: tomcat_logs
-      changed_when: False
-      ignore_errors: True
-
-    - name: Print Tomcat logs if errors found
-      ansible.builtin.debug:
-        var: tomcat_logs.stdout_lines
-      when: tomcat_logs.rc != 0
-
-    - name: Check if Tomcat is listening on port 8080
+    - name: Wait for Tomcat to start
       ansible.builtin.wait_for:
         host: 127.0.0.1
         port: 8080
-        timeout: 5
-      register: tomcat_port_check
-      ignore_errors: True
-
-    - name: Print message if Tomcat is not listening on port 8080
-      ansible.builtin.debug:
-        msg: "Tomcat is not listening on port 8080. Check for port conflicts or configuration issues."
-      when: tomcat_port_check.failed
+        timeout: 180
+      when: "'systemd' not in ansible_playbook_python | lower"
+      become: yes
 
     - name: Check Tomcat status
       ansible.builtin.systemd:
         name: tomcat
-        state: restarted
+        state: started
       register: tomcat_status
       ignore_errors: True
 
