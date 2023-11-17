@@ -1,180 +1,53 @@
----
-- name: Install Java and Apache Tomcat
-  hosts: group1
+- name: Install Apache Tomcat and Java
+  hosts: g2
   become: true
-  gather_facts: true
+
   tasks:
-    - name: Install EPEL repository on CentOS
-      yum:
-        name: epel-release
-        state: present
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Install minimal packages
+    - name: Update package cache
       package:
-        name:
-          - 'vim'
-          - 'wget'
-          - 'curl'
+        name: "*"
+        state: latest
+      when: ansible_distribution in ['RedHat', 'Amazon'] and ansible_python.version.major == 3
+
+    - name: Install required packages
+      package:
+        name: "{{ item }}"
         state: present
-
-    - name: Install Java 11 on CentOS, Ubuntu, and Amazon Linux
-      block:
-        - name: Install Java (CentOS)
-          yum:
-            name: java-11-openjdk-devel
-            state: present
-          when: "'CentOS' in ansible_distribution"
-
-        - name: Install Java (Ubuntu)
-          apt:
-            name: openjdk-11-jdk
-            state: present
-          when: "'Ubuntu' in ansible_distribution"
-
-        - name: Install Java (Amazon Linux)
-          yum:
-            name: java-11-amazon-corretto-devel
-            state: present
-          when: "'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
-
-    - name: Set Java Home environment variable
-      block:
-        - name: Set Java Home (CentOS and Ubuntu)
-          lineinfile:
-            dest: /etc/environment
-            line: 'export JAVA_HOME={{ "/usr/lib/jvm/java-11-openjdk-amd64" if "Ubuntu" in ansible_distribution else "/usr/lib/jvm/java-11" if "CentOS" in ansible_distribution else "/usr/lib/jvm/java-11-amazon-corretto" if "Amazon" in ansible_distribution or "amzn" in ansible_distribution else "/opt/java" }}'
-            create: yes
-      notify: reload environment
-  when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+      loop:
+        - java-11-amazon-corretto
+        - python3-dnf
+        - openjdk-11-jdk-headless
+        - java-11-openjdk
+      when: ansible_distribution == 'Amazon' or (ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3)
 
     - name: Download Apache Tomcat
-      block:
-        - name: Download Apache Tomcat
-          get_url:
-            url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-            dest: "/opt/"
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+      get_url:
+        url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
 
     - name: Extract Tomcat archive
-      block:
-        - name: Extract Tomcat archive
-          ansible.builtin.unarchive:
-            src: "/opt/apache-tomcat-10.1.16.tar.gz"
-            dest: "/opt/"
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
+        dest: "/opt"
+        remote_src: yes
 
     - name: Set Tomcat environment variables
-      block:
-        - name: Set Tomcat environment variables
-          lineinfile:
-            dest: "/opt/apache-tomcat-10.1.16/bin/setenv.sh"
-            line: 'export CATALINA_OPTS="$CATALINA_OPTS -Djava.security.egd=file:/dev/./urandom"'
-            create: yes
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+      lineinfile:
+        path: "/etc/environment"
+        line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
 
-    - name: System CTL - Daemon reload
-      block:
-        - name: System CTL - Daemon reload
-          systemd:
-            daemon_reload: yes
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+    - name: Systemd - Daemon reload
+      ansible.builtin.systemd:
+        daemon_reload: yes
+      become: yes
+      when: ansible_distribution in ['Amazon', 'CentOS']
 
     - name: Debug output for systemd check
-      debug:
-        msg: "Systemd is not present"
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
+      ansible.builtin.debug:
+        msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      block:
-        - name: Start Tomcat service
-          ansible.builtin.command: "/opt/apache-tomcat-10.1.16/bin/startup.sh"
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
-
-    - name: Print Tomcat status
-      block:
-        - name: Print Tomcat status
-          ansible.builtin.command: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/version.sh"
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
-
-    - name: Add tomcat group
-      group:
-        name: tomcat
-
-    - name: Add "tomcat" user
-      user:
-        name: tomcat
-        group: tomcat
-        home: /usr/share/tomcat
-        createhome: no
-        system: yes
-
-    - name: Download Tomcat (alternative method)
-      get_url:
-        url: "{{ tomcat_archive_url }}"
-        dest: "{{ tomcat_archive_dest }}"
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
-
-    - name: Create a tomcat directory
-      file:
-        path: /usr/share/tomcat
-        state: directory
-        owner: tomcat
-        group: tomcat
-
-    - name: Extract tomcat archive (alternative method)
-      ansible.builtin.unarchive:
-        src: "{{ tomcat_archive_dest }}"
-        dest: /usr/share/tomcat
-        owner: tomcat
-        group: tomcat
-        remote_src: yes
-        extra_opts: "--strip-components=1"
-        creates: /usr/share/tomcat/bin
-      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution or 'Amazon' in ansible_distribution or 'amzn' in ansible_distribution"
-
-    - name: Copy tomcat service file
-      template:
-        src: templates/tomcat.service.j2
-        dest: /etc/systemd/system/tomcat.service
-      when: ansible_service_mgr == "systemd"
-
-    - name: Start and enable tomcat
-      service:
-        daemon_reload: yes
-        name: tomcat
-        state: started
-        enabled: yes
-      when: ansible_service_mgr == "systemd"
-
-    - name: Start and enable firewalld
-      service:
-        name: firewalld
-        state: started
-        enabled: yes
-      when: ansible_service_mgr == "systemd"
-
-    - name: Open tomcat port on the firewall
-      firewalld:
-        port: 8080/tcp
-        permanent: true
-        state: enabled
-        immediate: yes
-      when: ansible_service_mgr == "systemd"
-
-    - name: Set UI access credentials
-      template:
-        src: tomcat-users.xml
-        dest: /usr/share/tomcat/conf/tomcat-users.xml
-      notify: restart tomcat
-
-    - name: Allow access to Manager and Host Manager apps from any IP
-      template:
-        src: context.xml.j2 
-        dest: "{{ item }}"
-      with_items:
-        - /usr/share/tomcat/webapps/host-manager/META-INF/context.xml
-        - /usr/share/tomcat/webapps/manager/META-INF/context.xml
-      notify: restart tomcat
+      ansible.builtin.shell: "nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
+      when: "'systemd' not in ansible_playbook_python | lower"
+      become: true
 ...
