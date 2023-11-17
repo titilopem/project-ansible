@@ -79,9 +79,9 @@
          nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       when: "'systemd' not in ansible_playbook_python | lower"
       become: true
-      
+
     - name: Print Tomcat status
       ansible.builtin.debug:
-        msg: "{{ 'failed' if 'non-zero return code' in ansible_run_status.stderr else 'succeeded' }}"
-      when: "'non-zero return code' in ansible_run_status.stderr"
+        msg: "{{ 'failed' if ansible_run_status.rc != 0 else 'succeeded' }}"
+      when: ansible_run_status.rc != 0
 ...
