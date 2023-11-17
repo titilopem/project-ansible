@@ -35,10 +35,14 @@
         line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
       become: true
 
-    - name: Set JAVA_HOME using set_fact on CentOS/RHEL and Ubuntu
+    - name: Set JAVA_HOME using set_fact on CentOS/RHEL
       ansible.builtin.set_fact:
-        JAVA_HOME: "{{ ansible_java.java_home | default('/usr/lib/jvm/java-11-openjdk-amd64') }}"
-      when: ansible_distribution in ['RedHat', 'CentOS', 'Ubuntu'] and ansible_python.version.major == 3
+        JAVA_HOME: "/usr/lib/jvm/java-11-openjdk-amd64"
+      when: ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3
+
+    - name: Set JAVA_HOME using alternatives on CentOS/RHEL
+      ansible.builtin.shell: "alternatives --set java {{ JAVA_HOME }}/bin/java"
+      when: ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3
 
     - name: Systemd - Daemon reload on CentOS/RHEL
       ansible.builtin.systemd:
