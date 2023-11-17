@@ -59,7 +59,7 @@
     - name: System CTL - Daemon reload
       ansible.builtin.command: "systemctl daemon-reload"
       become: yes
-      when: "'systemd' in ansible_playbook_python | lower"
+      when: ansible_service_mgr == "systemd"
 
     - name: Debug output for systemd check
       ansible.builtin.debug:
