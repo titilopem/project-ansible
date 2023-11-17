@@ -62,7 +62,7 @@
 
     - name: Start Tomcat service
       become: true
-      systemd:
+      service:
         name: tomcat
         state: started
       tags:
