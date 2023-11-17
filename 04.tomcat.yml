@@ -68,7 +68,7 @@
     - name: Start Tomcat service
       ansible.builtin.shell: |
         export JAVA_HOME=$(grep JAVA_HOME /etc/environment | cut -d'=' -f2)
-        nohup $JAVA_HOME/bin/java -jar /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
+        nohup $JAVA_HOME/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       when: "'systemd' not in ansible_playbook_python | lower"
       become: yes
 ...
