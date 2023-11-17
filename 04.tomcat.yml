@@ -10,17 +10,23 @@
         state: latest
       when: ansible_distribution in ['RedHat', 'Amazon'] and ansible_python.version.major == 3
 
-    - name: Install java-11-openjdk on CentOS/RHEL and Ubuntu
+    - name: Install java-11-openjdk on CentOS/RHEL
       package:
-        name: "openjdk-11-jdk"
+        name: "java-11-openjdk"
         state: present
-      when: ansible_pkg_mgr == 'yum' or ansible_pkg_mgr == 'dnf'
+      when: ansible_distribution == 'RedHat' and ansible_pkg_mgr == 'yum'
+
+    - name: Install java-11-openjdk on CentOS/RHEL (dnf)
+      package:
+        name: "java-11-openjdk"
+        state: present
+      when: ansible_distribution == 'RedHat' and ansible_pkg_mgr == 'dnf'
 
     - name: Install java-11-openjdk on Ubuntu
       package:
         name: "openjdk-11-jdk"
         state: present
-      when: ansible_pkg_mgr == 'apt'
+      when: ansible_distribution == 'Ubuntu'
 
     - name: Download Apache Tomcat
       get_url:
@@ -45,7 +51,7 @@
 
     - name: Set JAVA_HOME using alternatives on CentOS/RHEL
       ansible.builtin.shell: "alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java"
-      when: ansible_distribution in ['RedHat', 'CentOS']
+      when: ansible_distribution == 'RedHat'
 
     - name: Systemd - Daemon reload on CentOS/RHEL
       ansible.builtin.systemd:
