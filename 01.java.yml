@@ -1,3 +1,4 @@
+---
 - name: Install Java 11
   hosts: all
   become: yes
@@ -20,6 +21,15 @@
         creates: /usr/bin/java
       when: "'CentOS' in ansible_distribution"
 
+    - name: Set JAVA_HOME environment variable
+      set_fact:
+        java_home_path: "/usr/lib/jvm/java-11-openjdk-{{ ansible_architecture }}"
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution"
+
     - name: Display Java version
       command: java -version
+
+    - name: Print JAVA_HOME path
+      debug:
+        var: java_home_path
 ...
