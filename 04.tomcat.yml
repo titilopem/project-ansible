@@ -5,25 +5,17 @@
   gather_facts: true
 
   tasks:
-    - name: Install Java 11
-      ansible.builtin.include_role:
-        name: geerlingguy.java
-      vars:
-        java_openjdk_packages:
-          - "java-11-openjdk"
+    - name: Install Java 11 on CentOS
+      ansible.builtin.yum:
+        name: java-11-openjdk
+        state: present
+      when: "'CentOS' in ansible_distribution"
 
-    - name: Display Java version
-      ansible.builtin.command: java -version
-
-    - name: Install wget
-      ansible.builtin.package:
-        name: wget
-      when: "'Ubuntu' in ansible_distribution or 'CentOS' in ansible_distribution"
-
-    - name: Create a directory for Java installation
-      ansible.builtin.file:
-        path: "/opt/java"
-        state: directory
+    - name: Install Java 11 on Ubuntu
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
 
     - name: Set Java Home environment variable
       ansible.builtin.lineinfile:
@@ -51,27 +43,21 @@
     - name: System CTL - Daemon reload
       ansible.builtin.command: "systemctl daemon-reload"
       become: true
-      when: "'systemd' in ansible_service_mgr"
+      when: "'systemd' in ansible_service_mgr | lower"
 
     - name: Debug output for systemd check
       ansible.builtin.debug:
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: "export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/opt/java' }} && nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &"
-      become: true
+      ansible.builtin.shell: |
+         . /etc/environment
+         export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/opt/java' }}
+         nohup /opt/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       when: "'systemd' not in ansible_playbook_python | lower"
+      become: true
 
     - name: Print Tomcat status
-      ansible.builtin.script:
-        interpreter: bash
-        script: |
-          export JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if 'Ubuntu' in ansible_distribution else '/usr/lib/jvm/java-11' if 'CentOS' in ansible_distribution else '/opt/java' }}
-          /opt/apache-tomcat-10.1.16/bin/version.sh
-      register: tomcat_status
-
-    - name: Print Tomcat status output
-      ansible.builtin.debug:
-        var: tomcat_status.stdout_lines
-      when: tomcat_status.rc != 0
+      ansible.builtin.shell: "source /etc/environment && /opt/apache-tomcat-10.1.16/bin/version.sh"
+      ignore_errors: true
 ...
