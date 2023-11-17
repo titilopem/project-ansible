@@ -1,25 +1,34 @@
-- name: Install and Configure Tomcat 10 on Multiple Operating Systems
+---
+- name: Install Apache Tomcat and Java
   hosts: group1
-  become: yes
+  become: true
 
   tasks:
-    - name: Update package system
-      package:
-        name: '*'
-        state: latest
-      when: ansible_distribution in ['Ubuntu', 'CentOS']
+    - name: Check the OS Distribution
+      debug:
+        var: ansible_distribution
+
+    - name: Update package cache on Ubuntu
+      apt:
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Update package cache on CentOS
+      yum:
+        update_cache: yes
+      when: ansible_distribution == "CentOS"
 
     - name: Install default available Java on Ubuntu
-      package:
+      apt:
         name: default-jdk
         state: present
-      when: ansible_distribution == 'Ubuntu'
+      when: ansible_distribution == "Ubuntu"
 
     - name: Install OpenJDK on CentOS
-      package:
+      yum:
         name: java-11-openjdk
         state: present
-      when: ansible_distribution == 'CentOS'
+      when: ansible_distribution == "CentOS"
 
     - name: Install wget
       package:
@@ -28,36 +37,35 @@
 
     - name: Create a directory for Tomcat installation
       file:
-        path: /usr/local/tomcat
+        path: /opt
         state: directory
 
-    - name: Download Tomcat 10
+    - name: Download Apache Tomcat
       ansible.builtin.get_url:
-        url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/usr/local/tomcat/apache-tomcat-10.1.16.tar.gz"
+        url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
 
     - name: Extract Tomcat archive
       ansible.builtin.unarchive:
-        src: "/usr/local/tomcat/apache-tomcat-10.1.16.tar.gz"
-        dest: "/usr/local/tomcat/"
+        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
+        dest: "/opt"
         remote_src: yes
-      become: yes
 
     - name: Set Tomcat environment variables
       lineinfile:
         path: "/etc/environment"
-        line: "CATALINA_HOME=/usr/local/tomcat/apache-tomcat-10.1.16"
-      become: yes
+        line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
+      become: true
 
     - name: Set Java Home environment variable dynamically
       lineinfile:
         path: "/etc/environment"
         line: "JAVA_HOME={{ '/usr/lib/jvm/java-11-openjdk-amd64' if ansible_distribution == 'Ubuntu' else '/usr/lib/jvm/java-11' }}"
-      become: yes
+      become: true
 
     - name: System CTL - Daemon reload
       ansible.builtin.command: "systemctl daemon-reload"
-      become: yes
+      become: true
       when: ansible_service_mgr == "systemd"
 
     - name: Debug output for systemd check
@@ -65,11 +73,9 @@
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: >
-        export JAVA_HOME=$(grep JAVA_HOME /etc/environment | cut -d'=' -f2) &&
-        nohup $JAVA_HOME/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
+      ansible.builtin.shell: "nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
       when: "'systemd' not in ansible_playbook_python | lower"
-      become: yes
+      become: true
 
     - name: Print Tomcat status
       ansible.builtin.debug:
