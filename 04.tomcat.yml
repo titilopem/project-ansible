@@ -4,30 +4,23 @@
   become: true
 
   tasks:
-    - name: Update package cache
-      package:
-        name: "*"
-        state: latest
-      when: ansible_distribution in ['RedHat', 'Amazon'] and ansible_python.version.major == 3
+    - name: Update package cache on CentOS/RHEL
+      ansible.builtin.dnf:
+        update_cache: yes
+      when: ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3
 
     - name: Install java-11-openjdk on CentOS/RHEL
-      package:
+      ansible.builtin.package:
         name: "java-11-openjdk"
         state: present
-      when: ansible_distribution == 'RedHat' and ansible_pkg_mgr == 'yum'
-
-    - name: Install java-11-openjdk on CentOS/RHEL (dnf)
-      package:
-        name: "java-11-openjdk"
-        state: present
-      when: ansible_distribution == 'RedHat' and ansible_pkg_mgr == 'dnf'
+      when: ansible_distribution in ['RedHat', 'CentOS']
 
     - name: Install java-11-openjdk on Ubuntu
-      package:
+      ansible.builtin.package:
         name: "openjdk-11-jdk"
         state: present
       when: ansible_distribution == 'Ubuntu'
-
+      
     - name: Download Apache Tomcat
       get_url:
         url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
