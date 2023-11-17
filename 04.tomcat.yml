@@ -71,4 +71,40 @@
         nohup $JAVA_HOME/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh > /dev/null 2>&1 &
       when: "'systemd' not in ansible_playbook_python | lower"
       become: yes
+
+    - name: Check Tomcat logs for errors
+      ansible.builtin.command: "tail -n 20 /usr/local/tomcat/apache-tomcat-10.1.16/logs/catalina.out"
+      register: tomcat_logs
+      changed_when: False
+      ignore_errors: True
+
+    - name: Print Tomcat logs if errors found
+      ansible.builtin.debug:
+        var: tomcat_logs.stdout_lines
+      when: tomcat_logs.rc != 0
+
+    - name: Check if Tomcat is listening on port 8080
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 8080
+        timeout: 5
+      register: tomcat_port_check
+      ignore_errors: True
+
+    - name: Print message if Tomcat is not listening on port 8080
+      ansible.builtin.debug:
+        msg: "Tomcat is not listening on port 8080. Check for port conflicts or configuration issues."
+      when: tomcat_port_check.failed
+
+    - name: Check Tomcat status
+      ansible.builtin.systemd:
+        name: tomcat
+        state: restarted
+      register: tomcat_status
+      ignore_errors: True
+
+    - name: Print Tomcat status
+      ansible.builtin.debug:
+        msg: "{{ tomcat_status.stdout }}"
+      when: tomcat_status.rc != 0
 ...
