@@ -53,9 +53,9 @@
     - name: Set Java Home environment variable dynamically
       lineinfile:
         path: "/etc/environment"
-        line: "JAVA_HOME={{ ansible_java.jdk_home }}"
+        line: "JAVA_HOME={{ ansible_env.JAVA_HOME }}"
       become: true
-      when: "'ansible_java' in hostvars[inventory_hostname]"
+      when: "'ansible_env' in hostvars[inventory_hostname] and 'JAVA_HOME' in ansible_env"
 
     - name: System CTL - Daemon reload
       ansible.builtin.command: "systemctl daemon-reload"
