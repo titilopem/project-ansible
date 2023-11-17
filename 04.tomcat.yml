@@ -14,16 +14,18 @@
         manager: auto
 
     - name: Install Java on CentOS/RHEL
+      become: true
+      command: "{{ java_package }}"
+      args:
+        creates: "/usr/bin/java"
       when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
-      package:
-        name: "{{ java_package }}"
-        state: present
 
     - name: Install Java on Ubuntu
-      when: "'ubuntu' in ansible_distribution"
+      become: true
       apt:
-        name: "{{ java_package }}"
-        state: present
+       name: "{{ java_package }}"
+       state: present
+      when: "'ubuntu' in ansible_distribution"
 
     - name: Download Apache Tomcat
       get_url:
