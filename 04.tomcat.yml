@@ -1,6 +1,6 @@
 ---
 - name: Install Java and Apache Tomcat
-  hosts: group1
+  hosts: all
   become: true
   vars:
     java_package: "java-11-openjdk"
@@ -58,7 +58,7 @@
 
     - name: Reload systemd for changes to take effect
       systemd:
-        name: tomcat
+        name: "tomcat"
         state: restarted
         daemon_reload: yes
 ...
