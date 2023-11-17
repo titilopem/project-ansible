@@ -89,5 +89,5 @@
     - name: Print Tomcat status
       ansible.builtin.debug:
         msg: "{{ tomcat_status.stdout }}"
-      when: tomcat_status.rc != 0
+      when: tomcat_status is succeeded
 ...
