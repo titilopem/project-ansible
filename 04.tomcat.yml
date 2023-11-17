@@ -1,34 +1,50 @@
 ---
-- name: Install Java and Apache Tomcat
+- name: Install Apache Tomcat
   hosts: group1
   become: true
   vars:
-    java_package: "java-11-openjdk"
     tomcat_version: "10.1.16"
     tomcat_install_dir: "/opt/apache-tomcat-{{ tomcat_version }}"
     tomcat_url: "https://archive.apache.org/dist/tomcat/tomcat-10/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
   tasks:
-    - name: Debug - Print Distribution Information
-      debug:
-        var: ansible_distribution
+    - name: Download Apache Tomcat
+      get_url:
+        url: "{{ tomcat_url }}"
+        dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
-    - name: Debug - Print Distribution Version
-      debug:
-        var: ansible_distribution_version
+    - name: Extract Tomcat archive
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "{{ tomcat_install_dir }}"
+        remote_src: true
 
-    - name: Update package cache
-      package_facts:
-        manager: auto
+    - name: Set Tomcat environment variables
+      lineinfile:
+        dest: "{{ tomcat_install_dir }}/bin/setenv.sh"
+        line: "export CATALINA_HOME={{ tomcat_install_dir }}"
+        create: yes
 
-    - name: Install Java
-      become: true
-      block:
-        - name: Install Java on CentOS/RHEL
-          command: "{{ java_package }}"
-          args:
-            creates: "/usr/bin/java"
-          when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
+    - name: Set JAVA_HOME in Tomcat systemd service file on Ubuntu
+      lineinfile:
+        dest: "/etc/systemd/system/tomcat.service"
+        line: "Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
+        create: yes
+      when: "'ubuntu' in ansible_distribution"
 
-        - name
+    - name: Set JAVA_HOME in Tomcat systemd service file on CentOS/RHEL
+      lineinfile:
+        dest: "/etc/systemd/system/tomcat.service"
+        line: "Environment=JAVA_HOME={{ ansible_env.JAVA_HOME }}"
+        create: yes
+      when: "'centos' in ansible_distribution or 'redhat' in ansible_distribution"
+
+    - name: Reload systemd for changes to take effect
+      systemd:
+        name: "{{ item }}"
+        state: restarted
+        daemon_reload: yes
+        loop:
+          - "tomcat"
+          - "tomcat9"
 ...
