@@ -73,7 +73,7 @@
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: "source /etc/environment && nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
+      ansible.builtin.shell: ". /etc/environment && nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
       when: "'systemd' not in ansible_playbook_python | lower"
       become: true
 
