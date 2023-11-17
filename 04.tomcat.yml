@@ -20,7 +20,7 @@
         name: "openjdk-11-jdk"
         state: present
       when: ansible_distribution == 'Ubuntu'
-      
+
     - name: Download Apache Tomcat
       get_url:
         url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
@@ -61,7 +61,12 @@
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: "nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
-      when: "'systemd' not in ansible_playbook_python | lower"
       become: true
+      command: >
+        JAVA_HOME={{ ansible_env.JAVA_HOME }}
+        nohup /opt/apache-tomcat-10.1.16/bin/startup.sh
+      args:
+        executable: /bin/bash
+      tags:
+        - tomcat
 ...
