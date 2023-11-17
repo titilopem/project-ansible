@@ -4,35 +4,19 @@
   become: true
 
   tasks:
-    - name: Update package cache on CentOS/RHEL
+    - name: Update package cache
       package:
         name: "*"
         state: latest
-      when: ansible_distribution in ['RedHat', 'Amazon']
+      when: ansible_distribution in ['RedHat', 'Amazon'] and ansible_python.version.major == 3
 
-    - name: Install java-11-amazon-corretto on CentOS/RHEL
+    - name: Install required packages
       package:
-        name: java-11-amazon-corretto
+        name: "{{ item }}"
         state: present
-      when: ansible_distribution == 'Amazon' or ansible_distribution in ['RedHat', 'CentOS']
-
-    - name: Install python3-dnf on CentOS/RHEL
-      package:
-        name: python3-dnf
-        state: present
-      when: ansible_distribution == 'Amazon' or ansible_distribution in ['RedHat', 'CentOS']
-
-    - name: Install openjdk-11-jdk-headless on CentOS/RHEL
-      package:
-        name: openjdk-11-jdk-headless
-        state: present
-      when: ansible_distribution == 'Amazon' or ansible_distribution in ['RedHat', 'CentOS']
-
-    - name: Install java-11-openjdk on CentOS/RHEL
-      package:
-        name: java-11-openjdk
-        state: present
-      when: ansible_distribution == 'Amazon' or ansible_distribution in ['RedHat', 'CentOS']
+      loop:
+        - java-11-openjdk
+      when: ansible_distribution == 'Amazon' or (ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3)
 
     - name: Download Apache Tomcat
       get_url:
@@ -51,11 +35,10 @@
         line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
       become: true
 
-    - name: Set JAVA_HOME environment variable
-      lineinfile:
-        path: "/etc/environment"
-        line: "JAVA_HOME={{ ansible_java.java_home | default('/usr/lib/jvm/java-11-openjdk-amd64') }}"
-      become: true
+    - name: Set JAVA_HOME using set_fact
+      ansible.builtin.set_fact:
+        JAVA_HOME: "{{ ansible_java.java_home | default('/usr/lib/jvm/java-11-openjdk-amd64') }}"
+      when: ansible_distribution == 'Amazon' or (ansible_distribution in ['RedHat', 'CentOS'] and ansible_python.version.major == 3)
 
     - name: Systemd - Daemon reload on CentOS/RHEL
       ansible.builtin.systemd:
@@ -67,58 +50,8 @@
       ansible.builtin.debug:
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
-    - name: Start Tomcat service on CentOS/RHEL
+    - name: Start Tomcat service
       ansible.builtin.shell: "nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
       when: "'systemd' not in ansible_playbook_python | lower"
       become: true
-
-    - name: Update package cache on Ubuntu
-      apt:
-        update_cache: yes
-      when: ansible_os_family == "Debian"
-
-    - name: Install openjdk-11-jdk-headless on Ubuntu
-      apt:
-        name: openjdk-11-jdk-headless
-        state: present 
-      when: ansible_os_family == "Debian"
-
-    - name: Install java-11-openjdk on Ubuntu
-      apt:
-        name: default-jdk
-        state: present
-      when: ansible_os_family == "Debian"
-
-    - name: Download Apache Tomcat on Ubuntu
-      get_url:
-        url: "https://downloads.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
-      when: ansible_os_family == "Debian"
-
-    - name: Extract Tomcat archive on Ubuntu
-      ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
-        dest: "/opt"
-        remote_src: yes
-      when: ansible_os_family == "Debian"
-
-    - name: Set Tomcat environment variables on Ubuntu
-      lineinfile:
-        path: "/etc/environment"
-        line: "CATALINA_HOME=/opt/apache-tomcat-10.1.16"
-      become: true
-      when: ansible_os_family == "Debian"
-
-    - name: Set JAVA_HOME environment variable on Ubuntu
-      lineinfile:
-        path: "/etc/environment"
-        line: "JAVA_HOME={{ ansible_java.java_home | default('/usr/lib/jvm/java-11-openjdk-amd64') }}"
-      become: true
-      when: ansible_os_family == "Debian"
-
-    - name: Start Tomcat service on Ubuntu
-      ansible.builtin.shell: "nohup /opt/apache-tomcat-10.1.16/bin/startup.sh"
-      when: "'systemd' not in ansible_playbook_python | lower"
-      become: true
-      when: ansible_os_family == "Debian"
 ...
