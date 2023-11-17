@@ -60,14 +60,14 @@
     - name: System CTL - Daemon reload
       ansible.builtin.command: "systemctl daemon-reload"
       become: yes
-      when: ansible_distribution in ['Amazon', 'CentOS']
+      when: "'systemd' in ansible_playbook_python | lower and ansible_distribution in ['Amazon', 'CentOS']"
 
     - name: Debug output for systemd check
       ansible.builtin.debug:
         msg: "Systemd is {{ 'present' if 'systemd' in ansible_playbook_python | lower else 'not present' }}"
 
     - name: Start Tomcat service
-      ansible.builtin.shell: "nohup {{ ansible_env.JAVA_HOME }}/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh"
+      ansible.builtin.shell: "source /etc/environment && nohup $JAVA_HOME/bin/java -jar /usr/local/tomcat/apache-tomcat-10.1.16/bin/startup.sh"
       when: "'systemd' not in ansible_playbook_python | lower"
       become: yes
 ...
