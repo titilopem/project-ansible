@@ -21,11 +21,6 @@
         cmd: "yum makecache"
       when: "'Amazon' in ansible_distribution"
 
-    - name: Install Amazon Linux Extras on Amazon Linux
-      ansible.builtin.command:
-        cmd: "yum install -y amazon-linux-extras"
-      when: "'Amazon' in ansible_distribution"
-
     - name: Install Java 11 on Amazon Linux
       ansible.builtin.shell:
         cmd: "amazon-linux-extras install java-openjdk11"
