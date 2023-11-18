@@ -9,7 +9,7 @@
         var: ansible_distribution
 
     - name: Install Java 11 on CentOS
-      yum:
+      dnf:
         name: java-11-openjdk
         state: present
       when: ansible_os_family == 'RedHat'
