@@ -55,7 +55,7 @@
 
     - name: Install Java on Amazon Linux
       command: sudo dnf install -y java-1.8.0-openjdk
-      when: ansible_os_family == 'Amazon'
+      when: ansible_distribution == 'Amazon'
 
     - name: Print Java version
       command: java -version
