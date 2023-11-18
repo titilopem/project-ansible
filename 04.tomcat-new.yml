@@ -19,10 +19,14 @@
         name: java-1.8.0-openjdk
         state: present
       when: "'yum' in item or 'dnf' in item"
+      loop_control:
+        label: "{{ item }}"
 
     - name: Install required java on Ubuntu
       package:
         name: openjdk-8-jre
         state: present
       when: "'apt' in item"
+      loop_control:
+        label: "{{ item }}"
 ...
