@@ -1,48 +1,57 @@
 ---
-- name: Install and configure tomcat
-  hosts: all
-  become: true
+- hosts: group1
+  become: yes
+
   tasks:
-    - name: Gathering Facts
-      gather_facts: true
+    - name: Show active Java version on CentOS
+      ansible.builtin.shell:
+        cmd: alternatives --display java | grep 'currently points to'
+      when: "'CentOS' in ansible_distribution"
+      register: java_info_centos
 
-    - name: Update repositories
-      block:
-        - name: Update repositories on CentOS and Amazon
-          yum:
-            name: "*"
-            state: latest
-          when: "'CentOS' in ansible_facts['distribution'] or 'Amazon' in ansible_facts['distribution']"
+    - name: Debug CentOS Java information
+      ansible.builtin.debug:
+        var: java_info_centos.stdout_lines
+      when: "'CentOS' in ansible_distribution"
 
-        - name: Update repositories on Ubuntu
-          apt:
-            upgrade: yes
-          when: "'Ubuntu' in ansible_facts['distribution']"
+    - name: Show active Java version on Ubuntu
+      ansible.builtin.shell:
+        cmd: update-alternatives --display java | grep 'currently points to'
+      when: "'Ubuntu' in ansible_distribution"
+      register: java_info_ubuntu
 
-      become: true
+    - name: Debug Ubuntu Java information
+      ansible.builtin.debug:
+        var: java_info_ubuntu.stdout_lines
+      when: "'Ubuntu' in ansible_distribution"
 
-    - name: Set package manager variable
-      set_fact:
-        package_manager: "{{ 'yum' if 'CentOS' in ansible_facts['distribution'] or 'Amazon' in ansible_facts['distribution'] else 'apt' }}"
+    - name: Show active Java version on Amazon Linux
+      ansible.builtin.shell:
+        cmd: alternatives --display java | grep 'currently points to'
+      when: "'Amazon' in ansible_distribution"
+      register: java_info_amazon
 
-    - name: Install required Java on CentOS and Amazon
-      package:
-        name: java-1.8.0-openjdk
-        state: present
-      when: "'CentOS' in ansible_facts['distribution'] or 'Amazon' in ansible_facts['distribution']"
-      become: true
+    - name: Debug Amazon Linux Java information
+      ansible.builtin.debug:
+        var: java_info_amazon.stdout_lines
+      when: "'Amazon' in ansible_distribution"
 
-    - name: Install required Java on Ubuntu
-      package:
-        name: openjdk-8-jdk
-        state: present
-      when: "'Ubuntu' in ansible_facts['distribution']"
-      become: true
+    - name: Download Tomcat
+      ansible.builtin.get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+        dest: "/usr/local"
 
-  rescue:
-    - name: Handle failures
-      debug:
-        msg: "An error occurred during playbook execution."
+    - name: Extract Tomcat
+      ansible.builtin.unarchive:
+        src: "/usr/local/apache-tomcat-10.1.16.tar.gz"
+        dest: "/usr/local"
+        remote_src: yes
 
-  ignore_errors: true
+    - name: Set Tomcat home
+      ansible.builtin.command:
+        cmd: mv "/usr/local/apache-tomcat-10.1.16" "/usr/local/latest"
+
+    - name: Starting Tomcat
+      ansible.builtin.shell:
+        cmd: "nohup /usr/local/latest/bin/startup.sh &"
 ...
