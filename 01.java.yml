@@ -1,4 +1,3 @@
----
 - name: Install Java
   hosts: all
   become: true
@@ -18,23 +17,27 @@
         state: latest
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
 
-    - name: Install OpenJDK 11
+    - name: Install OpenJDK 11 (for Ubuntu)
       package:
         name: openjdk-11-jdk
         state: present
-      when: ansible_os_family == 'Debian'  # For Ubuntu
+      when: ansible_os_family == 'Debian'
 
-    - name: Install OpenJDK 11
+    - name: Install OpenJDK 11 (for CentOS 8 and Amazon Linux 2)
       package:
         name: java-11-openjdk
         state: present
-      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'  # For CentOS 8 and Amazon Linux 2
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
 
-    - name: Install Java on CentOS
+    - name: Install Java on CentOS 7
       yum:
         name: java-1.8.0-openjdk
         state: present
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
+
+    - name: Install Java on Amazon Linux
+      command: sudo dnf install -y java-1.8.0-openjdk
+      when: ansible_os_family == 'Amazon'
 
     - name: Print Java version
       command: java -version
