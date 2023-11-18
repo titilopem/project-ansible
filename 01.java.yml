@@ -1,32 +1,24 @@
 ---
-- name: Install Java 11 on CentOS
-  hosts: group1
-  become: yes  # Run tasks with sudo privileges
-
+- name: Install Java 11
+  hosts: all
+  become: true
   tasks:
-    - name: Check the OS distribution
-      debug:
-        var: ansible_distribution
-
     - name: Install Java 11 on CentOS
-      dnf:
+      ansible.builtin.yum:
         name: java-11-openjdk
         state: present
-      when: ansible_os_family == 'RedHat'
+        enablerepo: epel
+      when: "'CentOS' in ansible_distribution"
 
-    - name: Install Java on Amazon Linux
-      dnf:
-        name: java-11-amazon-corretto
+    - name: Install Java 11 on Amazon Linux
+      ansible.builtin.yum:
+        name: java-11-openjdk
         state: present
-      when: ansible_distribution == 'Amazon'
+      when: "'Amazon' in ansible_distribution"
 
-    - name: Verify Java installation
-      command: java -version
-      register: java_version_output
-      changed_when: false
-      failed_when: "'11' in java_version_output.stdout and 'OpenJDK' in java_version_output.stdout"
-
-    - name: Print Java version
-      debug:
-        msg: "Java version is {{ java_version_output.stderr }}"
+    - name: Install Java 11 on Ubuntu
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
 ...
