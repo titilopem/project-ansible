@@ -30,6 +30,12 @@
         state: present
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'  # For CentOS 8 and Amazon Linux 2
 
+    - name: Install Java on CentOS
+      package:
+        name: java
+        state: present
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
+
     - name: Print Java version
       command: java -version
       register: java_version
