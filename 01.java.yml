@@ -3,50 +3,60 @@
   hosts: all
   become: true
   tasks:
-    - name: Update package lists (for Ubuntu)
+    - name: Update package lists (Ubuntu)
       apt:
         update_cache: yes
       when: ansible_distribution == 'Ubuntu'
 
-    - name: Install Python 3 (for CentOS)
+    - name: Install Python 3 (CentOS)
       raw: sudo yum install -y python3
       when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
 
-    - name: Update package lists (for CentOS)
+    - name: Update package lists (CentOS 7)
+      yum:
+        name: '*'
+        state: latest
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+
+    - name: Update package lists (CentOS 8)
       dnf:
         name: '*'
         state: latest
-      when: ansible_distribution == 'CentOS'
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
 
-    - name: Install OpenJDK 11 (for Ubuntu)
+    - name: Install OpenJDK 11 (Ubuntu)
       package:
         name: openjdk-11-jdk
         state: present
       when: ansible_distribution == 'Ubuntu'
 
-    - name: Install OpenJDK 11 (for CentOS)
+    - name: Install OpenJDK 11 (CentOS 7)
       package:
         name: java-11-openjdk
         state: present
       when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
 
-    - name: Install OpenJDK 8 on CentOS 7
+    - name: Install OpenJDK 11 (CentOS 8)
+      package:
+        name: java-11-openjdk
+        state: present
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+
+    - name: Install Java 8 on CentOS 7
       yum:
         name: java-1.8.0-openjdk
         state: present
       when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
 
-    - name: Install OpenJDK 8 on Amazon Linux
-      command: sudo amazon-linux-extras install java-openjdk8
+    - name: Install Java 8 on CentOS 8
+      dnf:
+        name: java-1.8.0-openjdk
+        state: present
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+
+    - name: Install Java 8 on Amazon Linux
+      command: sudo yum install -y java-1.8.0-openjdk
       when: ansible_distribution == 'Amazon'
-
-    - name: Display Java paths
-      command: java -XshowSettings:properties -version
-      register: java_paths
-      ignore_errors: yes  # Ignore errors if the 'java' command is not found
-
-    - debug:
-        var: java_paths.stdout_lines
 
     - name: Print Java version
       command: java -version
