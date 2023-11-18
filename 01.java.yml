@@ -13,10 +13,10 @@
       when: ansible_os_family == 'RedHat'
 
     - name: Update package lists (for CentOS and Amazon Linux)
-      dnf:
+      yum:
         name: '*'
         state: latest
-      when: ansible_os_family == 'RedHat'
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
 
     - name: Install OpenJDK 11
       package:
@@ -28,7 +28,7 @@
       package:
         name: java-11-openjdk
         state: present
-      when: ansible_os_family == 'RedHat'  # For CentOS and Amazon Linux
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'  # For CentOS 8 and Amazon Linux 2
 
     - name: Print Java version
       command: java -version
