@@ -11,17 +11,11 @@
       raw: sudo yum install -y python3
       when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
 
-    - name: Update package lists (for CentOS 7)
-      yum:
-        name: '*'
-        state: latest
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
-
-    - name: Update package lists (for CentOS 8)
+    - name: Update package lists (for CentOS)
       dnf:
         name: '*'
         state: latest
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+      when: ansible_distribution == 'CentOS'
 
     - name: Install OpenJDK 11 (for Ubuntu)
       package:
@@ -29,33 +23,17 @@
         state: present
       when: ansible_distribution == 'Ubuntu'
 
-    - name: Install OpenJDK 11 (for CentOS 7)
+    - name: Install OpenJDK 11 (for CentOS)
       package:
         name: java-11-openjdk
         state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+      when: ansible_distribution == 'CentOS'
 
-    - name: Install OpenJDK 11 (for CentOS 8)
-      package:
-        name: java-11-openjdk
-        state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
-
-    - name: Install Java 8 on CentOS 7
-      yum:
-        name: java-1.8.0-openjdk
-        state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
-
-    - name: Install Java 8 on CentOS 8
+    - name: Install Java 8 on CentOS
       dnf:
         name: java-1.8.0-openjdk
         state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
-
-    - name: Install Java 8 on Amazon Linux
-      command: sudo yum install -y java-1.8.0-openjdk
-      when: ansible_distribution == 'Amazon'
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
 
     - name: Print Java version
       command: java -version
