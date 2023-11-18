@@ -5,34 +5,19 @@
 
   tasks:
     - name: Download Tomcat
-      ansible.builtin.get_url:
-        url: "https://apache.mirrors.tworzy.net/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
+      get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+        dest: /usr/local
 
     - name: Extract Tomcat
-      ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
-        dest: "/opt/tomcat"
+      unarchive:
+        src: "/usr/local/apache-tomcat-10.1.16.tar.gz"
+        dest: /usr/local
         remote_src: yes
 
-    - name: Set Tomcat environment variables
-      ansible.builtin.lineinfile:
-        path: "/etc/profile.d/tomcat.sh"
-        line: "{{ item.line }}"
-      loop:
-        - 'export CATALINA_HOME="/opt/tomcat/apache-tomcat-10.1.16"'
-        - 'export CATALINA_BASE="/opt/tomcat/apache-tomcat-10.1.16"'
-        - 'export CATALINA_TMPDIR="/opt/tomcat/apache-tomcat-10.1.16/temp"'
+    - name: Set Tomcat home
+      command: mv /usr/local/apache-tomcat-10.1.16 /usr/local/latest
 
-    - name: Ensure Tomcat user owns Tomcat directory
-      ansible.builtin.file:
-        path: "/opt/tomcat/apache-tomcat-10.1.16"
-        state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-        recurse: yes
-
-    - name: Start Tomcat
-      ansible.builtin.command:
-        cmd: "/opt/tomcat/apache-tomcat-10.1.16/bin/startup.sh"
+    - name: Starting tomcat
+      shell:  nohup /usr/locall/latest/bin/startup.sh &
 ...
