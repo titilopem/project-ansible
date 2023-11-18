@@ -1,9 +1,9 @@
 ---
 - hosts: all
+  become: yes
+  become_method: sudo
   tasks:
     - name: Install Tomcat
-      become: yes
-      become_method: sudo
       vars:
         tomcat_version: "9.0.54"  # Change this to the desired Tomcat version
         tomcat_install_dir: "/opt/tomcat"
@@ -22,12 +22,12 @@
 
         - name: Set Tomcat environment variables
           ansible.builtin.lineinfile:
-            path: "{{ item.path }}"
+            path: "/etc/profile.d/tomcat.sh"
             line: "{{ item.line }}"
           loop:
-            - { path: "/etc/profile.d/tomcat.sh", line: 'export CATALINA_HOME="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"' }
-            - { path: "/etc/profile.d/tomcat.sh", line: 'export CATALINA_BASE="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"' }
-            - { path: "/etc/profile.d/tomcat.sh", line: 'export CATALINA_TMPDIR="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}/temp"' }
+            - 'export CATALINA_HOME="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"'
+            - 'export CATALINA_BASE="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"'
+            - 'export CATALINA_TMPDIR="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}/temp"'
 
         - name: Ensure Tomcat user owns Tomcat directory
           ansible.builtin.file:
