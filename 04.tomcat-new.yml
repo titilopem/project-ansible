@@ -45,16 +45,15 @@
       ansible.builtin.shell:
         cmd: "nohup /usr/local/latest/bin/startup.sh &"
 
-    - name: Check if Tomcat is running on port 8080
-      ansible.builtin.wait_for:
-        host: "{{ inventory_hostname }}"
-        port: 8080
-        timeout: 60
-        state: started
-      ignore_errors: yes
-      register: tomcat_check
-
-    - name: Debug Tomcat status
+    - name: Debug - Check if Tomcat is listening on port 8080
       ansible.builtin.debug:
-        var: tomcat_check
+        var: tomcat_start_output.stdout_lines
+      when: "'Address already in use' in tomcat_start_output.stderr"
+
+    - name: Wait for Tomcat to start on port 8080
+      ansible.builtin.wait_for:
+        host: "localhost"
+        port: 8080
+        state: started
+      when: "'Address already in use' not in tomcat_start_output.stderr"
 ...
