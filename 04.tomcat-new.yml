@@ -3,37 +3,19 @@
   become: yes
 
   tasks:
-    - name: Show active Java version on CentOS
+    - name: Set Java 11 as the active version on CentOS
       ansible.builtin.shell:
-        cmd: alternatives --display java | grep 'currently points to'
-      when: "'CentOS' in ansible_distribution"
-      register: java_info_centos
-
-    - name: Debug CentOS Java information
-      ansible.builtin.debug:
-        var: java_info_centos.stdout_lines
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
       when: "'CentOS' in ansible_distribution"
 
-    - name: Show active Java version on Ubuntu
+    - name: Set Java 11 as the active version on Ubuntu
       ansible.builtin.shell:
-        cmd: update-alternatives --display java | grep 'currently points to'
-      when: "'Ubuntu' in ansible_distribution"
-      register: java_info_ubuntu
-
-    - name: Debug Ubuntu Java information
-      ansible.builtin.debug:
-        var: java_info_ubuntu.stdout_lines
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Show active Java version on Amazon Linux
+    - name: Set Java 11 as the active version on Amazon Linux
       ansible.builtin.shell:
-        cmd: alternatives --display java | grep 'currently points to'
-      when: "'Amazon' in ansible_distribution"
-      register: java_info_amazon
-
-    - name: Debug Amazon Linux Java information
-      ansible.builtin.debug:
-        var: java_info_amazon.stdout_lines
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/java
       when: "'Amazon' in ansible_distribution"
 
     - name: Download Tomcat

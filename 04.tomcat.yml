@@ -3,9 +3,9 @@
   become: yes
 
   tasks:
-    - name: Show existing Java versions and paths on CentOS
+    - name: Show active Java version on CentOS
       ansible.builtin.shell:
-        cmd: alternatives --display java
+        cmd: alternatives --display java | grep 'currently points to'
       when: "'CentOS' in ansible_distribution"
       register: java_info_centos
 
@@ -14,9 +14,9 @@
         var: java_info_centos.stdout_lines
       when: "'CentOS' in ansible_distribution"
 
-    - name: Show existing Java versions and paths on Ubuntu
+    - name: Show active Java version on Ubuntu
       ansible.builtin.shell:
-        cmd: update-alternatives --display java
+        cmd: update-alternatives --display java | grep 'currently points to'
       when: "'Ubuntu' in ansible_distribution"
       register: java_info_ubuntu
 
@@ -25,9 +25,9 @@
         var: java_info_ubuntu.stdout_lines
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Show existing Java versions and paths on Amazon Linux
+    - name: Show active Java version on Amazon Linux
       ansible.builtin.shell:
-        cmd: alternatives --display java
+        cmd: alternatives --display java | grep 'currently points to'
       when: "'Amazon' in ansible_distribution"
       register: java_info_amazon
 
