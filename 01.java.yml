@@ -11,11 +11,17 @@
       raw: sudo yum install -y python3
       when: ansible_os_family == 'RedHat'
 
-    - name: Update package lists (for CentOS and Amazon Linux)
+    - name: Update package lists (for CentOS 7)
       yum:
         name: '*'
         state: latest
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
+
+    - name: Update package lists (for CentOS 8)
+      dnf:
+        name: '*'
+        state: latest
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
 
     - name: Install OpenJDK 11 (for Ubuntu)
       package:
@@ -23,17 +29,29 @@
         state: present
       when: ansible_os_family == 'Debian'
 
-    - name: Install OpenJDK 11 (for CentOS 8 and Amazon Linux 2)
+    - name: Install OpenJDK 11 (for CentOS 7)
       package:
-        name: java-1.8.0-openjdk
+        name: java-11-openjdk
+        state: present
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
+
+    - name: Install OpenJDK 11 (for CentOS 8)
+      package:
+        name: java-11-openjdk
         state: present
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
 
-    - name: Install Java on CentOS 7
+    - name: Install Java 8 on CentOS 7
       yum:
         name: java-1.8.0-openjdk
         state: present
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
+
+    - name: Install Java 8 on CentOS 8
+      dnf:
+        name: java-1.8.0-openjdk
+        state: present
+      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
 
     - name: Install Java on Amazon Linux
       command: sudo dnf install -y java-1.8.0-openjdk
