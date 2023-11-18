@@ -1,4 +1,3 @@
----
 - name: Install Java 11
   hosts: all
   become: yes
@@ -13,10 +12,11 @@
       apt:
         name: openjdk-11-jdk
         state: present
-      when: "'ubuntu' in ansible_distribution"
+      when: "'Ubuntu' in ansible_distribution"
       register: install_result
 
-    - debug:
+    - name: Debug - Installation failed
+      debug:
         var: install_result
       when: install_result.failed
 
@@ -37,4 +37,5 @@
     - name: Print JAVA_HOME path
       debug:
         var: java_home_path
+      when: "'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution"
 ...
