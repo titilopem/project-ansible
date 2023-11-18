@@ -53,9 +53,9 @@
         state: present
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
 
-    - name: Install Java on Amazon Linux
-      command: sudo dnf install -y java-1.8.0-openjdk
-      when: ansible_distribution == 'Amazon'
+    - name: Install Java 8 on Amazon Linux
+      command: sudo amazon-linux-extras install java-openjdk8
+      when: ansible_os_family == 'Amazon'
 
     - name: Print Java version
       command: java -version
