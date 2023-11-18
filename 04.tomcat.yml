@@ -3,29 +3,47 @@
   vars:
     req_java: java-1.8.0-openjdk
     set_java: jre-1.8.0-openjdk
+    tomcat_version: "10.1.16"
+    tomcat_install_dir: "/usr/local"
   become: yes
-  
+
   tasks:
-    - name: Set default java
-      alternatives:
+    - name: Set default java on CentOS
+      ansible.builtin.alternatives:
         name: java
         link: /usr/bin/java
-        path: /usr/lib/jvm/set_java/bin/java
+        path: /usr/lib/jvm/{{ req_java }}/bin/java
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Set default java on Ubuntu
+      ansible.builtin.update_alternatives:
+        name: java
+        path: /usr/lib/jvm/{{ req_java }}/bin/java
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Set default java on Amazon Linux
+      ansible.builtin.alternatives:
+        name: java
+        link: /usr/bin/java
+        path: /usr/lib/jvm/{{ req_java }}/bin/java
+      when: "'Amazon' in ansible_distribution"
 
     - name: Download Tomcat
-      get_url:
-        url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: /usr/local
+      ansible.builtin.get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "{{ tomcat_install_dir }}"
 
     - name: Extract Tomcat
-      unarchive:
-        src: "/usr/local/apache-tomcat-10.1.16.tar.gz"
-        dest: /usr/local
+      ansible.builtin.unarchive:
+        src: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "{{ tomcat_install_dir }}"
         remote_src: yes
 
     - name: Set Tomcat home
-      command: mv /usr/local/apache-tomcat-10.1.16 /usr/local/latest
+      ansible.builtin.command:
+        cmd: mv "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}" "{{ tomcat_install_dir }}/latest"
 
-    - name: Starting tomcat
-      shell:  nohup /usr/locall/latest/bin/startup.sh &
+    - name: Starting Tomcat
+      ansible.builtin.shell:
+        cmd: "nohup {{ tomcat_install_dir }}/latest/bin/startup.sh &"
 ...
