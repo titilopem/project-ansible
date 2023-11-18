@@ -37,13 +37,10 @@
         path: "/usr/local/latest"
         state: absent
 
-    - name: Set Tomcat home
-      ansible.builtin.command:
-        cmd: mv "/usr/local/apache-tomcat-10.1.16" "/usr/local/latest"
-
     - name: Starting Tomcat
       ansible.builtin.shell:
         cmd: "nohup /usr/local/latest/bin/startup.sh &"
+      register: tomcat_start_output
 
     - name: Debug - Check if Tomcat is listening on port 8080
       ansible.builtin.debug:
