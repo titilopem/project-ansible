@@ -14,15 +14,20 @@
         - ansible_facts['distribution'] == 'Amazon'
         - ansible_facts['distribution'] == 'Ubuntu'
 
+    - name: Set package manager variable
+      set_fact:
+        package_manager: "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
+      when: ansible_facts['distribution'] in ['Amazon', 'CentOS']
+
     - name: Install required java on CentOS and Amazon
       package:
         name: java-1.8.0-openjdk
         state: present
-      when: ansible_facts['distribution'] in ['CentOS', 'Amazon']
+      when: package_manager is defined
+      loop:
+        - "{{ package_manager }}"
       loop_control:
         label: "{{ item }}"
-      loop:
-        - "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
 
     - name: Install required java on Ubuntu
       package:
