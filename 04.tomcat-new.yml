@@ -1,5 +1,5 @@
 ---
-- name: Install and configure tomcat
+- name: Install and configure Tomcat
   hosts: group1
   gather_facts: true
   become: yes
@@ -10,16 +10,14 @@
         name: "*"
         state: latest
       when:
-        - ansible_facts['distribution'] == 'CentOS'
-        - ansible_facts['distribution'] == 'Amazon'
-        - ansible_facts['distribution'] == 'Ubuntu'
+        - ansible_facts['distribution'] in ['CentOS', 'Amazon', 'Ubuntu']
 
     - name: Set package manager variable
       set_fact:
         package_manager: "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
       when: ansible_facts['distribution'] in ['Amazon', 'CentOS']
 
-    - name: Install required java on CentOS and Amazon
+    - name: Install required Java on CentOS and Amazon
       package:
         name: java-1.8.0-openjdk
         state: present
@@ -29,7 +27,7 @@
       loop_control:
         label: "{{ item }}"
 
-    - name: Install required java on Ubuntu
+    - name: Install required Java on Ubuntu
       package:
         name: openjdk-8-jre
         state: present
