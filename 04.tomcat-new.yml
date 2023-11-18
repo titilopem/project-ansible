@@ -5,6 +5,21 @@
   become: yes
 
   tasks:
+    - name: Debug distribution on CentOS
+      debug:
+        var: ansible_facts['distribution']
+      when: "'CentOS' in ansible_facts['distribution']"
+
+    - name: Debug distribution on Amazon
+      debug:
+        var: ansible_facts['distribution']
+      when: "'Amazon' in ansible_facts['distribution']"
+
+    - name: Debug distribution on Ubuntu
+      debug:
+        var: ansible_facts['distribution']
+      when: "'Ubuntu' in ansible_facts['distribution']"
+
     - name: Update repositories
       package:
         name: "*"
