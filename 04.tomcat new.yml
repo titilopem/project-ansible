@@ -1,0 +1,43 @@
+---
+- name: install and configure tomcat
+  hosts: group1
+  gather_facts: false
+  become: yes
+
+  tasks:
+    - name: updating repos on CentOS
+      yum:
+        name: "*"
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: updating repos on Amazon
+      dnf:
+        name: "*"
+        state: latest
+      when: ansible_distribution == "Amazon"
+
+    - name: updating repos on Ubuntu
+      apt:
+        name: "*"
+        state: latest
+      when: ansible_distribution == "Ubuntu"  
+    
+    - name: installing required java on CentOS
+      yum:
+        name: java-1.8.0-openjdk
+        state: present
+      when: ansible_distribution == "CentOS"
+    
+    - name: installing required java on Amazon
+      yum:
+        name: java-1.8.0-openjdk
+        state: present
+      when: ansible_distribution == "Amazon"
+
+    - name: installing required java on Ubuntu
+      yum:
+        name: java-1.8.0-openjdk
+        state: present
+      when: ansible_distribution == "Ubuntu"
+...
