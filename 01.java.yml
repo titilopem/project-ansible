@@ -17,9 +17,8 @@
       when: "'CentOS' in ansible_distribution"
 
     - name: Install Amazon Linux Extras on Amazon Linux
-      ansible.builtin.yum:
-        name: amazon-linux-extras
-        state: present
+      ansible.builtin.command:
+        cmd: "yum install -y amazon-linux-extras"
       when: "'Amazon' in ansible_distribution"
 
     - name: Install Java 11 on Amazon Linux
