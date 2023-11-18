@@ -37,5 +37,5 @@
 
     - name: Display Java Info
       ansible.builtin.debug:
-        var: java_info.stdout_line
+        var: java_info.stdout_lines
 ...
