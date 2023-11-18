@@ -9,7 +9,7 @@
       when: ansible_os_family == 'Debian'
 
     - name: Install Python 3 (for CentOS)
-      raw: sudo dnf install -y python3
+      raw: sudo yum install -y python3
       when: ansible_os_family == 'RedHat'
 
     - name: Update package lists (for CentOS and Amazon Linux)
@@ -33,6 +33,7 @@
     - name: Print Java version
       command: java -version
       register: java_version
+      ignore_errors: yes  # Ignore errors if the 'java' command is not found
 
     - debug:
         var: java_version.stdout_lines
