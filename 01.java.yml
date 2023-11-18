@@ -30,7 +30,7 @@
         state: present
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'  # For CentOS 8 and Amazon Linux 2
 
-    - name: Install Java on CentOS 7
+    - name: Install Java on CentOS
       yum:
         name: java-1.8.0-openjdk
         state: present
