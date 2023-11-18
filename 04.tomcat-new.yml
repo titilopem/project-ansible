@@ -14,12 +14,15 @@
         - "{{ 'apt' if ansible_facts['distribution'] == 'Ubuntu' else '' }}"
       when: "'apt' in item or 'dnf' in item"
 
-    - name: Install required java
+    - name: Install required java on CentOS and Amazon
       package:
-        name: "{{ 'java-1.8.0-openjdk' if 'yum' in item else 'openjdk-8-jre' }}"
+        name: java-1.8.0-openjdk
         state: present
-      loop:
-        - "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
-        - "{{ 'apt' if ansible_facts['distribution'] == 'Ubuntu' else '' }}"
-      when: "'yum' in item or 'apt' in item"
+      when: "'yum' in item or 'dnf' in item"
+
+    - name: Install required java on Ubuntu
+      package:
+        name: openjdk-8-jre
+        state: present
+      when: "'apt' in item"
 ...
