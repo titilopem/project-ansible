@@ -1,15 +1,15 @@
 ---
-- hosts: group1
+- hosts: all
   become: yes
   become_method: sudo
   vars:
-    tomcat_version: "9.0.54"  # Change this to the desired Tomcat version
+    tomcat_version: "10.1.16"  # Update to the desired Tomcat version
     tomcat_install_dir: "/opt/tomcat"
 
   tasks:
     - name: Download Tomcat
       get_url:
-        url: "https://downloads.apache.org/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        url: "https://dlcdn.apache.org/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
         dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
     - name: Extract Tomcat
