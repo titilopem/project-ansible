@@ -1,29 +1,48 @@
 ---
-- name: Install and configure Tomcat
-  hosts: group1
-  gather_facts: true
-  become: yes
-
+- name: Install and configure tomcat
+  hosts: all
+  become: true
   tasks:
+    - name: Gathering Facts
+      gather_facts: true
+
     - name: Update repositories
-      package:
-        name: "*"
-        state: latest
-      when: ansible_facts['distribution'] in ['CentOS', 'Amazon'] or ansible_facts['distribution'] == 'Ubuntu'
+      block:
+        - name: Update repositories on CentOS and Amazon
+          yum:
+            name: "*"
+            state: latest
+          when: "'CentOS' in ansible_facts['distribution'] or 'Amazon' in ansible_facts['distribution']"
+
+        - name: Update repositories on Ubuntu
+          apt:
+            upgrade: yes
+          when: "'Ubuntu' in ansible_facts['distribution']"
+
+      become: true
+
+    - name: Set package manager variable
+      set_fact:
+        package_manager: "{{ 'yum' if 'CentOS' in ansible_facts['distribution'] or 'Amazon' in ansible_facts['distribution'] else 'apt' }}"
 
     - name: Install required Java on CentOS and Amazon
       package:
         name: java-1.8.0-openjdk
         state: present
-      when: "'dnf' in ansible_playbook_python or 'yum' in ansible_playbook_python"
-      loop:
-        - "{{ 'dnf' if ansible_facts['distribution'] in ['Amazon', 'CentOS'] else 'yum' }}"
-      loop_control:
-        label: "{{ item }}"
+      when: "'CentOS' in ansible_facts['distribution'] or 'Amazon' in ansible_facts['distribution']"
+      become: true
 
     - name: Install required Java on Ubuntu
       package:
-        name: openjdk-8-jre
+        name: openjdk-8-jdk
         state: present
-      when: "'apt' in ansible_playbook_python"
+      when: "'Ubuntu' in ansible_facts['distribution']"
+      become: true
+
+  rescue:
+    - name: Handle failures
+      debug:
+        msg: "An error occurred during playbook execution."
+
+  ignore_errors: true
 ...
