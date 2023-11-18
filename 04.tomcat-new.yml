@@ -9,9 +9,7 @@
       package:
         name: "*"
         state: latest
-      when:
-        - ansible_facts['distribution'] in ['CentOS', 'Amazon', 'Ubuntu']
-        - "'dnf' if ansible_facts['distribution'] in ['Amazon', 'CentOS'] else 'apt' if ansible_facts['distribution'] == 'Ubuntu' else 'false'"
+      when: ansible_facts['distribution'] in ['CentOS', 'Amazon'] or ansible_facts['distribution'] == 'Ubuntu'
 
     - name: Install required Java on CentOS and Amazon
       package:
