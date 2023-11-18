@@ -1,43 +1,41 @@
 ---
-- hosts: all
+- hosts: group1
   become: yes
   become_method: sudo
+  vars:
+    tomcat_version: "9.0.54"  # Change this to the desired Tomcat version
+    tomcat_install_dir: "/opt/tomcat"
+
   tasks:
-    - name: Install Tomcat
-      vars:
-        tomcat_version: "9.0.54"  # Change this to the desired Tomcat version
-        tomcat_install_dir: "/opt/tomcat"
+    - name: Download Tomcat
+      get_url:
+        url: "https://downloads.apache.org/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
 
-      tasks:
-        - name: Download Tomcat
-          get_url:
-            url: "https://downloads.apache.org/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
-            dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+    - name: Extract Tomcat
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "{{ tomcat_install_dir }}"
+        remote_src: yes
 
-        - name: Extract Tomcat
-          ansible.builtin.unarchive:
-            src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
-            dest: "{{ tomcat_install_dir }}"
-            remote_src: yes
+    - name: Set Tomcat environment variables
+      ansible.builtin.lineinfile:
+        path: "/etc/profile.d/tomcat.sh"
+        line: "{{ item.line }}"
+      loop:
+        - 'export CATALINA_HOME="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"'
+        - 'export CATALINA_BASE="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"'
+        - 'export CATALINA_TMPDIR="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}/temp"'
 
-        - name: Set Tomcat environment variables
-          ansible.builtin.lineinfile:
-            path: "/etc/profile.d/tomcat.sh"
-            line: "{{ item.line }}"
-          loop:
-            - 'export CATALINA_HOME="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"'
-            - 'export CATALINA_BASE="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"'
-            - 'export CATALINA_TMPDIR="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}/temp"'
+    - name: Ensure Tomcat user owns Tomcat directory
+      ansible.builtin.file:
+        path: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        recurse: yes
 
-        - name: Ensure Tomcat user owns Tomcat directory
-          ansible.builtin.file:
-            path: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"
-            state: directory
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-            recurse: yes
-
-        - name: Start Tomcat
-          ansible.builtin.command:
-            cmd: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}/bin/startup.sh"
+    - name: Start Tomcat
+      ansible.builtin.command:
+        cmd: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}/bin/startup.sh"
 ...
