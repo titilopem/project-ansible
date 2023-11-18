@@ -2,6 +2,11 @@
   hosts: all
   become: yes
   tasks:
+    - name: Update package lists (Ubuntu)
+      apt:
+        update_cache: yes
+      when: "'ubuntu' in ansible_distribution"
+
     - name: Install Java 11 on CentOS
       yum:
         name: java-11-openjdk
