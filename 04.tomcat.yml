@@ -2,20 +2,17 @@
 - hosts: all
   become: yes
   become_method: sudo
-  vars:
-    tomcat_version: "10.1.16"  # Update to the desired Tomcat version
-    tomcat_install_dir: "/opt/tomcat"
 
   tasks:
     - name: Download Tomcat
-      get_url:
-        url: "https://dlcdn.apache.org/tomcat/tomcat-{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
-        dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+      ansible.builtin.get_url:
+        url: "https://apache.mirrors.tworzy.net/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+        dest: "/tmp/apache-tomcat-10.1.16.tar.gz"
 
     - name: Extract Tomcat
       ansible.builtin.unarchive:
-        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
-        dest: "{{ tomcat_install_dir }}"
+        src: "/tmp/apache-tomcat-10.1.16.tar.gz"
+        dest: "/opt/tomcat"
         remote_src: yes
 
     - name: Set Tomcat environment variables
@@ -23,13 +20,13 @@
         path: "/etc/profile.d/tomcat.sh"
         line: "{{ item.line }}"
       loop:
-        - 'export CATALINA_HOME="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"'
-        - 'export CATALINA_BASE="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"'
-        - 'export CATALINA_TMPDIR="{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}/temp"'
+        - 'export CATALINA_HOME="/opt/tomcat/apache-tomcat-10.1.16"'
+        - 'export CATALINA_BASE="/opt/tomcat/apache-tomcat-10.1.16"'
+        - 'export CATALINA_TMPDIR="/opt/tomcat/apache-tomcat-10.1.16/temp"'
 
     - name: Ensure Tomcat user owns Tomcat directory
       ansible.builtin.file:
-        path: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}"
+        path: "/opt/tomcat/apache-tomcat-10.1.16"
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
@@ -37,5 +34,5 @@
 
     - name: Start Tomcat
       ansible.builtin.command:
-        cmd: "{{ tomcat_install_dir }}/apache-tomcat-{{ tomcat_version }}/bin/startup.sh"
+        cmd: "/opt/tomcat/apache-tomcat-10.1.16/bin/startup.sh"
 ...
