@@ -11,19 +11,15 @@
         state: latest
       when:
         - ansible_facts['distribution'] in ['CentOS', 'Amazon', 'Ubuntu']
-
-    - name: Set package manager variable
-      set_fact:
-        package_manager: "{{ 'dnf' if ansible_facts['distribution'] in ['Amazon', 'CentOS'] else 'apt' }}"
-      when: ansible_facts['distribution'] in ['Amazon', 'CentOS']
+        - "'dnf' if ansible_facts['distribution'] in ['Amazon', 'CentOS'] else 'apt' if ansible_facts['distribution'] == 'Ubuntu' else 'false'"
 
     - name: Install required Java on CentOS and Amazon
       package:
         name: java-1.8.0-openjdk
         state: present
-      when: package_manager is defined
+      when: "'dnf' in ansible_playbook_python or 'yum' in ansible_playbook_python"
       loop:
-        - "{{ package_manager }}"
+        - "{{ 'dnf' if ansible_facts['distribution'] in ['Amazon', 'CentOS'] else 'yum' }}"
       loop_control:
         label: "{{ item }}"
 
@@ -31,5 +27,5 @@
       package:
         name: openjdk-8-jre
         state: present
-      when: ansible_facts['distribution'] == 'Ubuntu'
+      when: "'apt' in ansible_playbook_python"
 ...
