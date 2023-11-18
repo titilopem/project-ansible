@@ -41,6 +41,11 @@
       ansible.builtin.command:
         cmd: mv "/usr/local/apache-tomcat-10.1.16" "/usr/local/latest"
 
+    - name: System CTL - Daemon reload
+      ansible.builtin.command: "systemctl daemon-reload"
+      become: yes
+      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution"
+
     - name: Starting Tomcat
       ansible.builtin.shell:
         cmd: "nohup /usr/local/latest/bin/startup.sh &"
