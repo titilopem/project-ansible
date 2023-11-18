@@ -16,10 +16,10 @@
 
     - name: Install required java
       package:
-        name: java-1.8.0-openjdk
+        name: "{{ 'java-1.8.0-openjdk' if 'yum' in item else 'openjdk-8-jre' }}"
         state: present
       loop:
         - "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
-      when: "'yum' in item"
-
+        - "{{ 'apt' if ansible_facts['distribution'] == 'Ubuntu' else '' }}"
+      when: "'yum' in item or 'apt' in item"
 ...
