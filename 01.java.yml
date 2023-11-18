@@ -32,7 +32,7 @@
 
     - name: Install Java on CentOS
       package:
-        name: java
+        name: java-1.8.0-openjdk
         state: present
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
 
