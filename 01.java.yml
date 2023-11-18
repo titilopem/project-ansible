@@ -17,7 +17,7 @@
       when: "'CentOS' in ansible_distribution"
 
     - name: Install Java 11 on Amazon Linux
-      ansible.builtin.package:
+      ansible.builtin.dnf:
         name: java-11-openjdk
         state: present
       when: "'Amazon' in ansible_distribution"
