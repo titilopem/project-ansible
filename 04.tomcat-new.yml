@@ -14,7 +14,7 @@
 
     - name: Set package manager variable
       set_fact:
-        package_manager: "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
+        package_manager: "{{ 'dnf' if ansible_facts['distribution'] in ['Amazon', 'CentOS'] else 'apt' }}"
       when: ansible_facts['distribution'] in ['Amazon', 'CentOS']
 
     - name: Install required Java on CentOS and Amazon
