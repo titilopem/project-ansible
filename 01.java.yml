@@ -3,6 +3,12 @@
   hosts: all
   become: true
   tasks:
+    - name: Install EPEL repository on CentOS
+      ansible.builtin.yum:
+        name: epel-release
+        state: present
+      when: "'CentOS' in ansible_distribution"
+
     - name: Install Java 11 on CentOS
       ansible.builtin.yum:
         name: java-11-openjdk
