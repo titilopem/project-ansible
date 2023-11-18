@@ -1,75 +1,32 @@
 ---
-- name: Install Java
-  hosts: all
-  become: true
+- name: Install Java 11 on CentOS
+  hosts: g2
+  become: yes  # Run tasks with sudo privileges
+
   tasks:
-    - name: Update package lists (Ubuntu)
-      apt:
-        update_cache: yes
-      when: ansible_distribution == 'Ubuntu'
+    - name: Check the OS distribution
+      debug:
+        var: ansible_distribution
 
-    - name: Install Python 3 (CentOS)
-      raw: sudo yum install -y python3
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
-
-    - name: Update package lists (CentOS 7)
+    - name: Install Java 11 on CentOS
       yum:
-        name: '*'
-        state: latest
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
-
-    - name: Update package lists (CentOS 8)
-      dnf:
-        name: '*'
-        state: latest
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
-
-    - name: Install OpenJDK 11 (Ubuntu)
-      package:
-        name: openjdk-11-jdk
-        state: present
-      when: ansible_distribution == 'Ubuntu'
-
-    - name: Install OpenJDK 11 (CentOS 7)
-      package:
         name: java-11-openjdk
         state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+      when: ansible_os_family == 'RedHat'
 
-    - name: Install OpenJDK 11 (CentOS 8)
-      package:
-        name: java-11-openjdk
-        state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
-
-    - name: Install Java 8 on CentOS 7
-      yum:
-        name: java-1.8.0-openjdk
-        state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
-
-    - name: Install Java 8 on CentOS 8
+    - name: Install Java on Amazon Linux
       dnf:
-        name: java-1.8.0-openjdk
-        state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
-
-    - name: Install Java 8 on Amazon Linux
-      dnf:
-        name: java-1.8.0-openjdk
+        name: java-11-amazon-corretto
         state: present
       when: ansible_distribution == 'Amazon'
 
-    - name: Print Java version
+    - name: Verify Java installation
       command: java -version
-      register: java_version
-      ignore_errors: yes  # Ignore errors if the 'java' command is not found
+      register: java_version_output
+      changed_when: false
+      failed_when: "'11' in java_version_output.stdout and 'OpenJDK' in java_version_output.stdout"
 
-    - debug:
-        var: java_version.stdout_lines
-
-    - name: Debug - Installation failed
+    - name: Print Java version
       debug:
-        msg: "Java installation failed"
-      when: java_version.failed
+        msg: "Java version is {{ java_version_output.stderr }}"
 ...
