@@ -5,21 +5,6 @@
   become: yes
 
   tasks:
-    - name: Debug distribution on CentOS
-      debug:
-        var: ansible_facts['distribution']
-      when: "'CentOS' in ansible_facts['distribution']"
-
-    - name: Debug distribution on Amazon
-      debug:
-        var: ansible_facts['distribution']
-      when: "'Amazon' in ansible_facts['distribution']"
-
-    - name: Debug distribution on Ubuntu
-      debug:
-        var: ansible_facts['distribution']
-      when: "'Ubuntu' in ansible_facts['distribution']"
-
     - name: Update repositories
       package:
         name: "*"
@@ -33,14 +18,11 @@
       package:
         name: java-1.8.0-openjdk
         state: present
-      when:
-        - ansible_facts['distribution'] == 'CentOS'
-        - ansible_facts['distribution'] == 'Amazon'
+      when: ansible_facts['distribution'] in ['CentOS', 'Amazon']
 
     - name: Install required java on Ubuntu
       package:
         name: openjdk-8-jre
         state: present
-      when:
-        - ansible_facts['distribution'] == 'Ubuntu'
+      when: ansible_facts['distribution'] == 'Ubuntu'
 ...
