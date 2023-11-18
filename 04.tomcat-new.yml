@@ -1,43 +1,25 @@
 ---
-- name: install and configure tomcat
+- name: Install and configure tomcat
   hosts: group1
   gather_facts: true
   become: yes
 
   tasks:
-    - name: updating repos on CentOS
-      yum:
+    - name: Update repositories
+      package:
         name: "*"
         state: latest
-      when: ansible_distribution == "CentOS"
+      loop:
+        - "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
+        - "{{ 'apt' if ansible_facts['distribution'] == 'Ubuntu' else '' }}"
+      when: "'apt' in item or 'dnf' in item"
 
-    - name: updating repos on Amazon
-      dnf:
-        name: "*"
-        state: latest
-      when: ansible_distribution == "Amazon"
-
-    - name: updating repos on Ubuntu
-      apt:
-        name: "*"
-        state: latest
-      when: ansible_distribution == "Ubuntu"  
-    
-    - name: installing required java on CentOS
-      yum:
+    - name: Install required java
+      package:
         name: java-1.8.0-openjdk
         state: present
-      when: ansible_distribution == "CentOS"
-    
-    - name: installing required java on Amazon
-      yum:
-        name: java-1.8.0-openjdk
-        state: present
-      when: ansible_distribution == "Amazon"
+      loop:
+        - "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
+      when: "'yum' in item"
 
-    - name: installing required java on Ubuntu
-      yum:
-        name: java-1.8.0-openjdk
-        state: present
-      when: ansible_distribution == "Ubuntu"
 ...
