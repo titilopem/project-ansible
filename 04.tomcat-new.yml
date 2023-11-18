@@ -5,7 +5,10 @@
   tasks:
     - name: Set Java 11 as the active version on CentOS
       ansible.builtin.shell:
-        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+        cmd: |
+          if ! update-alternatives --display java | grep -q '/usr/lib/jvm/java-11-openjdk-amd64/bin/java'; then
+            update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-11-openjdk-amd64/bin/java 1
+          fi
       when: "'CentOS' in ansible_distribution"
 
     - name: Set Java 11 as the active version on Ubuntu
@@ -28,6 +31,11 @@
         src: "/usr/local/apache-tomcat-10.1.16.tar.gz"
         dest: "/usr/local"
         remote_src: yes
+
+    - name: Remove existing Tomcat directory
+      ansible.builtin.file:
+        path: "/usr/local/latest"
+        state: absent
 
     - name: Set Tomcat home
       ansible.builtin.command:
