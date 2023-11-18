@@ -9,24 +9,23 @@
       package:
         name: "*"
         state: latest
-      loop:
-        - "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
-        - "{{ 'apt' if ansible_facts['distribution'] == 'Ubuntu' else '' }}"
-      when: "'apt' in item or 'dnf' in item"
+      when:
+        - ansible_facts['distribution'] == 'CentOS'
+        - ansible_facts['distribution'] == 'Amazon'
+        - ansible_facts['distribution'] == 'Ubuntu'
 
     - name: Install required java on CentOS and Amazon
       package:
         name: java-1.8.0-openjdk
         state: present
-      when: "'yum' in item or 'dnf' in item"
-      loop_control:
-        label: "{{ item }}"
+      when:
+        - ansible_facts['distribution'] == 'CentOS'
+        - ansible_facts['distribution'] == 'Amazon'
 
     - name: Install required java on Ubuntu
       package:
         name: openjdk-8-jre
         state: present
-      when: "'apt' in item"
-      loop_control:
-        label: "{{ item }}"
+      when:
+        - ansible_facts['distribution'] == 'Ubuntu'
 ...
