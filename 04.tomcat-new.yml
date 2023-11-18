@@ -19,6 +19,10 @@
         name: java-1.8.0-openjdk
         state: present
       when: ansible_facts['distribution'] in ['CentOS', 'Amazon']
+      loop_control:
+        label: "{{ item }}"
+      loop:
+        - "{{ 'dnf' if ansible_facts['distribution'] == 'Amazon' else 'yum' }}"
 
     - name: Install required java on Ubuntu
       package:
