@@ -30,14 +30,14 @@
       when: ansible_distribution == "CentOS"
     
     - name: installing required java on Amazon
-      yum:
+      dnf:
         name: java-1.8.0-openjdk
         state: present
       when: ansible_distribution == "Amazon"
 
     - name: installing required java on Ubuntu
-      yum:
-        name: java-1.8.0-openjdk
+      apt:
+        name: openjdk-8-jre
         state: present
       when: ansible_distribution == "Ubuntu"
 ...
