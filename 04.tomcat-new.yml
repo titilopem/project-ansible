@@ -41,12 +41,20 @@
       ansible.builtin.command:
         cmd: mv "/usr/local/apache-tomcat-10.1.16" "/usr/local/latest"
 
-    - name: Allow traffic on port 8080
-      ansible.builtin.shell:
-        cmd: "firewall-cmd --zone=public --add-port=8080/tcp --permanent && firewall-cmd --reload"
-      when: "'CentOS' in ansible_distribution"
-
     - name: Starting Tomcat
       ansible.builtin.shell:
         cmd: "nohup /usr/local/latest/bin/startup.sh &"
+
+    - name: Check if Tomcat is running on port 8080
+      ansible.builtin.wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 8080
+        timeout: 60
+        state: started
+      ignore_errors: yes
+      register: tomcat_check
+
+    - name: Debug Tomcat status
+      ansible.builtin.debug:
+        var: tomcat_check
 ...
