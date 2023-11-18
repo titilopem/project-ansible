@@ -16,9 +16,8 @@
       when: "'CentOS' in ansible_distribution"
 
     - name: Set default java on Ubuntu
-      ansible.builtin.update_alternatives:
-        name: java
-        path: /usr/lib/jvm/{{ req_java }}/bin/java
+      ansible.builtin.command:
+        cmd: update-alternatives --set java /usr/lib/jvm/{{ req_java }}/bin/java
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Set default java on Amazon Linux
