@@ -28,23 +28,16 @@
       package:
         name: java-11-openjdk
         state: present
-      when: ansible_distribution == 'CentOS'
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
 
-    - name: Install Java 8 on CentOS 7
+    - name: Install OpenJDK 8 on CentOS 7
       yum:
         name: java-1.8.0-openjdk
         state: present
       when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
 
-    - name: Install Java 8 on CentOS 8
-      dnf:
-        name: java-1.8.0-openjdk
-        state: present
-      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
-
-    - name: Install Java 8 on Amazon Linux
-      become: false
-      command: sudo yum install -y java-1.8.0-openjdk
+    - name: Install OpenJDK 8 on Amazon Linux
+      command: sudo amazon-linux-extras install java-openjdk8
       when: ansible_distribution == 'Amazon'
 
     - name: Display Java paths
