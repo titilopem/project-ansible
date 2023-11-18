@@ -10,11 +10,7 @@
 
     - name: Install Python 3 (for CentOS)
       raw: sudo dnf install -y python3
-      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
-
-    - name: Install Python 3 (for CentOS 7)
-      raw: sudo yum install -y python3
-      when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'
+      when: ansible_os_family == 'RedHat'
 
     - name: Update package lists (for CentOS and Amazon Linux)
       dnf:
