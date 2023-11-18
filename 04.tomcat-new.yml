@@ -1,7 +1,7 @@
 ---
 - name: install and configure tomcat
   hosts: group1
-  gather_facts: false
+  gather_facts: true
   become: yes
 
   tasks:
@@ -30,14 +30,14 @@
       when: ansible_distribution == "CentOS"
     
     - name: installing required java on Amazon
-      dnf:
+      yum:
         name: java-1.8.0-openjdk
         state: present
       when: ansible_distribution == "Amazon"
 
     - name: installing required java on Ubuntu
-      apt:
-        name: openjdk-8-jre
+      yum:
+        name: java-1.8.0-openjdk
         state: present
       when: ansible_distribution == "Ubuntu"
 ...
