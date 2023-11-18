@@ -1,9 +1,17 @@
 ---
-- hosts: all
+- hosts: group1
+  vars:
+    req_java: java-1.8.0-openjdk
+    set_java: jre-1.8.0-openjdk
   become: yes
-  become_method: sudo
-
+  
   tasks:
+    - name: Set default java
+      alternatives:
+        name: java
+        link: /usr/bin/java
+        path: /usr/lib/jvm/set_java/bin/java
+
     - name: Download Tomcat
       get_url:
         url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
