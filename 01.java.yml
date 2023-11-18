@@ -17,9 +17,8 @@
       when: "'CentOS' in ansible_distribution"
 
     - name: Install Java 11 on Amazon Linux
-      ansible.builtin.yum:
-        name: java-11-openjdk
-        state: present
+      ansible.builtin.shell:
+        cmd: "amazon-linux-extras install java-openjdk11"
       when: "'Amazon' in ansible_distribution"
 
     - name: Install Java 11 on Ubuntu
