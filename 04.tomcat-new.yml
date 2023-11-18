@@ -37,20 +37,16 @@
         path: "/usr/local/latest"
         state: absent
 
+    - name: Set Tomcat home
+      ansible.builtin.command:
+        cmd: mv "/usr/local/apache-tomcat-10.1.16" "/usr/local/latest"
+
+    - name: System CTL - Daemon reload
+      ansible.builtin.command: "systemctl daemon-reload"
+      become: yes
+      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution"
+
     - name: Starting Tomcat
       ansible.builtin.shell:
         cmd: "nohup /usr/local/latest/bin/startup.sh &"
-      register: tomcat_start_output
-
-    - name: Debug - Check if Tomcat is listening on port 8080
-      ansible.builtin.debug:
-        var: tomcat_start_output.stdout_lines
-      when: "'Address already in use' in tomcat_start_output.stderr"
-
-    - name: Wait for Tomcat to start on port 8080
-      ansible.builtin.wait_for:
-        host: "localhost"
-        port: 8080
-        state: started
-      when: "'Address already in use' not in tomcat_start_output.stderr"
 ...
