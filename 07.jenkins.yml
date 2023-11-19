@@ -1,6 +1,6 @@
 ---
 - name: Install Jenkins on CentOS
-  hosts: 
+  hosts: n4c
   become: true
 
   tasks:
