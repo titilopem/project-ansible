@@ -9,22 +9,28 @@
         name: jenkins
         description: Jenkins Official Repository
         baseurl: http://pkg.jenkins.io/redhat-stable
-        gpgcheck: true
-        gpgkey: http://pkg.jenkins.io/redhat-stable/jenkins.io.key
+        gpgcheck: false
         state: present
 
-    - name: Debug Jenkins repository GPG keys
-      debug:
-        var: ansible_facts.jenkins_repository_gpg_keys
+    - name: Import Jenkins GPG key
+      rpm_key:
+        key: http://pkg.jenkins.io/redhat-stable/jenkins.io.key
+        state: present
+
+    - name: Enable GPG check for Jenkins repository
+      ini_file:
+        path: /etc/yum.repos.d/jenkins.repo
+        section: jenkins
+        option: gpgcheck
+        value: 1
+        backup: yes
+      notify:
+        - Run Yum Clean
 
     - name: Install Jenkins
       yum:
         name: jenkins
         state: present
-
-    - name: Debug Jenkins installation output
-      debug:
-        var: ansible_facts.packages['jenkins']
 
     - name: Install EPEL repository
       yum:
@@ -47,21 +53,13 @@
         path: /usr/lib/jvm/java-11-openjdk-11.0.21.0.9-1.el7_9.x86_64/bin/java
         priority: 2
 
-    - name: Debug Java installation output
-      debug:
-        var: ansible_facts.packages['java-11-openjdk']
-
     - name: Start Jenkins service
       systemd:
         name: jenkins
         state: started
         enabled: true
 
-    - name: Display Jenkins initial admin password
-      shell: "sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
-      register: initial_password_output
-
-    - name: Display initial admin password
-      debug:
-        var: initial_password_output.stdout_lines
+  handlers:
+    - name: Run Yum Clean
+      command: yum clean all
 ...
