@@ -1,0 +1,12 @@
+---
+- name: Display Root, Java, and Maven information
+  hosts: n4u
+  become: true
+  tasks:
+    - name: Display Root, Java, and Maven information
+      ansible.builtin.debug:
+        msg: |
+          root_directory: {{ root_directory }}
+          java_home: {{ java_home }}
+          maven_home: {{ maven_home }}
+...
