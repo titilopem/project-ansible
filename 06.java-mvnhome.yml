@@ -4,10 +4,20 @@
   become: true
   gather_facts: true
   tasks:
+    - name: Display Environment Variables
+      ansible.builtin.debug:
+        msg: "{{ ansible_env }}"
+    
+    - name: Display Java and Maven Paths
+      ansible.builtin.shell:
+        cmd: "echo 'java_path: $(which java) maven_path: $(which mvn)'"
+      register: path_output
+
     - name: Display Root, Java, and Maven information
       ansible.builtin.debug:
         msg: |
           root_directory: {{ ansible_mounts[0].mount }}
-          java_home: {{ ansible_env.JAVA_HOME }}
-          maven_home: {{ ansible_env.MAVEN_HOME }}
+          java_home: {{ ansible_env.JAVA_HOME | default('Not available') }}
+          maven_home: {{ ansible_env.MAVEN_HOME | default('Not available') }}
+          path_output: {{ path_output.stdout | default('Not available') }}
 ...
