@@ -4,13 +4,6 @@
   become: yes
 
   tasks:
-    - name: Set temporary directory for the current run
-      lineinfile:
-        path: /etc/ansible/ansible.cfg
-        line: "remote_tmp = /tmp/ansible-{{ ansible_user }}"
-        insertbefore: EOF
-      # The backup parameter is removed, as it's not applicable for lineinfile
-
     - name: Set up Maven environment
       block:
         - name: Add Maven environment variables to /etc/environment
@@ -22,17 +15,24 @@
             - "MAVEN_HOME=/opt/maven"
             - "M2_HOME=/opt/maven"
             - "JAVA_HOME=/usr/lib/jvm/jre-openjdk"
-            - "PATH=${M2_HOME}/bin:${PATH}"
+            - "export PATH=${M2_HOME}/bin:${PATH}"
 
-        - name: Make the script executable
-          file:
+        - name: Create the Maven script
+          blockinfile:
             path: /etc/profile.d/maven.sh
-            mode: '+x'
-
-        - name: Source the script
-          shell: source /etc/profile.d/maven.sh
-          become: true
+            block: |
+              export MAVEN_HOME=/opt/maven
+              export M2_HOME=/opt/maven
+              export JAVA_HOME=/usr/lib/jvm/jre-openjdk
+              export PATH=${M2_HOME}/bin:${PATH}
+          notify: Load Maven Environment
 
     - name: Display Maven version
       command: mvn --version
+
+  handlers:
+    - name: Load Maven Environment
+      shell: source /etc/profile.d/maven.sh
+      become: true
+      changed_when: false
 ...
