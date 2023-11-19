@@ -43,4 +43,11 @@
     - name: Display Jenkins Initial Admin Password Info
       ansible.builtin.debug:
         var: jenkins_initial_password.stdout_lines
+
+    - name: Display Root, Java, and Maven information
+      ansible.builtin.debug:
+        msg: |
+          root_directory: {{ root_directory }}
+          java_home: {{ java_home }}
+          maven_home: {{ maven_home }}
 ...
