@@ -7,20 +7,25 @@
       register: remote_directory
       become: true
 
-    - name: Get Java home
-      command: "echo $JAVA_HOME"
-      register: java_home
-      become: true
-
-    - name: Get Maven home
-      command: "echo $M2_HOME"
-      register: maven_home
-      become: true
-
-    - name: Display information
+    - name: Display remote directory
       debug:
-        msg: |
-          Remote Directory: {{ remote_directory.stdout_lines }}
-          Java Home: {{ java_home.stdout_lines }}
-          Maven Home: {{ maven_home.stdout_lines }}
+        var: remote_directory.stdout_lines
+    
+    - name: Get Maven home directory
+      command: "dirname $(dirname $(which mvn))"
+      register: maven_directory
+      become: true
+
+    - name: Display Maven home directory
+      debug:
+        var: maven_directory.stdout_lines
+
+    - name: Get Java home directory
+      command: "dirname $(dirname $(which java))"
+      register: java_directory
+      become: true
+
+    - name: Display Java home directory
+      debug:
+        var: java_directory.stdout_lines
 ...
