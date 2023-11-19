@@ -4,35 +4,17 @@
   become: yes
 
   tasks:
-    - name: Set up Maven environment
-      block:
-        - name: Add Maven environment variables to /etc/environment
-          lineinfile:
-            dest: /etc/environment
-            line: "{{ item }}"
-            insertafter: EOF
-          with_items:
-            - "MAVEN_HOME=/opt/maven"
-            - "M2_HOME=/opt/maven"
-            - "JAVA_HOME=/usr/lib/jvm/jre-openjdk"
-            - "export PATH=${M2_HOME}/bin:${PATH}"
+    - name: Update Maven environment variables in /etc/profile.d/maven.sh
+      lineinfile:
+        path: /etc/profile.d/maven.sh
+        regexp: "^(export JAVA_HOME=).*"
+        line: "export JAVA_HOME=/usr/lib/jvm/jre-openjdk"
 
-        - name: Create the Maven script
-          blockinfile:
-            path: /etc/profile.d/maven.sh
-            block: |
-              export MAVEN_HOME=/opt/maven
-              export M2_HOME=/opt/maven
-              export JAVA_HOME=/usr/lib/jvm/jre-openjdk
-              export PATH=${M2_HOME}/bin:${PATH}
-          notify: Load Maven Environment
-
-    - name: Display Maven version
-      command: mvn --version
-
-  handlers:
-    - name: Load Maven Environment
-      shell: source /etc/profile.d/maven.sh
-      become: true
-      changed_when: false
+    - name: Append Maven environment variables to /etc/profile.d/maven.sh
+      blockinfile:
+        path: /etc/profile.d/maven.sh
+        block: |
+          export M2_HOME=/opt/maven
+          export MAVEN_HOME=/opt/maven
+          export PATH=${M2_HOME}/bin:${PATH}
 ...
