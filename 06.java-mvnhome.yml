@@ -1,36 +1,13 @@
 ---
-- name: Display Root, Java, Maven, and Current Working Directory information
-  hosts: n4u
-  become: true
-  gather_facts: true
+- hosts: n4u
+  gather_facts: false
   tasks:
-    - name: Display Environment Variables
-      ansible.builtin.debug:
-        msg: "{{ ansible_env }}"
-    
-    - name: Display Java Home Directory
-      ansible.builtin.shell:
-        cmd: "echo 'java_home: $(dirname $(dirname $(readlink -f $(which java))))'"
-      register: java_output
-      changed_when: false
+    - name: Get remote directory
+      command: "pwd"
+      register: remote_directory
+      become: true
 
-    - name: Display Maven Home Directory
-      ansible.builtin.shell:
-        cmd: "echo 'maven_home: $(dirname $(dirname $(readlink -f $(which mvn))))'"
-      register: maven_output
-      changed_when: false
-
-    - name: Capture Current Working Directory
-      ansible.builtin.shell:
-        cmd: "echo 'current_working_directory: $(pwd)'"
-      register: cwd_output
-      changed_when: false
-
-    - name: Display Root, Java, Maven, and Current Working Directory information
-      ansible.builtin.debug:
-        msg: |
-          root_directory: {{ ansible_mounts[0].mount }}
-          java_home: {{ java_output.stdout | regex_replace('^java_home: (.*)$', '\\1') }}
-          maven_home: {{ maven_output.stdout | regex_replace('^maven_home: (.*)$', '\\1') }}
-          current_working_directory: {{ cwd_output.stdout | regex_replace('^current_working_directory: (.*)$', '\\1') }}
+    - name: Display remote directory
+      debug:
+        var: remote_directory.stdout_lines
 ...
