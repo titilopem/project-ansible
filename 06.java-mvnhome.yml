@@ -10,4 +10,22 @@
     - name: Display remote directory
       debug:
         var: remote_directory.stdout_lines
+    
+    - name: Get remote directory
+      command: "echo $(dirname $(dirname $(readlink -f $(which mvn)))"
+      register: remote_directory
+      become: true
+
+    - name: Display remote directory
+      debug:
+        var: remote_directory.stdout_lines
+
+    - name: Get remote directory
+      command: "echo $(dirname $(dirname $(readlink -f $(which java)))"
+      register: remote_directory
+      become: true
+
+    - name: Display remote directory
+      debug:
+        var: remote_directory.stdout_lines
 ...
