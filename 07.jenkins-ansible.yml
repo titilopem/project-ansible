@@ -36,24 +36,16 @@
     - name: Set Java 11 as the default version
       alternatives:
         name: java
-        path: /usr/lib/jvm/java-11-openjdk-11/bin/java
+        path: /usr/lib/jvm/java-11-openjdk-11.0.21.0.9-1.el7_9.x86_64/bin/java
         priority: 2
 
     - name: Display Java version
-      shell: "{{ ansible_env.PATH }}:/usr/lib/jvm/java-11-openjdk-11/bin/java -version"
-      register: java_version_output
-
-    - name: Display Java version output
       debug:
-        var: java_version_output.stdout_lines
+        msg: "Java Version: {{ java_info.stdout_lines[0].split(' ')[2] }}"
 
     - name: Display Java home directory
-      shell: echo $JAVA_HOME
-      register: java_home_output
-
-    - name: Display Java home directory output
       debug:
-        var: java_home_output.stdout_lines
+        msg: "Java Home: {{ java_info.stdout_lines[0].split(' ')[3] }}"
 
     - name: Start Jenkins service
       systemd:
