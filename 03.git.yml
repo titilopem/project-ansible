@@ -1,6 +1,6 @@
 ---
 - name: Install Git on Multiple servers
-  hosts: all
+  hosts: group1
   become: yes 
   tasks:
     - name: Install Git on CentOS
