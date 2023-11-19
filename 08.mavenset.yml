@@ -5,9 +5,11 @@
 
   tasks:
     - name: Set temporary directory for the current run
-      ansible.builtin.ansible_cfg:
-        options:
-          remote_tmp: "/tmp/ansible-{{ ansible_user }}"
+      community.general.ini_file:
+        dest: /etc/ansible/ansible.cfg
+        section: defaults
+        option: remote_tmp
+        value: "/tmp/ansible-{{ ansible_user }}"
 
     - name: Set up Maven environment
       block:
