@@ -30,7 +30,7 @@
       ansible.builtin.debug:
         msg: |
           root_directory: {{ ansible_mounts[0].mount }}
-          java_home: {{ java_output.stdout | default('Not available') }}
-          maven_home: {{ maven_output.stdout | default('Not available') }}
-          current_working_directory: {{ cwd_output.stdout | default('Not available') }}
+          java_home: {{ java_output.stdout | regex_replace('^java_home: (.*)$', '\\1') }}
+          maven_home: {{ maven_output.stdout | regex_replace('^maven_home: (.*)$', '\\1') }}
+          current_working_directory: {{ cwd_output.stdout | regex_replace('^current_working_directory: (.*)$', '\\1') }}
 ...
