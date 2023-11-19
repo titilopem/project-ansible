@@ -11,21 +11,21 @@
       debug:
         var: remote_directory.stdout_lines
     
-    - name: Get remote directory
-      command: "echo $(dirname $(dirname $(readlink -f $(which mvn)))"
-      register: remote_directory
+    - name: Get Maven home directory
+      command: "dirname $(dirname $(readlink -f $(which mvn)))"
+      register: maven_directory
       become: true
 
-    - name: Display remote directory
+    - name: Display Maven home directory
       debug:
-        var: remote_directory.stdout_lines
+        var: maven_directory.stdout_lines
 
-    - name: Get remote directory
-      command: "echo $(dirname $(dirname $(readlink -f $(which java)))"
-      register: remote_directory
+    - name: Get Java home directory
+      command: "dirname $(dirname $(readlink -f $(which java)))"
+      register: java_directory
       become: true
 
-    - name: Display remote directory
+    - name: Display Java home directory
       debug:
-        var: remote_directory.stdout_lines
+        var: java_directory.stdout_lines
 ...
