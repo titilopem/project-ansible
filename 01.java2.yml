@@ -27,26 +27,20 @@
         state: present
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Set Java 11 as the default on CentOS
-      ansible.builtin.alternatives:
-        name: java
-        path: /usr/lib/jvm/java-11-openjdk-<your-specific-version>/bin/java
-        state: present
+    - name: Set Java 11 as the active version on CentOS
+      ansible.builtin.shell:
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.21.0.9-1.el7_9.x86_64/bin/java
       when: "'CentOS' in ansible_distribution"
 
-    - name: Set Java 11 as the default on Amazon Linux
-      ansible.builtin.alternatives:
-        name: java
-        path: /usr/lib/jvm/java-11-amazon-corretto/bin/java
-        state: present
-      when: "'Amazon' in ansible_distribution"
-
-    - name: Set Java 11 as the default on Ubuntu
-      ansible.builtin.update_alternatives:
-        name: java
-        path: /usr/lib/jvm/java-11-openjdk-<your-specific-version>/bin/java
-        state: present
+    - name: Set Java 11 as the active version on Ubuntu
+      ansible.builtin.shell:
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
       when: "'Ubuntu' in ansible_distribution"
+
+    - name: Set Java 11 as the active version on Amazon Linux
+      ansible.builtin.shell:
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/java
+      when: "'Amazon' in ansible_distribution"
 
     - name: Display Java Version and Path
       ansible.builtin.shell:
