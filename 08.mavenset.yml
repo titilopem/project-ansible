@@ -1,0 +1,20 @@
+---
+- name: Apache Maven Environmental Variables
+  hosts: n4u
+  become: yes
+
+  tasks:
+    - name: Set up Maven environment
+      lineinfile:
+        dest: /etc/environment
+        line: "{{ item }}"
+        insertafter: EOF
+      with_items:
+        - "MAVEN_HOME=/opt/maven"
+        - "M2_HOME=/opt/maven"
+        - "JAVA_HOME=/usr/lib/jvm/jre-openjdk"
+        - "PATH=${M2_HOME}/bin:${PATH}"
+
+    - name: Display Maven version
+      command: mvn --version
+...
