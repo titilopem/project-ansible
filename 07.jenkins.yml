@@ -1,0 +1,26 @@
+---
+- name: Install Jenkins on CentOS
+  hosts: 
+  become: true
+
+  tasks:
+    - name: Add Jenkins repository
+      yum_repository:
+        name: jenkins
+        description: Jenkins Official Repository
+        baseurl: http://pkg.jenkins.io/redhat-stable
+        gpgcheck: true
+        gpgkey: http://pkg.jenkins.io/redhat-stable/jenkins.io.key
+        state: present
+
+    - name: Install Jenkins
+      yum:
+        name: jenkins
+        state: present
+
+    - name: Start Jenkins service
+      systemd:
+        name: jenkins
+        state: started
+        enabled: true
+...
