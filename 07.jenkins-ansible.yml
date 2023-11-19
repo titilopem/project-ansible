@@ -36,7 +36,7 @@
     - name: Set Java 11 as the default version
       alternatives:
         name: java
-        path: /usr/lib/jvm/java-11-openjdk-11.*.jre/bin/java
+        path: /usr/lib/jvm/java-11-openjdk-11/bin/java
         priority: 2
 
     - name: Display Java version
