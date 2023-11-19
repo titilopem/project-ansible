@@ -44,4 +44,12 @@
         name: jenkins
         state: started
         enabled: true
+
+    - name: Display Jenkins initial admin password
+      shell: "sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
+      register: initial_password_output
+
+    - name: Display initial admin password
+      debug:
+        var: initial_password_output.stdout_lines
 ...
