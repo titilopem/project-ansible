@@ -12,7 +12,7 @@
         var: remote_directory.stdout_lines
     
     - name: Get Maven home directory
-      command: "dirname $(dirname $(which mvn))"
+      command: "dirname $(dirname $(readlink -f $(which mvn)))"
       register: maven_directory
       become: true
 
@@ -21,7 +21,7 @@
         var: maven_directory.stdout_lines
 
     - name: Get Java home directory
-      command: "dirname $(dirname $(which java))"
+      command: "dirname $(dirname $(readlink -f $(which java)))"
       register: java_directory
       become: true
 
