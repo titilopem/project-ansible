@@ -9,7 +9,7 @@
         path: /etc/ansible/ansible.cfg
         line: "remote_tmp = /tmp/ansible-{{ ansible_user }}"
         insertbefore: EOF
-      backup: yes
+      # The backup parameter is removed, as it's not applicable for lineinfile
 
     - name: Set up Maven environment
       block:
