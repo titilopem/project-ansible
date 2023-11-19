@@ -7,6 +7,16 @@
         update_cache: yes
       when: "'Ubuntu' in ansible_distribution"
 
+    - name: Add Jenkins GPG key
+      ansible.builtin.apt_key:
+        url: "https://pkg.jenkins.io/debian/jenkins.io.key"
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Add Jenkins repository
+      ansible.builtin.apt_repository:
+        repo: "deb http://pkg.jenkins.io/debian-stable binary/"
+      when: "'Ubuntu' in ansible_distribution"
+
     - name: Install Jenkins on Ubuntu
       ansible.builtin.apt:
         name: jenkins
