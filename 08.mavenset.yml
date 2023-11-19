@@ -2,10 +2,12 @@
 - name: Apache Maven Environmental Variables
   hosts: n4u
   become: yes
-  environment:
-    ANSIBLE_REMOTE_TEMP: "/tmp/ansible-{{ ansible_user }}"
 
   tasks:
+    - name: Set ANSIBLE_REMOTE_TEMP
+      ansible.builtin.set_fact:
+        ANSIBLE_REMOTE_TEMP: "/tmp/ansible-{{ ansible_user }}"
+
     - name: Set up Maven environment
       block:
         - name: Add Maven environment variables to /etc/environment
