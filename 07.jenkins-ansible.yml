@@ -39,14 +39,17 @@
         path: /usr/lib/jvm/java-11-openjdk-11/bin/java
         priority: 2
 
+    - name: Display Java home directory
+      debug:
+        var: ansible_facts['java_home']
+
     - name: Display Java version
-      command: java -version
+      command: "{{ ansible_facts['java_home'] }}/bin/java -version"
       register: java_version_output
 
-    - name: Display Java path
+    - name: Display Java version output
       debug:
         var: java_version_output.stdout_lines
-        msg: "Java Path: {{ java_version_output.stdout_lines | join('\n') }}"
 
     - name: Start Jenkins service
       systemd:
