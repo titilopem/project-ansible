@@ -1,65 +1,32 @@
----
-- name: Install Jenkins, Ansible, and set Java 11 as the active version on CentOS
-  hosts: n4c
+- name: Install Jenkins
+  hosts: n4u
   become: true
-
   tasks:
-    - name: Add Jenkins repository
-      yum_repository:
-        name: jenkins
-        description: Jenkins Official Repository
-        baseurl: http://pkg.jenkins.io/redhat-stable
-        gpgcheck: false
-        state: present
-
-    - name: Import Jenkins GPG key
-      rpm_key:
-        key: http://pkg.jenkins.io/redhat-stable/jenkins.io.key
-        state: present
-
-    - name: Enable GPG check for Jenkins repository
-      ini_file:
-        path: /etc/yum.repos.d/jenkins.repo
-        section: jenkins
-        option: gpgcheck
-        value: 1
-        backup: yes
-      notify:
-        - Run Yum Clean
-
-    - name: Install Jenkins
-      yum:
+    - name: Install Jenkins on CentOS
+      ansible.builtin.yum:
         name: jenkins
         state: present
+        enablerepo: epel
+      when: "'CentOS' in ansible_distribution"
 
-    - name: Install EPEL repository
-      yum:
-        name: epel-release
-        state: present
-
-    - name: Install Ansible
-      yum:
-        name: ansible
-        state: present
-
-    - name: Install Java 11
-      yum:
-        name: java-11-openjdk
-        state: present
-
-    - name: Set Java 11 as the default version
-      alternatives:
-        name: java
-        path: /usr/lib/jvm/java-11-openjdk-11.0.21.0.9-1.el7_9.x86_64/bin/java
-        priority: 2
-
-    - name: Start Jenkins service
-      systemd:
+    - name: Install Jenkins on Amazon Linux
+      ansible.builtin.dnf:
         name: jenkins
-        state: started
-        enabled: true
+        state: present
+      when: "'Amazon' in ansible_distribution"
 
-  handlers:
-    - name: Run Yum Clean
-      command: yum clean all
+    - name: Install Jenkins on Ubuntu
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Display Jenkins Version
+      ansible.builtin.shell:
+        cmd: "java -jar /usr/share/jenkins/jenkins.war --version"
+      register: jenkins_version
+
+    - name: Display Jenkins Version Info
+      ansible.builtin.debug:
+        var: jenkins_version.stdout_lines
 ...
