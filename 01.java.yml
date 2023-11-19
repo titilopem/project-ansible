@@ -3,6 +3,11 @@
   hosts: n4u
   become: true
   tasks:
+    - name: Update package repositories on Ubuntu
+      ansible.builtin.apt:
+        update_cache: yes
+      when: "'Ubuntu' in ansible_distribution"
+
     - name: Install EPEL repository on CentOS
       ansible.builtin.yum:
         name: epel-release
@@ -27,6 +32,21 @@
         name: openjdk-11-jdk
         state: present
       when: "'Ubuntu' in ansible_distribution"
+
+    - name: Set Java 11 as the active version on CentOS
+      ansible.builtin.shell:
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.21.0.9-1.el7_9.x86_64/bin/java
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Set Java 11 as the active version on Ubuntu
+      ansible.builtin.shell:
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Set Java 11 as the active version on Amazon Linux
+      ansible.builtin.shell:
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/java
+      when: "'Amazon' in ansible_distribution"
 
     - name: Display Java Version and Path
       ansible.builtin.shell:
