@@ -33,22 +33,4 @@
       ansible.builtin.shell:
         cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
       when: "'Ubuntu' in ansible_distribution"
-
-    - name: Display Java Version
-      ansible.builtin.shell:
-        cmd: java -version
-      register: java_version
-
-    - name: Display Java Version Info
-      ansible.builtin.debug:
-        var: java_version.stdout_lines
-
-    - name: Display Jenkins Version
-      ansible.builtin.shell:
-        cmd: "java -jar /usr/share/jenkins/jenkins.war --version"
-      register: jenkins_version
-
-    - name: Display Jenkins Version Info
-      ansible.builtin.debug:
-        var: jenkins_version.stdout_lines
 ...
