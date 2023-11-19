@@ -1,4 +1,3 @@
-#update
 ---
 - name: Apache Maven Environmental Variables
   hosts: n4u
@@ -25,15 +24,15 @@
             - "JAVA_HOME=/usr/lib/jvm/jre-openjdk"
             - "PATH=${M2_HOME}/bin:${PATH}"
 
-      - name: Make the script executable
+        - name: Make the script executable
           file:
             path: /etc/profile.d/maven.sh
             mode: '+x'
 
-      - name: Source the script
+        - name: Source the script
           shell: source /etc/profile.d/maven.sh
           become: true
 
-      - name: Display Maven version
-        command: mvn --version
+    - name: Display Maven version
+      command: mvn --version
 ...
