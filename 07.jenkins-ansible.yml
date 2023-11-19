@@ -1,5 +1,5 @@
 ---
-- name: Install Jenkins on CentOS
+- name: Install Jenkins, Ansible, and set Java 11 as the active version on CentOS
   hosts: n4c
   become: true
 
@@ -17,6 +17,27 @@
       yum:
         name: jenkins
         state: present
+
+    - name: Install EPEL repository
+      yum:
+        name: epel-release
+        state: present
+
+    - name: Install Ansible
+      yum:
+        name: ansible
+        state: present
+
+    - name: Install Java 11
+      yum:
+        name: java-11-openjdk
+        state: present
+
+    - name: Set Java 11 as the default version
+      alternatives:
+        name: java
+        path: /usr/lib/jvm/java-11-openjdk-11.*.jre/bin/java
+        priority: 2
 
     - name: Start Jenkins service
       systemd:
