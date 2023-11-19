@@ -31,7 +31,7 @@
 
         - name: Source the script
           shell: source /etc/profile.d/maven.sh
-      become: true
+          become: true
 
     - name: Display Maven version
       command: mvn --version
