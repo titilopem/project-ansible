@@ -39,14 +39,6 @@
         path: /usr/lib/jvm/java-11-openjdk-11.0.21.0.9-1.el7_9.x86_64/bin/java
         priority: 2
 
-    - name: Display Java version
-      debug:
-        msg: "Java Version: {{ java_info.stdout_lines[0].split(' ')[2] }}"
-
-    - name: Display Java home directory
-      debug:
-        msg: "Java Home: {{ java_info.stdout_lines[0].split(' ')[3] }}"
-
     - name: Start Jenkins service
       systemd:
         name: jenkins
