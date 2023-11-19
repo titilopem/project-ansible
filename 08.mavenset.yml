@@ -2,6 +2,8 @@
 - name: Apache Maven Environmental Variables
   hosts: n4u
   become: yes
+  environment:
+    ANSIBLE_REMOTE_TEMP: "/tmp/ansible-{{ ansible_user }}"
 
   tasks:
     - name: Set up Maven environment
