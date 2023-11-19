@@ -13,10 +13,18 @@
         gpgkey: http://pkg.jenkins.io/redhat-stable/jenkins.io.key
         state: present
 
+    - name: Debug Jenkins repository GPG keys
+      debug:
+        var: ansible_facts.jenkins_repository_gpg_keys
+
     - name: Install Jenkins
       yum:
         name: jenkins
         state: present
+
+    - name: Debug Jenkins installation output
+      debug:
+        var: ansible_facts.packages['jenkins']
 
     - name: Install EPEL repository
       yum:
@@ -38,6 +46,10 @@
         name: java
         path: /usr/lib/jvm/java-11-openjdk-11.0.21.0.9-1.el7_9.x86_64/bin/java
         priority: 2
+
+    - name: Debug Java installation output
+      debug:
+        var: ansible_facts.packages['java-11-openjdk']
 
     - name: Start Jenkins service
       systemd:
