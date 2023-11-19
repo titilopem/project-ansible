@@ -13,16 +13,11 @@
         cmd: "echo 'java_path: $(which java) maven_path: $(which mvn)'"
       register: path_output
 
-    - name: Set Java and Maven Paths
-      ansible.builtin.set_fact:
-        java_home: "{{ path_output.stdout.split(' ')[1] | default('Not available') }}"
-        maven_home: "{{ path_output.stdout.split(' ')[3] | default('Not available') }}"
-
     - name: Display Root, Java, and Maven information
       ansible.builtin.debug:
         msg: |
           root_directory: {{ ansible_mounts[0].mount }}
-          java_home: {{ java_home }}
-          maven_home: {{ maven_home }}
+          java_home: {{ path_output.stdout | regex_replace('java_path: (.*) maven_path: (.*)', '\\1') }}
+          maven_home: {{ path_output.stdout | regex_replace('java_path: (.*) maven_path: (.*)', '\\2') }}
           path_output: {{ path_output.stdout | default('Not available') }}
 ...
