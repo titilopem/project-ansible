@@ -4,9 +4,10 @@
   become: yes
 
   tasks:
-    - name: Set ANSIBLE_REMOTE_TEMP
-      ansible.builtin.set_fact:
-        ANSIBLE_REMOTE_TEMP: "/tmp/ansible-{{ ansible_user }}"
+    - name: Set temporary directory for the current run
+      ansible.builtin.ansible_cfg:
+        options:
+          remote_tmp: "/tmp/ansible-{{ ansible_user }}"
 
     - name: Set up Maven environment
       block:
