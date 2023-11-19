@@ -5,15 +5,26 @@
 
   tasks:
     - name: Set up Maven environment
-      lineinfile:
-        dest: /etc/environment
-        line: "{{ item }}"
-        insertafter: EOF
-      with_items:
-        - "MAVEN_HOME=/opt/maven"
-        - "M2_HOME=/opt/maven"
-        - "JAVA_HOME=/usr/lib/jvm/jre-openjdk"
-        - "PATH=${M2_HOME}/bin:${PATH}"
+      block:
+        - name: Add Maven environment variables to /etc/environment
+          lineinfile:
+            dest: /etc/environment
+            line: "{{ item }}"
+            insertafter: EOF
+          with_items:
+            - "MAVEN_HOME=/opt/maven"
+            - "M2_HOME=/opt/maven"
+            - "JAVA_HOME=/usr/lib/jvm/jre-openjdk"
+            - "PATH=${M2_HOME}/bin:${PATH}"
+
+        - name: Make the script executable
+          file:
+            path: /etc/profile.d/maven.sh
+            mode: '+x'
+
+        - name: Source the script
+          shell: source /etc/profile.d/maven.sh
+      become: true
 
     - name: Display Maven version
       command: mvn --version
