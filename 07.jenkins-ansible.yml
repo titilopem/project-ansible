@@ -39,6 +39,15 @@
         path: /usr/lib/jvm/java-11-openjdk-11.*.jre/bin/java
         priority: 2
 
+    - name: Display Java version
+      command: java -version
+      register: java_version_output
+
+    - name: Display Java path
+      debug:
+        var: java_version_output.stdout_lines
+        msg: "Java Path: {{ java_version_output.stdout_lines | join('\n') }}"
+
     - name: Start Jenkins service
       systemd:
         name: jenkins
