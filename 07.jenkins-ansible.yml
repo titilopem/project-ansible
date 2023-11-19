@@ -1,3 +1,4 @@
+---
 - name: Install Jenkins and Ansible on Ubuntu
   hosts: n4u
   become: true
@@ -33,4 +34,13 @@
       ansible.builtin.shell:
         cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
       when: "'Ubuntu' in ansible_distribution"
+
+    - name: Display Jenkins Initial Admin Password
+      ansible.builtin.shell:
+        cmd: sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_initial_password
+
+    - name: Display Jenkins Initial Admin Password Info
+      ansible.builtin.debug:
+        var: jenkins_initial_password.stdout_lines
 ...
