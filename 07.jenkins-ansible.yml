@@ -8,11 +8,14 @@
         name: wget
         state: present
 
-    - name: Add Jenkins repository GPG key
-      ansible.builtin.repo_key:
-        id: EF5975CA
-        keyserver: hkp://keyserver.ubuntu.com:80
-        state: present
+    - name: Download Jenkins GPG key
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+        dest: /etc/pki/rpm-gpg/jenkins.io.key
+
+    - name: Import Jenkins GPG key
+      ansible.builtin.shell:
+        cmd: "rpm --import /etc/pki/rpm-gpg/jenkins.io.key"
 
     - name: Upgrade packages
       ansible.builtin.yum:
