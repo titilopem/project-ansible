@@ -17,6 +17,10 @@
       ansible.builtin.shell:
         cmd: "rpm --import /etc/pki/rpm-gpg/jenkins.io.key"
 
+    - name: Add Jenkins repository with GPG check disabled
+      ansible.builtin.shell:
+        cmd: "echo -e '[jenkins]\nname=Jenkins\nbaseurl=http://pkg.jenkins.io/redhat-stable\nenabled=1\ngpgcheck=0' > /etc/yum.repos.d/jenkins.repo"
+
     - name: Upgrade packages
       ansible.builtin.yum:
         name: '*'
