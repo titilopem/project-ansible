@@ -1,5 +1,5 @@
 ---
-- name: Install Maven on CentOS
+- name: Install Maven
   hosts: group2
   become: yes
 
