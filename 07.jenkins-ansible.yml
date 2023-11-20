@@ -1,3 +1,4 @@
+---
 - name: Install Jenkins on CentOS/RHEL
   hosts: n4c
   become: true
@@ -8,8 +9,9 @@
         state: present
 
     - name: Import Jenkins GPG key
-      ansible.builtin.shell:
-        cmd: "sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key"
+      ansible.builtin.yum_key:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+        state: present
 
     - name: Upgrade packages
       ansible.builtin.yum:
