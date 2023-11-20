@@ -1,3 +1,4 @@
+---
 - name: Install Jenkins and Ansible on Ubuntu
   hosts: n4u
   become: true
@@ -23,7 +24,37 @@
         var: apt_update_result.package_list
       when: "'Ubuntu' in ansible_distribution"
 
-    # ... (the rest of your tasks)
+    - name: Add Jenkins GPG key
+      ansible.builtin.apt_key:
+        url: "https://pkg.jenkins.io/debian/jenkins.io.key"
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Add Jenkins repository
+      ansible.builtin.apt_repository:
+        repo: "deb http://pkg.jenkins.io/debian-stable binary/"
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Debug Jenkins Repository Contents
+      ansible.builtin.debug:
+        var: ansible_apt.list
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Install Jenkins on Ubuntu
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Install Ansible on Ubuntu
+      ansible.builtin.apt:
+        name: ansible
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Set Java 11 as the active version on Ubuntu
+      ansible.builtin.shell:
+        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+      when: "'Ubuntu' in ansible_distribution"
 
     - name: Display Jenkins Initial Admin Password
       ansible.builtin.shell:
