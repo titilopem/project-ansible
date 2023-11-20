@@ -1,60 +1,99 @@
 ---
-- name: Install Jenkins and Ansible on Ubuntu
+- name: Install Jenkins and Ansible
   hosts: n4u
   become: true
   tasks:
-    - name: Debug APT Cache Update (Before)
+    - name: Debug Package Manager Update (Before)
       ansible.builtin.debug:
         var: ansible_pkg_mgr_update_cache_update_cache.stdout
-      when: "'Ubuntu' in ansible_distribution"
 
     - name: Update package repositories
-      ansible.builtin.apt:
-        update_cache: yes
-      register: apt_update_result
-      when: "'Ubuntu' in ansible_distribution"
+      ansible.builtin.package:
+        name: '*'
+        state: latest
+      register: package_update_result
 
-    - name: Debug APT Update Result
+    - name: Debug Package Manager Update Result
       ansible.builtin.debug:
-        var: apt_update_result
-      when: "'Ubuntu' in ansible_distribution"
+        var: package_update_result
 
-    - name: Debug APT Package List
+    - name: Debug Package Manager Package List
       ansible.builtin.debug:
-        var: apt_update_result.package_list
+        var: package_update_result.package_list
+
+    - name: Install Wget on CentOS/RHEL
+      ansible.builtin.package:
+        name: wget
+        state: present
+      when: "'RedHat' in ansible_distribution"
+
+    - name: Add Jenkins GPG key on CentOS/RHEL
+      ansible.builtin.shell:
+        cmd: "sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key"
+      when: "'RedHat' in ansible_distribution"
+
+    - name: Add Jenkins repository on CentOS/RHEL
+      ansible.builtin.shell:
+        cmd: "sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+      when: "'RedHat' in ansible_distribution"
+
+    - name: Install Java 11 on CentOS/RHEL
+      ansible.builtin.package:
+        name: java-11-openjdk
+        state: present
+      when: "'RedHat' in ansible_distribution"
+
+    - name: Install Jenkins on CentOS/RHEL
+      ansible.builtin.package:
+        name: jenkins
+        state: present
+      when: "'RedHat' in ansible_distribution"
+
+    - name: Install Wget on Ubuntu
+      ansible.builtin.package:
+        name: wget
+        state: present
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Add Jenkins GPG key
+    - name: Add Jenkins GPG key on Ubuntu
       ansible.builtin.apt_key:
         url: "https://pkg.jenkins.io/debian/jenkins.io.key"
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Add Jenkins repository
+    - name: Add Jenkins repository on Ubuntu
       ansible.builtin.apt_repository:
         repo: "deb http://pkg.jenkins.io/debian-stable binary/"
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Debug Jenkins Repository Contents
-      ansible.builtin.debug:
-        var: ansible_apt.list
+    - name: Upgrade packages on Ubuntu
+      ansible.builtin.package:
+        name: '*'
+        state: latest
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Install Java 11 on Ubuntu
+      ansible.builtin.package:
+        name: openjdk-11-jdk
+        state: present
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Install Jenkins on Ubuntu
-      ansible.builtin.apt:
+      ansible.builtin.package:
         name: jenkins
         state: present
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Install Ansible on Ubuntu
-      ansible.builtin.apt:
-        name: ansible
-        state: present
-      when: "'Ubuntu' in ansible_distribution"
+    - name: Reload systemd manager configuration on CentOS/RHEL
+      ansible.builtin.systemd:
+        daemon_reload: yes
+      when: "'RedHat' in ansible_distribution"
 
-    - name: Set Java 11 as the active version on Ubuntu
-      ansible.builtin.shell:
-        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
-      when: "'Ubuntu' in ansible_distribution"
+    - name: Enable and start Jenkins service on CentOS/RHEL
+      ansible.builtin.systemd:
+        name: jenkins
+        enabled: yes
+        state: started
+      when: "'RedHat' in ansible_distribution"
 
     - name: Display Jenkins Initial Admin Password
       ansible.builtin.shell:
