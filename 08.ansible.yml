@@ -1,0 +1,15 @@
+---
+- name: Install Ansible on CentOS
+  hosts: n5c
+  become: true
+  tasks:
+    - name: Install EPEL repository
+      ansible.builtin.yum:
+        name: epel-release
+        state: present
+
+    - name: Install Ansible
+      ansible.builtin.yum:
+        name: ansible
+        state: present
+...
