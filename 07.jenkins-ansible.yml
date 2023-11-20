@@ -1,36 +1,38 @@
-- name: Install Jenkins on Ubuntu
+---
+- name: Install Jenkins on CentOS/RHEL
   hosts: n4u
   become: true
   tasks:
     - name: Install Wget
-      ansible.builtin.apt:
+      ansible.builtin.yum:
         name: wget
         state: present
 
-    - name: Add Jenkins GPG key
-      ansible.builtin.apt_key:
-        url: "https://pkg.jenkins.io/debian/jenkins.io.key"
+    - name: Import Jenkins GPG key
+      ansible.builtin.shell:
+        cmd: "sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key"
 
     - name: Add Jenkins repository
-      ansible.builtin.apt_repository:
-        repo: "deb http://pkg.jenkins.io/debian-stable binary/"
+      ansible.builtin.shell:
+        cmd: "sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo"
 
     - name: Upgrade packages
-      ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
 
     - name: Install Jenkins
-      ansible.builtin.apt:
+      ansible.builtin.yum:
         name: jenkins
         state: present
 
-    - name: Display Jenkins Initial Admin Password
-      ansible.builtin.shell:
-        cmd: sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-      register: jenkins_initial_password
+    - name: Reload systemd manager configuration
+      ansible.builtin.systemd:
+        daemon_reload: yes
 
-    - name: Display Jenkins Initial Admin Password Info
-      ansible.builtin.debug:
-        var: jenkins_initial_password.stdout_lines
+    - name: Enable and start Jenkins service
+      ansible.builtin.systemd:
+        name: jenkins
+        enabled: yes
+        state: started
 ...
