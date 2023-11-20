@@ -28,11 +28,6 @@
         url: "https://pkg.jenkins.io/debian/jenkins.io.key"
       when: "'Ubuntu' in ansible_distribution"
 
-    - name: Add Jenkins repository
-      ansible.builtin.apt_repository:
-        repo: "deb http://pkg.jenkins.io/debian-stable binary/"
-      when: "'Ubuntu' in ansible_distribution"
-
     - name: Debug Jenkins Repository Contents
       ansible.builtin.debug:
         var: ansible_apt.list
