@@ -10,16 +10,17 @@
     - name: Update package repositories
       ansible.builtin.apt:
         update_cache: yes
+      register: apt_update
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Debug APT Cache Update (After)
       ansible.builtin.debug:
-        var: ansible_pkg_mgr_update_cache_update_cache.stdout
+        var: apt_update.stdout
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Debug APT Package List
       ansible.builtin.debug:
-        var: ansible_pkg_mgr_update_cache_package_list.stdout_lines
+        var: apt_update.package_list
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Add Jenkins GPG key
