@@ -1,6 +1,6 @@
 ---
 - name: Install Jenkins on CentOS/RHEL
-  hosts: n4u
+  hosts: n4c
   become: true
   tasks:
     - name: Install Wget
