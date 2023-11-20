@@ -7,76 +7,76 @@
 
   tasks:
 
-  - name: Install HTTPD
+  - name: Install HTTPD on Amazon
     dnf:
      name: httpd
      state: present
     when: ansible_distribution == "Amazon"
 
-  - name: Start httpd
+  - name: Start httpd on Amazon
     service:
      name: httpd
      state: started
     when: ansible_distribution == "Amazon"
 
-  - name: Enable httpd
+  - name: Enable httpd on Amazon
     service:
      name: httpd
      enabled: yes
     when: ansible_distribution == "Amazon"
 
-  - name: Install Apache2
+  - name: Install Apache2 on Ubuntu
     apt:
      name: apache2
      state: present
     when: ansible_distribution == "Ubuntu"
 
-  - name: Start apache2
+  - name: Start apache2 on Ubuntu
     service:
      name: apache2
      state: started
     when: ansible_distribution == "Ubuntu"
 
-  - name: Enable apache2
+  - name: Enable apache2 on Ubuntu
     service:
      name: apache2
      enabled: yes
     when: ansible_distribution == "Ubuntu"
 
-  - name: Install HTTPD
+  - name: Install HTTPD on CentOS
     yum:
      name: httpd
      state: present
     when: ansible_distribution == "CentOS"
 
-  - name: Start httpd
+  - name: Start httpd on CentOS
     service:
      name: httpd
      state: started
     when: ansible_distribution == "CentOS"
 
-  - name: Enable httpd
+  - name: Enable httpd on CentOS
     service:
      name: httpd
      enabled: yes
     when: ansible_distribution == "CentOS"
 
-  - command: apt-get update
+  - command: apt-get update on Debian
     when: ansible_distribution == "Debian"
 
-  - name: Install Apache2
+  - name: Install Apache2 on Debian
     apt:
      name: apache2
      state: present
     when: ansible_distribution == "Debian"
 
-  - name: Start apache2
+  - name: Start apache2 on Debian
     service:
      name: apache2
      state: started
     when: ansible_distribution == "Debian"
 
-  - name: Enable apache2
+  - name: Enable apache2 on Debian
     service:
      name: apache2
      enabled: yes
