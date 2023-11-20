@@ -40,4 +40,13 @@
         name: jenkins
         enabled: yes
         state: started
+
+    - name: Display Jenkins Initial Admin Password
+      ansible.builtin.shell:
+        cmd: "sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
+      register: jenkins_initial_password
+
+    - name: Display Jenkins Initial Admin Password Info
+      ansible.builtin.debug:
+        var: jenkins_initial_password.stdout_lines
 ...
