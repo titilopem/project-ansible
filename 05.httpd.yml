@@ -2,7 +2,7 @@
 
 ---
 - name: Install HTTP server
-  hosts: n4u
+  hosts: all
   become: yes
 
   tasks:
