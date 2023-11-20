@@ -1,11 +1,25 @@
----
 - name: Install Jenkins and Ansible on Ubuntu
   hosts: n4u
   become: true
   tasks:
+    - name: Debug APT Cache Update (Before)
+      ansible.builtin.debug:
+        var: ansible_pkg_mgr_update_cache_update_cache.stdout
+      when: "'Ubuntu' in ansible_distribution"
+
     - name: Update package repositories
       ansible.builtin.apt:
         update_cache: yes
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Debug APT Cache Update (After)
+      ansible.builtin.debug:
+        var: ansible_pkg_mgr_update_cache_update_cache.stdout
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Debug APT Package List
+      ansible.builtin.debug:
+        var: ansible_pkg_mgr_update_cache_package_list.stdout_lines
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Add Jenkins GPG key
@@ -16,6 +30,11 @@
     - name: Add Jenkins repository
       ansible.builtin.apt_repository:
         repo: "deb http://pkg.jenkins.io/debian-stable binary/"
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Debug Jenkins Repository Contents
+      ansible.builtin.debug:
+        var: ansible_apt.list
       when: "'Ubuntu' in ansible_distribution"
 
     - name: Install Jenkins on Ubuntu
