@@ -7,6 +7,10 @@
         name: wget
         state: present
 
+    - name: Import Jenkins GPG key
+      ansible.builtin.shell:
+        cmd: "sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key"
+
     - name: Upgrade packages
       ansible.builtin.yum:
         name: '*'
