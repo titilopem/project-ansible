@@ -1,8 +1,30 @@
 ---
-- name: Install Ansible
+- name: Update dnf and install prerequisites like ansible
   hosts: group1
   become: true
   tasks:
+    - name: Update dnf on Amazon Linux
+      ansible.builtin.command:
+        cmd: "dnf makecache"
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install Python 3 on Amazon Linux
+      ansible.builtin.dnf:
+        name: python3
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install Pip for Python 3 on Amazon Linux
+      ansible.builtin.dnf:
+        name: python3-pip
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install Ansible using Pip on Amazon Linux
+      ansible.builtin.command:
+        cmd: "/usr/bin/pip3 install ansible"
+      when: ansible_distribution == 'Amazon'
+
     - name: Install software-properties-common on Ubuntu
       ansible.builtin.apt:
         name: software-properties-common
@@ -27,13 +49,9 @@
         state: present
       when: ansible_distribution == 'CentOS'
 
-    - name: Install EPEL repository on CentOS and Amazon Linux 2
-      ansible.builtin.shell:
-        cmd: "dnf install -y epel-release"
-      when: "'CentOS' in ansible_distribution and ansible_distribution_major_version == '8' or 'Amazon' in ansible_distribution and ansible_distribution_major_version == '2'"
-
-    - name: Install Ansible on CentOS and Amazon Linux 2
-      ansible.builtin.shell:
-        cmd: "dnf install -y ansible"
-      when: "'CentOS' in ansible_distribution and ansible_distribution_major_version == '8' or 'Amazon' in ansible_distribution and ansible_distribution_major_version == '2'"
+    - name: Install Ansible on CentOS
+      ansible.builtin.package:
+        name: ansible
+        state: present
+      when: ansible_distribution == 'CentOS'
 ...
