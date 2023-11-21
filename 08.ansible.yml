@@ -1,3 +1,4 @@
+---
 - name: Install Ansible
   hosts: group1
   become: true
@@ -25,25 +26,15 @@
         state: present
       when: ansible_distribution == 'Ubuntu'
 
-    - name: Install Ansible on CentOS and Amazon Linux
-      ansible.builtin.yum:
+    - name: Install Ansible
+      ansible.builtin.package:
         name: ansible
         state: present
       when: ansible_distribution in ['CentOS', 'Amazon'] and ansible_distribution_major_version == '2'
 
-    - name: Install Ansible on Amazon Linux
-      ansible.builtin.yum:
-        name: ansible
-        state: present
-      when: ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2'
-
     - name: Install Ansible on Ubuntu
-      ansible.builtin.apt:
+      ansible.builtin.package:
         name: ansible
         state: present
       when: ansible_distribution == 'Ubuntu'
-
-    - name: Debug Ansible installation status
-      ansible.builtin.debug:
-        var: "ansible_is_installed"
 ...
