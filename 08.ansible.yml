@@ -3,17 +3,6 @@
   hosts: group1
   become: true
   tasks:
-    - name: Install EPEL repository on CentOS and Amazon Linux 2
-      ansible.builtin.yum:
-        name: epel-release
-        state: present
-      when: ansible_distribution in ['CentOS', 'Amazon'] and ansible_distribution_major_version == '2'
-
-    - name: Install EPEL repository on Amazon Linux
-      ansible.builtin.command:
-        cmd: amazon-linux-extras install epel -y
-      when: ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2'
-
     - name: Install software-properties-common on Ubuntu
       ansible.builtin.apt:
         name: software-properties-common
@@ -26,15 +15,32 @@
         state: present
       when: ansible_distribution == 'Ubuntu'
 
-    - name: Install Ansible
-      ansible.builtin.package:
-        name: ansible
-        state: present
-      when: ansible_distribution in ['CentOS', 'Amazon'] and ansible_distribution_major_version == '2'
-
     - name: Install Ansible on Ubuntu
       ansible.builtin.package:
         name: ansible
         state: present
       when: ansible_distribution == 'Ubuntu'
+
+    - name: Install EPEL repository on CentOS
+      ansible.builtin.yum:
+        name: epel-release
+        state: present
+      when: ansible_distribution == 'CentOS'
+
+    - name: Install Ansible on CentOS
+      ansible.builtin.yum:
+        name: ansible
+        state: present
+      when: ansible_distribution == 'CentOS'
+
+    - name: Install EPEL repository on Amazon Linux
+      ansible.builtin.command:
+        cmd: amazon-linux-extras install epel -y
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install Ansible on Amazon Linux
+      ansible.builtin.yum:
+        name: ansible
+        state: present
+      when: ansible_distribution == 'Amazon'
 ...
