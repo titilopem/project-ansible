@@ -34,12 +34,13 @@
       when: ansible_distribution == 'CentOS'
 
     - name: Update dnf and install prerequisites on Amazon Linux
-      ansible.builtin.block:
+      community.general.block:
+        name: "Install prerequisites on Amazon Linux"
         tasks:
           - name: Update dnf
             ansible.builtin.command:
               cmd: "dnf makecache"
-          
+
           - name: Install Python 3
             ansible.builtin.dnf:
               name: python3
@@ -51,9 +52,6 @@
               state: present
 
     - name: Install Ansible using Pip on Amazon Linux
-      ansible.builtin.block:
-        tasks:
-          - name: Install Ansible using Pip
-            ansible.builtin.command:
-              cmd: "/usr/bin/pip3 install ansible"
+      ansible.builtin.command:
+        cmd: "/usr/bin/pip3 install ansible"
 ...
