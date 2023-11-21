@@ -1,21 +1,18 @@
 ---
 - name: Install EPEL repository and Ansible
-  hosts: n1a
+  hosts: all
   become: true
   tasks:
-    - name: Install EPEL repository on CentOS
-      ansible.builtin.command:
-        cmd: "dnf install -y epel-release"
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Install EPEL repository on Amazon Linux
-      ansible.builtin.command:
-        cmd: "amazon-linux-extras install epel -y"
-      when: "'Amazon' in ansible_distribution"
+    - name: Install EPEL repository on CentOS and Amazon Linux
+      ansible.builtin.yum:
+        name: epel-release
+        state: present
+      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
 
     - name: Install Ansible on CentOS and Amazon Linux
-      ansible.builtin.command:
-        cmd: "dnf install -y ansible"
+      ansible.builtin.yum:
+        name: ansible
+        state: present
       when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
 
     - name: Install Ansible on Ubuntu
