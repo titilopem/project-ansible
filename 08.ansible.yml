@@ -1,25 +1,30 @@
 ---
-- name: Install Ansible
-  hosts: n1a
+- name: Install EPEL repository and Ansible
+  hosts: all
   become: true
   tasks:
-    - name: Debug distribution major version information
-      ansible.builtin.debug:
-        var: ansible_distribution_major_version
-
-    - name: Debug Ansible availability in dnf repo
-      ansible.builtin.debug:
-        var: "ansible_package_available"
-      when: "'Amazon' in ansible_distribution"
-
-    - name: Download and Install EPEL repository on CentOS
-      ansible.builtin.get_url:
-        url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
-        dest: "/tmp/epel-release-latest.rpm"
-      when: "'Amazon' in ansible_distribution"
-
     - name: Install EPEL repository on CentOS
       ansible.builtin.command:
-        cmd: "dnf install -y /tmp/epel-release-latest.rpm"
+        cmd: "dnf install -y epel-release"
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Install EPEL repository on Amazon Linux
+      ansible.builtin.command:
+        cmd: "amazon-linux-extras install epel -y"
       when: "'Amazon' in ansible_distribution"
+
+    - name: Install Ansible on CentOS and Amazon Linux
+      ansible.builtin.command:
+        cmd: "dnf install -y ansible"
+      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
+
+    - name: Install Ansible on Ubuntu
+      ansible.builtin.apt:
+        name: ansible
+        state: present
+      when: "'Ubuntu' in ansible_distribution"
+
+    - name: Debug Ansible installation status
+      ansible.builtin.debug:
+        var: "ansible_is_installed"
 ...
