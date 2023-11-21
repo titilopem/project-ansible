@@ -8,9 +8,8 @@
         var: ansible_distribution_major_version
 
     - name: Install EPEL repository on CentOS and Amazon Linux 2
-      command:
+      ansible.builtin.command:
         cmd: "dnf install -y epel-release"
-        state: present
       when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
 
     - name: Install Ansible on CentOS and Amazon Linux 2
