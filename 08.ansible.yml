@@ -15,8 +15,9 @@
 
     - name: Install EPEL repository on Amazon Linux
       ansible.builtin.command:
-        cmd: "amazon-linux-extras install epel -y"
-      when: "'Amazon' in ansible_distribution"
+        cmd: "/usr/bin/amazon-linux-extras install epel -y"
+        warn: false
+      when: "'Amazon' in ansible_distribution and '/usr/bin/amazon-linux-extras' is file"
 
     - name: Install Ansible on CentOS and Amazon Linux
       ansible.builtin.package:
