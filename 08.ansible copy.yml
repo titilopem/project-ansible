@@ -1,3 +1,4 @@
+#ansible installation
 ---
 - name: Update dnf and install prerequisites like ansible
   hosts: group1
