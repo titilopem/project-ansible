@@ -10,10 +10,10 @@
     - name: Install EPEL repository on CentOS and Amazon Linux 2
       ansible.builtin.shell:
         cmd: "dnf install -y epel-release"
-      when: "'CentOS' in ansible_distribution and 'Amazon' in ansible_distribution"
+      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
 
     - name: Install Ansible on CentOS and Amazon Linux 2
       ansible.builtin.shell:
         cmd: "dnf install -y ansible"
-      when: "'CentOS' in ansible_distribution and 'Amazon' in ansible_distribution"
+      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
 ...
