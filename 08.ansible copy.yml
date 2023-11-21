@@ -1,5 +1,5 @@
 ---
-- name: Update dnf and install prerequisites like ansible
+- name: Update dnf and install prerequisites
   hosts: group1
   become: true
   tasks:
