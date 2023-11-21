@@ -3,6 +3,10 @@
   hosts: n1a
   become: true
   tasks:
+    - name: Debug PATH
+      ansible.builtin.debug:
+        var: ansible_env.PATH
+
     - name: Install EPEL repository on CentOS
       ansible.builtin.yum:
         name: epel-release
