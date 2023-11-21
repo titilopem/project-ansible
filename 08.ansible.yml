@@ -7,13 +7,19 @@
       ansible.builtin.debug:
         var: ansible_distribution_major_version
 
-    - name: Install EPEL repository on CentOS and Amazon Linux 2
-      ansible.builtin.command:
-        cmd: "dnf install -y epel-release"
-      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
+    - name: Debug Ansible availability in dnf repo
+      ansible.builtin.debug:
+        var: "ansible_package_available"
+      when: "'CentOS' in ansible_distribution"
 
-    - name: Install Ansible on CentOS and Amazon Linux 2
-      ansible.builtin.shell:
-        cmd: "dnf install -y ansible"
-      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
+    - name: Download and Install EPEL repository on CentOS
+      ansible.builtin.get_url:
+        url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+        dest: "/tmp/epel-release-latest.rpm"
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Install EPEL repository on CentOS
+      ansible.builtin.command:
+        cmd: "dnf install -y /tmp/epel-release-latest.rpm"
+      when: "'CentOS' in ansible_distribution"
 ...
