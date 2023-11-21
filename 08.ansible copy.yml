@@ -4,51 +4,53 @@
   become: true
   tasks:
     - name: Update dnf on Amazon Linux
-      command: "dnf makecache"
+      ansible.builtin.command:
+        cmd: "dnf makecache"
       when: ansible_distribution == 'Amazon'
 
     - name: Install Python 3 on Amazon Linux
-      dnf:
+      ansible.builtin.dnf:
         name: python3
         state: present
       when: ansible_distribution == 'Amazon'
 
     - name: Install Pip for Python 3 on Amazon Linux
-      dnf:
+      ansible.builtin.dnf:
         name: python3-pip
         state: present
       when: ansible_distribution == 'Amazon'
 
     - name: Install Ansible using Pip on Amazon Linux
-      command: "/usr/bin/pip3 install ansible"
+      ansible.builtin.command:
+        cmd: "/usr/bin/pip3 install ansible"
       when: ansible_distribution == 'Amazon'
 
     - name: Install software-properties-common on Ubuntu
-      apt:
+      ansible.builtin.apt:
         name: software-properties-common
         state: present
       when: ansible_distribution == 'Ubuntu'
 
     - name: Add Ansible repository on Ubuntu
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: 'ppa:ansible/ansible'
         state: present
       when: ansible_distribution == 'Ubuntu'
 
     - name: Install Ansible on Ubuntu
-      package:
+      ansible.builtin.package:
         name: ansible
         state: present
       when: ansible_distribution == 'Ubuntu'
 
     - name: Install EPEL repository on CentOS
-      yum:
+      ansible.builtin.yum:
         name: epel-release
         state: present
       when: ansible_distribution == 'CentOS'
 
     - name: Install Ansible on CentOS
-      package:
+      ansible.builtin.package:
         name: ansible
         state: present
       when: ansible_distribution == 'CentOS'
