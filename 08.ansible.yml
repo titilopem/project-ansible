@@ -3,10 +3,6 @@
   hosts: n1a
   become: true
   tasks:
-    - name: Debug distribution information
-      ansible.builtin.debug:
-        var: ansible_distribution
-
     - name: Debug distribution major version information
       ansible.builtin.debug:
         var: ansible_distribution_major_version
@@ -14,11 +10,10 @@
     - name: Install EPEL repository on CentOS and Amazon Linux 2
       ansible.builtin.shell:
         cmd: "dnf install -y epel-release"
-      when: "'CentOS' in ansible_distribution and ansible_distribution_major_version == '8' or 'Amazon' in ansible_distribution and ansible_distribution_major_version == '2'"
+      when: "'CentOS' in ansible_distribution and 'Amazon' in ansible_distribution and '2' in ansible_distribution_version"
 
     - name: Install Ansible on CentOS and Amazon Linux 2
       ansible.builtin.shell:
         cmd: "dnf install -y ansible"
-      when: "'CentOS' in ansible_distribution and ansible_distribution_major_version == '8' or 'Amazon' in ansible_distribution and ansible_distribution_major_version == '2'"
-
+      when: "'CentOS' in ansible_distribution and 'Amazon' in ansible_distribution and '2' in ansible_distribution_version"
 ...
