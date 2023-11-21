@@ -11,6 +11,7 @@
       ansible.builtin.dnf:
         name: epel-release
         state: present
+        update_cache: true
       when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
 
     - name: Install Ansible on CentOS and Amazon Linux 2
