@@ -37,11 +37,9 @@
       ansible.builtin.dnf:
         name: epel-release
         state: present
-      when: ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2'
-
+      when: ansible_distribution == 'Amazon'
     - name: Install Ansible on Amazon Linux
       ansible.builtin.dnf:
         name: ansible
         state: present
-      when: ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2'
-...
+      when: ansible_distribution == 'Amazon'
