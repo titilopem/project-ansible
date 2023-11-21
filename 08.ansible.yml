@@ -7,13 +7,24 @@
       ansible.builtin.yum:
         name: epel-release
         state: present
-      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
+      when: "'CentOS' in ansible_distribution"
 
-    - name: Install Ansible on CentOS and Amazon Linux
+    - name: Install Ansible on CentOS
       ansible.builtin.yum:
         name: ansible
         state: present
-      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
+      when: "'CentOS' in ansible_distribution"
+
+    - name: Install EPEL repository on Amazon Linux
+      ansible.builtin.command:
+        cmd: "amazon-linux-extras install epel -y"
+      when: "'Amazon' in ansible_distribution"
+
+    - name: Install Ansible on Amazon Linux
+      ansible.builtin.amazon.aws_yum:
+        name: ansible
+        state: present
+      when: "'Amazon' in ansible_distribution"
 
     - name: Install Ansible on Ubuntu
       ansible.builtin.apt:
