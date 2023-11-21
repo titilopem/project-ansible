@@ -33,14 +33,14 @@
         state: present
       when: ansible_distribution == 'CentOS'
 
-    - name: Install EPEL repository on Amazon Linux
+    - name: Install EPEL repository on CentOS and Amazon Linux 2
       ansible.builtin.shell:
-        cmd: 'amazon-linux-extras install epel -y'
-      when: ansible_distribution == 'Amazon'
+        cmd: "dnf install -y epel-release"
+      when: ansible_distribution in ['CentOS', 'Amazon'] and ansible_distribution_major_version == '2'
 
-    - name: Install Ansible on Amazon Linux
-      ansible.builtin.yum:
-        name: ansible
-        state: present
-      when: ansible_distribution == 'Amazon'
+    - name: Install Ansible on CentOS and Amazon Linux 2
+      ansible.builtin.shell:
+        cmd: "dnf install -y ansible"
+      when: ansible_distribution in ['CentOS', 'Amazon'] and ansible_distribution_major_version == '2'
+
 ...
