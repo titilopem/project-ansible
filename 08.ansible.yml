@@ -20,9 +20,8 @@
       when: "'Amazon' in ansible_distribution and '/usr/bin/amazon-linux-extras' is file"
 
     - name: Install Ansible on CentOS and Amazon Linux
-      ansible.builtin.package:
-        name: ansible
-        state: present
+      ansible.builtin.command:
+        cmd: "/usr/bin/amazon-linux-extras enable ansible2 && /usr/bin/yum install -y ansible"
       when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
 
     - name: Install Ansible on Ubuntu
