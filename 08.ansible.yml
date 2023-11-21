@@ -1,36 +1,27 @@
 ---
-- name: Install EPEL repository and Ansible
+- name: Update dnf and install prerequisites
   hosts: n1a
   become: true
   tasks:
-    - name: Debug PATH
-      ansible.builtin.debug:
-        var: ansible_env.PATH
-
-    - name: Install EPEL repository on CentOS
-      ansible.builtin.yum:
-        name: epel-release
-        state: present
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Install EPEL repository on Amazon Linux
+    - name: Update dnf
       ansible.builtin.command:
-        cmd: "/usr/bin/amazon-linux-extras install epel -y"
-        warn: false
-      when: "'Amazon' in ansible_distribution and '/usr/bin/amazon-linux-extras' is file"
+        cmd: "dnf makecache"
 
-    - name: Install Ansible on CentOS and Amazon Linux
-      ansible.builtin.command:
-        cmd: "/usr/bin/amazon-linux-extras enable ansible2 && /usr/bin/yum install -y ansible"
-      when: "'CentOS' in ansible_distribution or 'Amazon' in ansible_distribution"
-
-    - name: Install Ansible on Ubuntu
-      ansible.builtin.apt:
-        name: ansible
+    - name: Install Python 3
+      ansible.builtin.dnf:
+        name: python3
         state: present
-      when: "'Ubuntu' in ansible_distribution"
 
-    - name: Debug Ansible installation status
-      ansible.builtin.debug:
-        var: "ansible_is_installed"
+    - name: Install Pip for Python 3
+      ansible.builtin.dnf:
+        name: python3-pip
+        state: present
+
+- name: Install Ansible using Pip
+  hosts: n1a
+  become: true
+  tasks:
+    - name: Install Ansible using Pip
+      ansible.builtin.command:
+        cmd: "/usr/bin/pip3 install ansible"
 ...
