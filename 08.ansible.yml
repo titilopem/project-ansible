@@ -1,6 +1,6 @@
 ---
 - name: Install EPEL repository and Ansible
-  hosts: all
+  hosts: n1a
   become: true
   tasks:
     - name: Install EPEL repository on CentOS
