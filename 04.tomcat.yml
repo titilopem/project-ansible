@@ -29,15 +29,6 @@
         dest: "/usr/local"
         remote_src: yes
 
-    - name: Remove existing Tomcat directory
-      ansible.builtin.file:
-        path: "/usr/local/latest"
-        state: absent
-
-    - name: Set Tomcat home
-      ansible.builtin.command:
-        cmd: mv "/usr/local/apache-tomcat-10.1.16" "/usr/local/latest"
-
     - name: System CTL - Daemon reload
       ansible.builtin.command: "systemctl daemon-reload"
       become: yes
