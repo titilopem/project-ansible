@@ -1,0 +1,20 @@
+#install and configure tools accross different servers
+# playbook.yml
+---
+- name: Install Java, HTTPD, and Git on all hosts
+  hosts: all
+  roles:
+    - role: java
+    - role: httpd
+    - role: git
+
+- name: Install Tomcat on Group1 hosts
+  hosts: group1
+  roles:
+    - role: tomcat
+
+- name: Install Maven on Group2 hosts
+  hosts: group2
+  roles:
+    - role: maven
+...
