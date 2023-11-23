@@ -8,7 +8,7 @@
 
     - name: Print out service status
       debug:
-        msg: “tomcat service status: {{ ansible_facts.services[‘tomcat.service’][‘state’] }}”
+        msg: “tomcat service status: "{{ ansible_facts.services[‘tomcat.service’][‘state’] }}”
 
     - name: Set Java 11 as the active version on CentOS
       ansible.builtin.shell:
