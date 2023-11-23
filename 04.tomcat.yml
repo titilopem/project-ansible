@@ -8,7 +8,7 @@
 
     - name: Print out service status
       debug:
-        msg: “tomcat service status: "{{ ansible_facts.services[‘tomcat.service’][‘state’] }}”
+        msg: "Tomcat service status: {{ ansible_facts.services['tomcat.service']['state'] }}"
 
     - name: Set Java 11 as the active version on CentOS
       ansible.builtin.shell:
@@ -43,5 +43,5 @@
 
     - name: Starting Tomcat
       ansible.builtin.shell:
-        cmd: "nohup /usr/local/latest/bin/startup.sh &"
+        cmd: "nohup /usr/local/bin/apache-tomcat-10.1.16/bin/startup.sh &"
 ...
