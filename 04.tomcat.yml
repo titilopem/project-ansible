@@ -6,9 +6,10 @@
     - name: Get service facts
       ansible.builtin.service_facts:
 
-    - name: Print out service status
+    - name: Print out service status if Tomcat service is present
       debug:
-        msg: "Tomcat service status: {{ ansible_facts.services['tomcat.service']['state'] }}"
+        msg: "Tomcat service status: {{ ansible_facts.services['tomcat.service']['state'] | default('Service not found') }}"
+      when: "'tomcat.service' in ansible_facts.services"
 
     - name: Set Java 11 as the active version on CentOS
       ansible.builtin.shell:
