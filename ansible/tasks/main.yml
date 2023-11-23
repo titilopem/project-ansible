@@ -1,0 +1,7 @@
+---
+# tasks file for ansible
+---
+- name: Install ansible across multiple OS
+  become: true
+  tasks:
+     - include_tasks: install.yml

@@ -1,0 +1,7 @@
+---
+# tasks file for tomcat
+- include_tasks: install.yml
+
+- include_tasks: restart.yml
+
+- include_tasks: status.yml

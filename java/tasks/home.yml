@@ -1,0 +1,8 @@
+- name: Get Java home directory
+  command: "dirname $(dirname $(readlink -f $(which java)))"
+  register: java_directory
+  become: true
+
+- name: Display Java home directory
+  debug:
+    var: java_directory.stdout_lines

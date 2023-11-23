@@ -1,0 +1,33 @@
+---
+# tasks file for maven
+- name: Install wget (if not already installed)
+  yum:
+    name: wget
+    state: present
+
+- name: Download Apache Maven
+  command: "wget {{ maven_download_url }} -O /tmp/apache-maven-{{ maven_version }}-bin.tar.gz"
+  args:
+    creates: "/tmp/apache-maven-{{ maven_version }}-bin.tar.gz"
+
+- name: Extract Maven archive
+  unarchive:
+    src: "/tmp/apache-maven-{{ maven_version }}-bin.tar.gz"
+    dest: "{{ maven_install_dir }}"
+    remote_src: yes
+
+- name: Create symbolic link to Maven
+  file:
+    src: "{{ maven_install_dir }}/apache-maven-{{ maven_version }}"
+    dest: "{{ maven_install_dir }}/maven"
+    state: link
+    force: yes
+
+- name: Set Maven environment variables
+  lineinfile:
+    path: "/etc/profile.d/maven.sh"
+    create: yes
+    line: |
+      export MAVEN_HOME={{ maven_install_dir }}/maven
+      export PATH=${MAVEN_HOME}/bin:${PATH}
+  notify: Reload shell environment  # Ensure the name matches the handler name

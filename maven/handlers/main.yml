@@ -1,0 +1,5 @@
+---
+# handlers file for maven
+- name: Reload shell environment
+  command: bash -c "source /etc/profile.d/maven.sh"
+  become: yes
