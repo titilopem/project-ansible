@@ -6,11 +6,9 @@
   tasks:
     - name: Test the webapp using Maven
       command: "mvn test"
-      args:
-        chdir: "~/"
 
-    - name: Stash the build artifacts
-      stash:
-        name: webapp-artifacts
-        path: "~/target/"
+    # - name: Stash the build artifacts
+    #   stash:
+    #     name: webapp-artifacts
+    #     path: "~/target/"
 ...
