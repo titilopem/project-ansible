@@ -1,8 +1,9 @@
-- name: Get Maven home directory
+---
+- name: Get Maven home directory on {{ target_host }}
   command: "dirname $(dirname $(readlink -f $(which mvn)))"
   register: maven_directory
   become: true
 
-- name: Display Maven home directory
+- name: Display Maven home directory on {{ target_host }}
   debug:
     var: maven_directory.stdout_lines

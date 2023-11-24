@@ -1,4 +1,10 @@
 
-  - include_tasks: install.yml
+- include_tasks: install.yml
+  loop: "{{ target_hosts }}"
+  loop_control:
+    loop_var: target_host
 
-  - include_tasks: home.yml
+- include_tasks: home.yml
+  loop: "{{ target_hosts }}"
+  loop_control:
+    loop_var: target_host
