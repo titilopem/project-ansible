@@ -1,6 +1,6 @@
 ---
 - name: Remove existing artifacts from workspace
-  hosts: group3
+  hosts: n4c
   become: true
 
   tasks:
