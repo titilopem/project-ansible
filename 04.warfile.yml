@@ -15,6 +15,11 @@
       register: warfile
       delegate_to: n4c
 
+- name: Copy .war files from n4c to Ansible Controller
+  hosts: n4c
+  become: true
+
+  tasks:
     - name: Copy .war files from n4c to Ansible Controller
       ansible.builtin.fetch:
         src: "{{ item }}"
@@ -24,9 +29,14 @@
       loop_control:
         loop_var: item
 
+- name: Deploy Artifacts into Tomcat on Nodes in group1
+  hosts: group1
+  become: true
+
+  tasks:
     - name: Copy .war files to target hosts
       ansible.builtin.copy:
-        src: "/tmp/{{ item_war }}"
+        src: "/tmp/{{ item }}"
         dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
         remote_src: yes
       loop: "{{ warfile.stdout_lines }}"
