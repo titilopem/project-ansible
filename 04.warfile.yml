@@ -38,7 +38,7 @@
   tasks:
     - name: Copy .war files to target hosts
       ansible.builtin.copy:
-        src: "/tmp/{{ item }}"
+        src: "{{ item }}"
         dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
         remote_src: yes
       loop: "{{ lookup('file', '/tmp/warfile_list.txt').splitlines() }}"
