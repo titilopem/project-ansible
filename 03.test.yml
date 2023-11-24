@@ -6,6 +6,8 @@
   tasks:
     - name: Test the webapp using Maven
       command: "mvn test"
+      args:
+        chdir: "~/ansibleproject"
 
     # - name: Stash the build artifacts
     #   stash:
