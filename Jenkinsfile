@@ -63,16 +63,16 @@ pipeline {
             }
         }
 
-        stage('Clean Workspace') {
-            agent { label 'n6c' }
-            steps {
-                echo 'Clean out workspace'
-                ansiblePlaybook(
-                    playbook: '06.clean.yml',
-                    inventory: 'hosts.ini'
-                )
-            }
-        }
+        // stage('Clean Workspace') {
+        //     agent { label 'n6c' }
+        //     steps {
+        //         echo 'Clean out workspace'
+        //         ansiblePlaybook(
+        //             playbook: '06.clean.yml',
+        //             inventory: 'hosts.ini'
+        //         )
+        //     }
+        // }
     }
 
     post {
