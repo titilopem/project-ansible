@@ -1,15 +1,9 @@
 ---
 - name: Build WebApp with Maven
   hosts: group3
-  become: true
 
   tasks:
     - name: Build the webapp using Maven
-      mvn:
-        goals: "clean package"
-        executable: "mvn"
-      become_user: n4c
-      become_method: sudo
+      command: "mvn clean package"
       args:
-        chdir: "{{ jenkins_workspace }}/ansibleproject"
 ...
