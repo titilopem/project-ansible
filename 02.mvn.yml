@@ -1,6 +1,6 @@
 ---
-- name: Install Maven
-  hosts: group2
+- name: Install Maven on CentOS
+  hosts: n3c
   become: yes
 
   tasks:
@@ -19,6 +19,13 @@
         src: "/tmp/apache-maven-3.9.5-bin.tar.gz"
         dest: "/opt"
         remote_src: yes
+
+    - name: Create symbolic link to Maven
+      file:
+        src: "/opt/apache-maven-3.9.5"
+        dest: "/opt/maven"
+        state: link
+        force: yes
 
     - name: Set Maven environment variables
       lineinfile:
