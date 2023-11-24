@@ -36,8 +36,18 @@
           export PATH=${MAVEN_HOME}/bin:${PATH}
       notify: Reload shell environment  # Ensure the name matches the handler name
 
+    - name: Explicitly source Maven environment file
+      command: "source /etc/profile.d/maven.sh"
+      become: yes
+
   handlers:
     - name: Reload shell environment
       command: bash -c "source /etc/profile.d/maven.sh"
       become: yes
+
+      - name: Debug - Verify handler execution
+        debug:
+          msg: "Handler executed successfully"
+        become: yes
+        tags: debug
 ...
