@@ -1,0 +1,4 @@
+become: true
+  - include_tasks: install.yml
+
+  - include_tasks: home.yml

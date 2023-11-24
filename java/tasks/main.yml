@@ -1,9 +1,10 @@
 ---
 # tasks file for java
-- include_tasks: install.yml
+become: true
+  - include_tasks: install.yml
 
-- include_tasks: setjavaversion.yml
+  - include_tasks: setjavaversion.yml
 
-- include_tasks: display.yml
+  - include_tasks: display.yml
 
-- include_tasks: home.yml
+  - include_tasks: home.yml
