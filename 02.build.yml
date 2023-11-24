@@ -2,7 +2,12 @@
 - name: Build and Package with Maven on Jenkins Slave
   hosts: n4c
   tasks:
-    - name: Create project directory if absent
+    - name: Ensure ~/ansibleproject directory is absent
+      file:
+        path: "~/ansibleproject"
+        state: absent
+
+    - name: Create project directory
       file:
         path: "~/ansibleproject"
         state: directory
