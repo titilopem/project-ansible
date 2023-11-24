@@ -1,0 +1,11 @@
+---
+- name: Build WebApp with Maven
+  hosts: group3
+  become: true
+
+  tasks:
+    - name: Build the webapp using Maven
+      command: "mvn clean package"
+      args:
+        chdir: "~/"
+...
