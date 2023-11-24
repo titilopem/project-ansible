@@ -22,11 +22,14 @@
     mode: '0755'
     remote_src: yes
 
-- name: Start Tomcat
-  ansible.builtin.systemd:
-    name: tomcat
-    state: started
-    enabled: yes
+- name: Starting Tomcat
+  ansible.builtin.command:
+    cmd: "{{ catalina_home }}/bin/startup.sh"
+    async: 0
+    poll: 0
+    become: true
+  environment:
+    CATALINA_HOME: "{{ catalina_home }}"
 
 - name: Print out service status if Tomcat service is present
   ansible.builtin.debug:
