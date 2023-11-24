@@ -1,10 +1,10 @@
----
-- name: Remove existing artifacts from workspace
-  hosts: n4c
-  become: true
+# ---
+# - name: Remove existing artifacts from workspace
+#   hosts: n4c
+#   become: true
 
-  tasks:
-    - name: Remove existing *.war files from webapps folder
-      ansible.builtin.shell:
-        cmd: "find ~/target/ -name '*.war' -type f -delete"
-...
+#   tasks:
+#     - name: Remove existing *.war files from webapps folder
+#       ansible.builtin.shell:
+#         cmd: "find ~/target/ -name '*.war' -type f -delete"
+# ...
