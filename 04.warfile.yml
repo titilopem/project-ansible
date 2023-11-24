@@ -16,18 +16,10 @@
       register: warfile
       delegate_to: n4c
 
-    - name: Fetch .war files from n4c to local machine
-      ansible.builtin.fetch:
-        src: "{{ item.path }}"
-        dest: "/tmp/"
-        flat: yes
-      with_items: "{{ warfile.files }}"
-      delegate_to: localhost
-
-    - name: Copy .war files to target hosts using SCP
+    - name: Copy .war files to Tomcat webapps folder on target hosts
       ansible.builtin.copy:
-        src: "/tmp/{{ item.item.name }}"
+        src: "{{ item.path }}"
         dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-      with_items: "{{ warfile.results }}"
-      delegate_to: localhost
+      with_items: "{{ warfile.files }}"
+      when: inventory_hostname != 'n4c'
 ...
