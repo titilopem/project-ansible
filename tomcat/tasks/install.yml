@@ -20,6 +20,7 @@
     src: "/usr/local/bin/apache-tomcat-10.1.16/bin/catalina.sh"
     dest: "/etc/init.d/tomcat"
     mode: '0755'
+    remote_src: yes
 
 - name: Start Tomcat
   ansible.builtin.service:
