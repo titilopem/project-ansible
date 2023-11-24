@@ -1,8 +1,13 @@
-    - name: System CTL - Daemon reload
-      ansible.builtin.command: "systemctl daemon-reload"
-      become: yes
-      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution"
+- name: Starting Tomcat
+  ansible.builtin.command:
+    cmd: "{{ catalina_home }}/bin/startup.sh"
+  environment:
+    CATALINA_HOME: "{{ catalina_home }}"
 
-    - name: Starting Tomcat
-      ansible.builtin.shell:
-        cmd: "nohup /usr/local/bin/apache-tomcat-10.1.16/bin/startup.sh &"
+- name: Print out service status if Tomcat service is present
+  ansible.builtin.debug:
+    msg: "Tomcat service status: {{ ansible_facts.services['tomcat.service']['state'] | default('Service not found') }}"
+  when: 
+    - "'services' in ansible_facts"
+    - "'tomcat.service' in ansible_facts.services"
+    - "'running' in ansible_facts.services['tomcat.service']['state']"
