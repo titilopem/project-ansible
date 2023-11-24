@@ -13,7 +13,7 @@
       ansible.builtin.shell:
         cmd: "find /home/centos/ansibleproject/target/ -name '*.war' -type f"
       register: warfile
-      delegate_to: localhost  # delegate the task to Ansible Controller
+      delegate_to: n4c  # delegate the task to Ansible Controller
 
     - name: Save warfile list to a file
       ansible.builtin.copy:
