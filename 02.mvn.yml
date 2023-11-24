@@ -20,13 +20,6 @@
         dest: "/opt"
         remote_src: yes
 
-    - name: Create symbolic link to Maven
-      file:
-        src: "/opt/apache-maven-3.9.5"
-        dest: "/opt/maven"
-        state: link
-        force: yes
-
     - name: Set Maven environment variables
       lineinfile:
         path: "/etc/profile.d/maven.sh"
