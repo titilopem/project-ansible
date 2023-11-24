@@ -28,6 +28,7 @@
       loop: "{{ warfile.stdout_lines }}"
       loop_control:
         loop_var: item
+      delegate_to: localhost  # delegate the task to Ansible Controller
 
 - name: Deploy Artifacts into Tomcat on Nodes in group1
   hosts: group1
