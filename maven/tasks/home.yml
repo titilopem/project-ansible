@@ -1,5 +1,5 @@
     - name: Get Maven home directory
-      command: "which mvn"
+      command: "dirname /opt/maven/bin/mvn"
       register: mvn_home
 
     - name: Display Maven home directory
