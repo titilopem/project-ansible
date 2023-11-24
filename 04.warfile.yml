@@ -9,17 +9,17 @@
         cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
       ignore_errors: yes
 
-    - name: Fetch new .war file from build server (n4c) to control node
+    - name: Fetch new .war file from build server to target hosts
       ansible.builtin.fetch:
-        src: "~/target/new-app.war"  # Adjust the source path accordingly on n4c
-        dest: "/path/on/control/node/"
+        src: "~/ansibleproject/target/*.war"  # Adjust the source path accordingly on n4c
+        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
       delegate_to: n4c  # Delegate the task to run on n4c
 
-    - name: Copy .war file from control node to target hosts
-      ansible.builtin.copy:
-        src: "/path/on/control/node/new-app.war"
-        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-      run_once: true  # Run the task only once on the control node
+    # - name: Copy .war file from control node to target hosts
+    #   ansible.builtin.copy:
+    #     src: "/path/on/control/node/new-app.war"
+    #     dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+    #   run_once: true  # Run the task only once on the control node
 ...
 
 # ---
