@@ -6,6 +6,4 @@
   tasks:
     - name: Build the webapp using Maven
       command: "mvn clean package"
-      args:
-        chdir: "~/"
 ...
