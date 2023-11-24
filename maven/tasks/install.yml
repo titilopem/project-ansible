@@ -1,4 +1,4 @@
----
+
     - name: Install wget (if not already installed)
       yum:
         name: wget
@@ -35,4 +35,3 @@
     - name: Reload shell environment
       command: bash -c "source /etc/profile.d/maven.sh"
       become: yes
-...
