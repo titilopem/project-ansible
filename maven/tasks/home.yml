@@ -1,5 +1,5 @@
 - name: Get Maven home directory
-  command: "dirname $(dirname $(readlink -f $(which mvn)))"
+  command: "dirname $(which mvn)"
   register: maven_directory
   become: true
 
