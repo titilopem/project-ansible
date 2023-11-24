@@ -4,8 +4,13 @@
   become: true
 
   tasks:
+    - name: Print current directory
+      command: "pwd"
+      args:
+        chdir: "~/ansibleproject"
+        
     - name: Test the webapp using Maven
       command: "mvn test"
       args:
-        chdir: "~/ansibleproject"
+        chdir: "/home/centos/ansibleproject"
 ...
