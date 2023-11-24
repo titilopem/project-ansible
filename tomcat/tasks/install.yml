@@ -1,33 +1,33 @@
-    - name: Get service facts
-      ansible.builtin.service_facts:
+- name: Download Tomcat
+  ansible.builtin.get_url:
+    url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+    dest: "/usr/local"
 
-    - name: Print out service status if Tomcat service is present
-      debug:
-        msg: "Tomcat service status: {{ ansible_facts.services['tomcat.service']['state'] | default('Service not found') }}"
-      when: "'tomcat.service' in ansible_facts.services"
+- name: Extract Tomcat
+  ansible.builtin.unarchive:
+    src: "/usr/local/apache-tomcat-10.1.16.tar.gz"
+    dest: "/usr/local/bin"
+    remote_src: yes
 
-    - name: Download Tomcat
-      ansible.builtin.get_url:
-        url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
-        dest: "/usr/local"
+- name: Set execute permissions for Tomcat scripts
+  ansible.builtin.file:
+    path: "/usr/local/bin/apache-tomcat-10.1.16/bin/*.sh"
+    mode: 'u+x,g+x'
+    recurse: yes
 
-    - name: Extract Tomcat
-      ansible.builtin.unarchive:
-        src: "/usr/local/apache-tomcat-10.1.16.tar.gz"
-        dest: "/usr/local/bin"
-        remote_src: yes
+- name: Install Tomcat init script
+  ansible.builtin.copy:
+    src: "/usr/local/bin/apache-tomcat-10.1.16/bin/catalina.sh"
+    dest: "/etc/init.d/tomcat"
+    mode: '0755'
 
-    - name: Set execute permissions for Tomcat scripts
-      ansible.builtin.file:
-        path: "/usr/local/bin/apache-tomcat-10.1.16/bin/*.sh"
-        mode: 'u+x,g+x'
-        recurse: yes
+- name: Start Tomcat
+  ansible.builtin.service:
+    name: tomcat
+    state: started
+    enabled: yes
 
-    - name: System CTL - Daemon reload
-      ansible.builtin.command: "systemctl daemon-reload"
-      become: yes
-      when: "'Amazon' in ansible_distribution or 'CentOS' in ansible_distribution or 'Ubuntu' in ansible_distribution"
-
-    - name: Starting Tomcat
-      ansible.builtin.shell:
-        cmd: "nohup /usr/local/bin/apache-tomcat-10.1.16/bin/startup.sh &"
+- name: Print out service status if Tomcat service is present
+  ansible.builtin.debug:
+    msg: "Tomcat service status: {{ ansible_facts.services['tomcat']['state'] | default('Service not found') }}"
+  when: "'tomcat' in ansible_facts.services"
