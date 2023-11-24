@@ -1,8 +1,9 @@
 - name: Get Java home directory
-  command: "dirname $(dirname $(readlink -f $(which java)))"
-  register: java_directory
-  become: true
+  command: "{{ 'dirname $(dirname $(readlink -f $(which java)))' }}"
+  register: java_home
+  ignore_errors: true
 
-- name: Display Java home directory
-  debug:
-    var: java_directory.stdout_lines
+- name: Set Java home fact
+  set_fact:
+    java_home: "{{ java_home.stdout | regex_replace('\n', '') }}"
+  when: java_home.rc == 0
