@@ -4,10 +4,6 @@
   environment:
     CATALINA_HOME: "{{ catalina_home }}"
 
-- name: Print out service status if Tomcat service is present
-  ansible.builtin.debug:
-    msg: "Tomcat service status: {{ ansible_facts.services['tomcat.service']['state'] | default('Service not found') }}"
-  when: 
-    - "'services' in ansible_facts"
-    - "'tomcat.service' in ansible_facts.services"
-    - "'running' in ansible_facts.services['tomcat.service']['state']"
+- name: Print out Tomcat process status
+  debug:
+    msg: "Tomcat process status: {{ 'Running' if tomcat_process_status.rc == 0 else 'Not running' }}"
