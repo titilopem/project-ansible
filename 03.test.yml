@@ -1,6 +1,6 @@
 ---
 - name: Test WebApp with Maven and Stash
-  hosts: group3
+  hosts: group2
   become: true
 
   tasks:
