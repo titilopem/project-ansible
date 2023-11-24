@@ -1,16 +1,11 @@
 ---
-- name: Test WebApp with Maven and Stash
+- name: Test WebApp with Maven
   hosts: n4c
   become: true
 
   tasks:
-    - name: Print current directory
-      command: "pwd"
-      args:
-        chdir: "~/ansibleproject"
-        
     - name: Test the webapp using Maven
       command: "mvn test"
       args:
-        chdir: "/home/centos/ansibleproject"
+        chdir: "~/ansibleproject/target"
 ...
