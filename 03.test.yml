@@ -5,9 +5,5 @@
     - name: Test the webapp using Maven
       command: "mvn test"
       args:
-        chdir: "/home/centos/ansibleproject"
-      register: mvn_output
-
-    - debug:
-        var: mvn_output
+        chdir: "~/ansibleproject"
 ...
