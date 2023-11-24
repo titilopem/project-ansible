@@ -1,17 +1,8 @@
-    - name: Get remote directory
-      command: "pwd"
-      register: remote_directory
-      become: true
-
-    - name: Display remote directory
-      debug:
-        var: remote_directory.stdout_lines
     
     - name: Get Java home directory
-      command: "dirname $(dirname $(readlink -f $(which java)))"
-      register: java_directory
-      become: true
+      command: "which java"
+      register: java_home
 
     - name: Display Java home directory
       debug:
-        var: java_directory.stdout_lines
+        var: java_home
