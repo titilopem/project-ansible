@@ -56,7 +56,8 @@
      enabled: yes
     when: ansible_distribution == "CentOS"
 
-  - command: apt-get update on Debian
+  - name: Update apt-get 
+    command: apt-get update on Debian
     when: ansible_distribution == "Debian"
 
   - name: Install Apache2 on Debian

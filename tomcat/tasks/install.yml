@@ -6,21 +6,6 @@
         msg: "Tomcat service status: {{ ansible_facts.services['tomcat.service']['state'] | default('Service not found') }}"
       when: "'tomcat.service' in ansible_facts.services"
 
-    - name: Set Java 11 as the active version on CentOS
-      ansible.builtin.shell:
-        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.21.0.9-1.el7_9.x86_64/bin/java
-      when: "'CentOS' in ansible_distribution"
-
-    - name: Set Java 11 as the active version on Ubuntu
-      ansible.builtin.shell:
-        cmd: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
-      when: "'Ubuntu' in ansible_distribution"
-
-    - name: Set Java 11 as the active version on Amazon Linux
-      ansible.builtin.shell:
-        cmd: update-alternatives --set java /usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/java
-      when: "'Amazon' in ansible_distribution"
-
     - name: Download Tomcat
       ansible.builtin.get_url:
         url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"

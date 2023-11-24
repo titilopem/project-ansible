@@ -1,17 +1,8 @@
-    - name: Get remote directory
-      command: "pwd"
-      register: remote_directory
-      become: true
-
-    - name: Display remote directory
-      debug:
-        var: remote_directory.stdout_lines
     
     - name: Get Maven home directory
-      command: "dirname $(dirname $(readlink -f $(which mvn)))"
-      register: maven_directory
-      become: true
+      command: "which mvn"
+      register: maven_home
 
     - name: Display Maven home directory
       debug:
-        var: maven_directory.stdout_lines
+        var: maven_home
