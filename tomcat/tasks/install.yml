@@ -34,4 +34,4 @@
 - name: Print out service status if Tomcat service is present
   ansible.builtin.debug:
     msg: "Tomcat service status: {{ ansible_facts.services['tomcat']['state'] | default('Service not found') }}"
-  when: "'tomcat' in ansible_facts.services"
+  when: "'tomcat.service' in ansible_facts.services"
