@@ -19,6 +19,7 @@
       ansible.builtin.copy:
         content: "{{ warfile.stdout_lines | join('\n') }}"
         dest: "/tmp/warfile_list.txt"
+      delegate_to: localhost
 
 - name: Copy .war files from n4c to Ansible Controller
   hosts: n4c
