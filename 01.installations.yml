@@ -1,8 +1,8 @@
-#install and configure tools accross different servers
+#install and configure tools across different servers
 ---
-- name: Install Maven on Group2 hosts
-  hosts: group2
+- name: Install Tomcat on Group1 hosts
+  hosts: group1
   become: true
   roles:
-    - role: maven
+    - role: tomcat
 ...
