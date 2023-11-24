@@ -8,6 +8,3 @@
   - include_tasks: display.yml
 
   - include_tasks: home.yml
-    loop: "{{ target_hosts }}"
-    loop_control:
-      loop_var: target_host
