@@ -8,9 +8,4 @@
       command: "mvn test"
       args:
         chdir: "~/ansibleproject"
-
-    # - name: Stash the build artifacts
-    #   stash:
-    #     name: webapp-artifacts
-    #     path: "~/target/"
 ...
