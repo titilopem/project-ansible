@@ -33,7 +33,7 @@
 
 - name: Check if Tomcat process is running
   ansible.builtin.shell:
-    cmd: "ps aux | grep [a]pache-tomcat-10.1.16"
+    cmd: "ps aux | grep apache-tomcat-10.1.16"
   register: tomcat_process_status
   ignore_errors: true
 
