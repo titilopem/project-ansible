@@ -1,3 +1,6 @@
+- name: Gather Facts
+  ansible.builtin.setup:
+
 - name: Download Tomcat
   ansible.builtin.get_url:
     url: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
