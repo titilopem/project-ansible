@@ -1,6 +1,6 @@
 ---
 - name: Build WebApp with Maven
-  hosts: group2
+  hosts: n4c
 
   tasks:
     - name: Build the webapp using Maven
