@@ -1,8 +1,7 @@
-- name: Get Maven home directory
-  command: "dirname $(which mvn)"
-  register: maven_directory
-  become: true
+    - name: Get Maven home directory
+      command: "which mvn"
+      register: mvn_home
 
-- name: Display Maven home directory
-  debug:
-    var: maven_directory.stdout_lines
+    - name: Display Maven home directory
+      debug:
+        var: mvn_home
