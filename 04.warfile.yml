@@ -17,15 +17,15 @@
     build_server: "build-server-ip-or-hostname"
 ...
 
----
-- name: Copy file to other nodes
-  hosts: node1
-  tasks:
-    - name: Copy file to node2 and node3
-      ansible.builtin.copy:
-        src: /path/to/source/file.txt
-        dest: /path/to/destination/file.txt
-      delegate_to: "{{ item }}"
-      with_items:
-        - node2
-        - node3
+# ---
+# - name: Copy file to other nodes
+#   hosts: node1
+#   tasks:
+#     - name: Copy file to node2 and node3
+#       ansible.builtin.copy:
+#         src: /path/to/source/file.txt
+#         dest: /path/to/destination/file.txt
+#       delegate_to: "{{ item }}"
+#       with_items:
+#         - node2
+#         - node3
