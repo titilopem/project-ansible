@@ -2,13 +2,12 @@
 - name: Build and Package with Maven on Jenkins Slave
   hosts: n4c
   tasks:
-  
-     - name: Test the webapp using Maven
-       command: "mvn test"
-       args:
-         chdir: "/home/centos/ansibleproject"
-       register: mvn_output
+    - name: Test the webapp using Maven
+      command: "mvn test"
+      args:
+        chdir: "/home/centos/ansibleproject"
+      register: mvn_output
 
     - debug:
-         var: mvn_output
+        var: mvn_output
 ...
