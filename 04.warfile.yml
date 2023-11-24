@@ -14,36 +14,22 @@
         cmd: "find /home/centos/ansibleproject/target/ -name '*.war' -type f"
       register: warfile
       delegate_to: n4c
+   
+   - name: Copy .war files from n4c to Ansible Controller
+     ansible.builtin.fetch:
+       src: "{{ item }}"
+       dest: "/tmp/"
+       flat: yes
+     loop: "{{ warfile.stdout_lines }}"
+     loop_control:
+       loop_var: item_war
 
-    - name: Copy .war files from n4c to Ansible Controller
-      ansible.builtin.fetch:
-        src: "{{ item }}"
-        dest: "/tmp/"
-        flat: yes
-      with_items: "{{ warfile.stdout_lines }}"
-
-    - name: Check if fetched files exist in /tmp/
-      ansible.builtin.stat:
-        path: "/tmp/{{ item }}"
-      register: file_stat
-      with_items: "{{ warfile.stdout_lines }}"
-      ignore_errors: yes
-
-    - name: Debug output of file existence status
-      ansible.builtin.debug:
-        msg: "File {{ item.item }} exists: {{ item.stat.exists }}"
-      with_items: "{{ file_stat.results }}"
-      when: item.stat.exists == false
-
-    - name: Fail if any fetched file is missing in /tmp/
-      ansible.builtin.fail:
-        msg: "One or more fetched files are missing in /tmp/"
-      when: file_stat | failed
-
-    - name: Copy .war files to target hosts
-      ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-        remote_src: yes
-      with_items: "{{ ansible_fetch_result._fetch | map(attribute='dest') | list }}"
+   - name: Copy .war files to target hosts
+     ansible.builtin.copy:
+       src: "/tmp/{{ item_war }}"
+       dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+       remote_src: yes
+     loop: "{{ warfile.stdout_lines }}"
+     loop_control:
+       loop_var: item_war
 ...
