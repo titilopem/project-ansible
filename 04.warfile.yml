@@ -40,10 +40,10 @@
         msg: "One or more fetched files are missing in /tmp/"
       when: file_stat | failed
 
-   - name: Copy .war files to target hosts
-     ansible.builtin.copy:
-       src: "{{ item.path }}"
-       dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-       remote_src: yes
-     with_items: "{{ ansible_fetch_result._fetch | map(attribute='dest') | list }}"
+    - name: Copy .war files to target hosts
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+        remote_src: yes
+      with_items: "{{ ansible_fetch_result._fetch | map(attribute='dest') | list }}"
 ...
