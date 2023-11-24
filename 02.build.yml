@@ -3,8 +3,12 @@
   hosts: n4c
 
   tasks:
+    - name: Create Workspace on n4c
+      become: true
+      shell: "mkdir -p ~/ansibleproject"
+
     - name: Build the webapp using Maven
       command: "mvn clean package"
       args:
-        chdir: "/home/centos/workspace/ansibleproject"
+        chdir: "~/ansibleproject"
 ...
