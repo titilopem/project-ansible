@@ -1,33 +1,12 @@
 ---
-- name: Fetch and Deploy Artifacts into Tomcat on Nodes in group1
-  hosts: group1
+- name: Copy files from build server to tomcat servers
+  hosts: n4c
   become: true
-
   tasks:
-    - name: Remove existing *.war files from webapps folder
-      ansible.builtin.shell:
-        cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
-      ignore_errors: yes
-
-    - name: Find .war files on build server (n4c)
-      ansible.builtin.find:
-        paths: "/home/centos/ansibleproject/target/"
-        patterns: "*.war"
-      register: warfile
-      delegate_to: n4c
-
-    - name: Fetch .war files from n4c to local machine
-      ansible.builtin.fetch:
-        src: "{{ item.path }}"
-        dest: "/tmp/"
-        flat: yes
-      with_items: "{{ warfile.files }}"
-      delegate_to: n4c
-
-    - name: Copy .war files to Tomcat webapps folder on target hosts
-      ansible.builtin.copy:
-        src: "/tmp/{{ item.path | basename }}"
-        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-      with_items: "{{ warfile.files }}"
-      when: inventory_hostname != 'n4c'
+    - name: Copy files to other servers
+      synchronize:
+        src: "/home/centos/ansibleproject/target/*.war"
+        dest:  "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['group1'] }}"
 ...
