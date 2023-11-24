@@ -1,8 +1,7 @@
-    
-    - name: Get Maven home directory
-      command: "command -v mvn"
-      register: maven_home
+- name: Get Maven home directory
+  command: "echo $(dirname $(dirname $(readlink -f $(which mvn))))"
+  register: maven_home
 
-    - name: Display Maven home directory
-      debug:
-        var: maven_home
+- name: Display Maven home directory
+  debug:
+    var: maven_home.stdout_lines
