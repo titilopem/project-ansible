@@ -22,7 +22,7 @@
         flat: yes
       loop: "{{ warfile.stdout_lines }}"
       loop_control:
-        loop_var: item_war
+        loop_var: item
 
     - name: Copy .war files to target hosts
       ansible.builtin.copy:
@@ -31,5 +31,5 @@
         remote_src: yes
       loop: "{{ warfile.stdout_lines }}"
       loop_control:
-        loop_var: item_war
+        loop_var: item
 ...
