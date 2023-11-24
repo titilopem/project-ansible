@@ -23,5 +23,6 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+        remote_src: yes
       with_items: "{{ warfile.stdout_lines }}"
 ...
