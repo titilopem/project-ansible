@@ -5,5 +5,11 @@
 
   tasks:
     - name: Build the webapp using Maven
-      command: "mvn clean package"
+      mvn:
+        goals: "clean package"
+        executable: "mvn"
+      become_user: n4c
+      become_method: sudo
+      args:
+        chdir: "{{ jenkins_workspace }}/ansibleproject"
 ...
