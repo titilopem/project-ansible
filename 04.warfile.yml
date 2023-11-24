@@ -11,7 +11,7 @@
         flat: yes
       vars:
         ansible_ssh_user: "centos"  # Replace with the SSH user on the build server
-        ansible_ssh_host: "n3c"
+        ansible_ssh_host: "n4c"
 
   vars:
     build_server: "build-server-ip-or-hostname"
