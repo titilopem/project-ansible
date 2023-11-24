@@ -1,0 +1,31 @@
+---
+- name: Deploy Stashed Artifacts to Tomcat on Nodes in group1
+  hosts: group1
+  become: true
+
+  tasks:
+    - name: Fetch artifacts from the build server
+      fetch:
+        src: "~/webapp-artifacts/*.war"
+        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+        flat: yes
+      vars:
+        ansible_ssh_user: "your-ssh-user"  # Replace with the SSH user on the build server
+        ansible_ssh_host: "build-server-ip-or-hostname"
+
+  vars:
+    build_server: "build-server-ip-or-hostname"
+...
+
+---
+- name: Copy file to other nodes
+  hosts: node1
+  tasks:
+    - name: Copy file to node2 and node3
+      ansible.builtin.copy:
+        src: /path/to/source/file.txt
+        dest: /path/to/destination/file.txt
+      delegate_to: "{{ item }}"
+      with_items:
+        - node2
+        - node3
