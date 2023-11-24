@@ -4,10 +4,10 @@
   become: true
 
   tasks:
-    - name: Remove existing *.war files from webapps folder
-      ansible.builtin.shell:
-        cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
-      ignore_errors: yes
+    # - name: Remove existing *.war files from webapps folder
+    #   ansible.builtin.shell:
+    #     cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
+    #   ignore_errors: yes
 
     - name: Find .war files on build server (n4c)
       ansible.builtin.shell:
