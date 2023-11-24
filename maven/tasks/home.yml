@@ -1,9 +1,10 @@
 - name: Get Maven home directory
-  command: "echo $(dirname $(dirname $(readlink -f $(which mvn))))"
+  find:
+    paths: /usr /opt  # Add additional paths as needed
+    patterns: mvn
+    recurse: yes
   register: maven_home
-  args:
-    executable: /bin/bash
 
 - name: Display Maven home directory
   debug:
-    var: maven_home.stdout_lines
+    var: maven_home.files | map(attribute='path') | first
