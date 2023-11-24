@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'n6c' }
+    agent any
     
     stages {
         stage('Checkout') {
