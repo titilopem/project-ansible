@@ -24,19 +24,3 @@
     dest: "/etc/init.d/tomcat"
     mode: '0755'
     remote_src: yes
-
-- name: Starting Tomcat
-  ansible.builtin.command:
-    cmd: "{{ catalina_home }}/bin/startup.sh"
-  environment:
-    CATALINA_HOME: "{{ catalina_home }}"
-
-- name: Check if Tomcat process is running
-  ansible.builtin.shell:
-    cmd: "ps aux | grep apache-tomcat-10.1.16"
-  register: tomcat_process_status
-  ignore_errors: true
-
-- name: Print out Tomcat process status
-  debug:
-    msg: "Tomcat process status: {{ 'Running' if tomcat_process_status.rc == 0 else 'Not running' }}"
