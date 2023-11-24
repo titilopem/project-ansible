@@ -1,5 +1,5 @@
 ---
-- name: Deploy Artifacts into Tomcat on Nodes in group1
+- name: Clean servers in group1
   hosts: group1
   become: true
 
@@ -9,28 +9,27 @@
         cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
       ignore_errors: yes
 
+
+- name: Copy Artifacts into ansible master
+  hosts: n4c
+  become: true
+  tasks:
     - name: Find .war files on build server (n4c)
       ansible.builtin.shell:
         cmd: "find /home/centos/ansibleproject/target/ -name '*.war' -type f"
       register: warfile
-      delegate_to: n4c  # delegate the task to Ansible Controller
-
+      
     - name: Save warfile list to a file
       ansible.builtin.copy:
         content: "{{ warfile.stdout_lines | join('\n') }}"
         dest: "/tmp/warfile_list.txt"
-      delegate_to: localhost
-
-- name: Copy .war files from n4c to Ansible Controller
-  hosts: n4c
-  become: true
-
-  tasks:
+      
     - name: Fetch warfile list from Ansible Controller
       ansible.builtin.fetch:
         src: "/tmp/warfile_list.txt"
         dest: "/tmp/"
         flat: yes
+      delegate_to: localhost
 
 - name: Deploy Artifacts into Tomcat on Nodes in group1
   hosts: group1
@@ -45,4 +44,5 @@
       loop: "{{ lookup('file', '/tmp/warfile_list.txt').splitlines() }}"
       loop_control:
         loop_var: item
+      delegate_to: localhost
 ...
