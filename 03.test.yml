@@ -1,0 +1,16 @@
+---
+- name: Test WebApp with Maven and Stash
+  hosts: group3
+  become: true
+
+  tasks:
+    - name: Test the webapp using Maven
+      command: "mvn test"
+      args:
+        chdir: "~/"
+
+    - name: Stash the build artifacts
+      stash:
+        name: webapp-artifacts
+        path: "~/target/"
+...
