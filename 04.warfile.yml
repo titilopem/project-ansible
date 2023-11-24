@@ -14,22 +14,22 @@
         cmd: "find /home/centos/ansibleproject/target/ -name '*.war' -type f"
       register: warfile
       delegate_to: n4c
-   
-   - name: Copy .war files from n4c to Ansible Controller
-     ansible.builtin.fetch:
-       src: "{{ item }}"
-       dest: "/tmp/"
-       flat: yes
-     loop: "{{ warfile.stdout_lines }}"
-     loop_control:
-       loop_var: item_war
 
-   - name: Copy .war files to target hosts
-     ansible.builtin.copy:
-       src: "/tmp/{{ item_war }}"
-       dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-       remote_src: yes
-     loop: "{{ warfile.stdout_lines }}"
-     loop_control:
-       loop_var: item_war
+    - name: Copy .war files from n4c to Ansible Controller
+      ansible.builtin.fetch:
+        src: "{{ item }}"
+        dest: "/tmp/"
+        flat: yes
+      loop: "{{ warfile.stdout_lines }}"
+      loop_control:
+        loop_var: item_war
+
+    - name: Copy .war files to target hosts
+      ansible.builtin.copy:
+        src: "/tmp/{{ item_war }}"
+        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+        remote_src: yes
+      loop: "{{ warfile.stdout_lines }}"
+      loop_control:
+        loop_var: item_war
 ...
