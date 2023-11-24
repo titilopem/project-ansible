@@ -3,5 +3,3 @@
 - include_tasks: install.yml
 
 - include_tasks: restart.yml
-
-- include_tasks: status.yml
