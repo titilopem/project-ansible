@@ -6,12 +6,12 @@
   tasks:
     - name: Fetch artifacts from the build server
       fetch:
-        src: "~/webapp-artifacts/*.war"
+        src: "~/target/*.war"
         dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
         flat: yes
       vars:
-        ansible_ssh_user: "your-ssh-user"  # Replace with the SSH user on the build server
-        ansible_ssh_host: "build-server-ip-or-hostname"
+        ansible_ssh_user: "centos"  # Replace with the SSH user on the build server
+        ansible_ssh_host: "n3c"
 
   vars:
     build_server: "build-server-ip-or-hostname"
