@@ -4,4 +4,4 @@
 
 - name: Display Maven home directory
   debug:
-    var: maven_home.stdout_lines
+    var: maven_home
