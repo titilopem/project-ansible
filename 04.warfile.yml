@@ -15,6 +15,10 @@
       register: warfile
       delegate_to: n4c
 
+    - name: Print find result
+      ansible.builtin.debug:
+        var: warfile.stdout_lines
+
     - name: Copy .war files to target hosts
       ansible.builtin.copy:
         src: "{{ item }}"
