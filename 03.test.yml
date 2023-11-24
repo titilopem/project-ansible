@@ -1,5 +1,5 @@
 ---
-- name: Build and Package with Maven on Jenkins Slave
+- name: Testing artifacts
   hosts: n4c
   tasks:
     - name: Test the webapp using Maven
