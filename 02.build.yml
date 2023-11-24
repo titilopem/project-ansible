@@ -1,13 +1,18 @@
 ---
-- name: Build WebApp with Maven
+- name: Build and Package with Maven on Jenkins Slave
   hosts: n4c
-
   tasks:
-    - name: Create Workspace on n4c
-      become: true
-      shell: "mkdir -p ~/ansibleproject"
+    - name: Create project directory if absent
+      file:
+        path: "~/ansibleproject"
+        state: directory
 
-    - name: Build the webapp using Maven
+    - name: Clone Git repository (if needed)
+      git:
+        repo: "https://github.com/titilopem/JavaWebAnsible.git"
+        dest: "~/ansibleproject"
+
+    - name: Build Maven project
       command: "mvn clean package"
       args:
         chdir: "~/ansibleproject"
