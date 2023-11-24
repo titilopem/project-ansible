@@ -22,10 +22,28 @@
         flat: yes
       with_items: "{{ warfile.stdout_lines }}"
 
-    - name: Copy .war files to target hosts
-      ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-        remote_src: yes
-      with_items: "{{ ansible_fetch_result._fetch | map(attribute='dest') | list }}"
+    - name: Check if fetched files exist in /tmp/
+      ansible.builtin.stat:
+        path: "/tmp/{{ item }}"
+      register: file_stat
+      with_items: "{{ warfile.stdout_lines }}"
+      ignore_errors: yes
+
+    - name: Debug output of file existence status
+      ansible.builtin.debug:
+        msg: "File {{ item.item }} exists: {{ item.stat.exists }}"
+      with_items: "{{ file_stat.results }}"
+      when: item.stat.exists == false
+
+    - name: Fail if any fetched file is missing in /tmp/
+      ansible.builtin.fail:
+        msg: "One or more fetched files are missing in /tmp/"
+      when: file_stat | failed
+
+   - name: Copy .war files to target hosts
+     ansible.builtin.copy:
+       src: "{{ item.path }}"
+       dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+       remote_src: yes
+     with_items: "{{ ansible_fetch_result._fetch | map(attribute='dest') | list }}"
 ...
