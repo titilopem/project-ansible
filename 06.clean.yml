@@ -1,0 +1,10 @@
+---
+- name: Remove existing artifacts from workspace
+  hosts: group3
+  become: true
+
+  tasks:
+    - name: Remove existing *.war files from webapps folder
+      ansible.builtin.shell:
+        cmd: "find ~/target/ -name '*.war' -type f -delete"
+...

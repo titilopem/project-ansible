@@ -1,0 +1,8 @@
+---
+- name: Restart Tomcat on Group1 hosts
+  hosts: group1
+  become: true
+  roles:
+    - role: tomcat
+      tasks_from: restart.yml
+...

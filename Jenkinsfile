@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
     
     stages {
         stage('Checkout') {
@@ -10,109 +10,84 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            agent { label 'n4c' }
-            steps {
-                echo 'Building the project using N4C'
-                script {
-                    sh 'mvn clean package'
-                }
-            }
-        }
-
-        stage('Test') {
-            agent { label 'n4c' }
-            steps {
-                echo 'Running tests using N4C'
-                script {
-                    sh 'mvn test'
-                    stash(name: 'build', includes: "target/*.war")
-                }
-            }
-        }
-
-        stage('Unstash on n1a') {
-            agent { label 'n1a' }
-            steps {
-                script {
-                    echo 'Unstashing files on n1a'
-                    unstash 'build'
-                    sh """
-                        sudo rm -f /usr/local/bin/apache-tomcat-10.1.16/webapps/*.war
-                        war_file=\$(find \$(pwd)/target -name '*.war' -type f -print -quit)
-                        if [ -n "\$war_file" ]; then
-                           sudo mv "\$war_file" /usr/local/bin/apache-tomcat-10.1.16/webapps/
-                        else
-                           echo "No .war file found in the target directory."
-                           exit 1
-                        fi
-                    """
-                }
-            }
-        }
-
-        stage('Unstash on n2u') {
-            agent { label 'n2u' }
-            steps {
-                script {
-                    echo 'Unstashing files on n2u'
-                    unstash 'build'
-                    sh """
-                        sudo rm /usr/local/bin/apache-tomcat-10.1.16/webapps/*.war
-                        sudo cp \$(find \$(pwd)/target -name '*.war') /usr/local/bin/apache-tomcat-10.1.16/webapps/
-                    """
-                }
-            }
-        }
-
-        stage('Unstash on n3cc') {
-            agent { label 'n3cc' }
-            steps {
-                script {
-                    echo 'Unstashing files on n3cc'
-                    unstash 'build'
-                    sh """
-                        sudo rm /usr/local/bin/apache-tomcat-10.1.16/webapps/*.war
-                        sudo cp \$(find \$(pwd)/target -name '*.war') /usr/local/bin/apache-tomcat-10.1.16/webapps/
-                    """
-                }
-            }
-        }
-
-        stage('Deploy with Ansible Master') {
+        stage('Install tools') {
             agent { label 'n6c' }
             steps {
+                echo 'Installing the required tools'
                 script {
-                    ansiblePlaybook(
-                        playbook: 'javawebansible.yml',
+                   ansiblePlaybook(
+                        playbook: '01.installations.yml',
                         inventory: 'hosts.ini'
                     )
                 }
             }
         }
 
-        stage('Clean Up') {
+        stage('Build') {
             agent { label 'n6c' }
             steps {
+                echo 'Building the webapp on the build server'
                 script {
-                    echo 'Cleaning up unnecessary files or directories'
-                    sh "rm -rf \$(pwd)/target"
+                   ansiblePlaybook(
+                        playbook: '02.build.yml',
+                        inventory: 'hosts.ini'
+                    )
                 }
             }
         }
 
-        stage('Diagnostic Output') {
+        stage('Test') {
             agent { label 'n6c' }
             steps {
+                echo 'Testing the webapp on the build server'
                 script {
-                    echo 'Current workspace contents:'
-                    sh 'ls -la $(pwd)'
-                    echo 'Git log:'
-                    sh 'git log -n 5'
+                   ansiblePlaybook(
+                        playbook: '03.test.yml',
+                        inventory: 'hosts.ini'
+                    )
                 }
             }
         }
-    }
+
+        stage('Deploy Artifacts') {
+            agent { label 'n6c' }
+            steps {
+                echo 'Copying the war file from the build server to tomcat servers'
+                script {
+                   ansiblePlaybook(
+                        playbook: '04.warfile.yml',
+                        inventory: 'hosts.ini'
+                    )
+                }
+            }
+        }
+
+        stage('Restart Tomcat') {
+            agent { label 'n6c' }
+            steps {
+                echo 'Starting tomcat'
+                script {
+                   ansiblePlaybook(
+                        playbook: '05.restart.yml',
+                        inventory: 'hosts.ini'
+                    )
+                }
+            }
+        }
+
+
+        stage('Clean Workspace') {
+            agent { label 'n6c' }
+            steps {
+                echo 'Clean out workspace'
+                script {
+                   ansiblePlaybook(
+                        playbook: '06.clean.yml',
+                        inventory: 'hosts.ini'
+                    )
+                }
+            }
+        }
 
     post {
         success {

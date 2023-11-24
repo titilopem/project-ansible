@@ -1,31 +1,36 @@
 ---
-- name: Deploy Stashed Artifacts to Tomcat on Nodes in group1
+- name: Deploy Artifacts into Tomcat on Nodes in group1
   hosts: group1
   become: true
 
   tasks:
-    - name: Fetch artifacts from the build server
-      fetch:
-        src: "~/webapp-artifacts/*.war"
-        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-        flat: yes
-      vars:
-        ansible_ssh_user: "your-ssh-user"  # Replace with the SSH user on the build server
-        ansible_ssh_host: "build-server-ip-or-hostname"
+    - name: Remove existing *.war files from webapps folder
+      ansible.builtin.shell:
+        cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
+      ignore_errors: yes
 
-  vars:
-    build_server: "build-server-ip-or-hostname"
+    - name: Fetch new .war file from build server (n4c) to control node
+      ansible.builtin.fetch:
+        src: "~/target/new-app.war"  # Adjust the source path accordingly on n4c
+        dest: "/path/on/control/node/"
+      delegate_to: n4c  # Delegate the task to run on n4c
+
+    - name: Copy .war file from control node to target hosts
+      ansible.builtin.copy:
+        src: "/path/on/control/node/new-app.war"
+        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+      run_once: true  # Run the task only once on the control node
 ...
 
----
-- name: Copy file to other nodes
-  hosts: node1
-  tasks:
-    - name: Copy file to node2 and node3
-      ansible.builtin.copy:
-        src: /path/to/source/file.txt
-        dest: /path/to/destination/file.txt
-      delegate_to: "{{ item }}"
-      with_items:
-        - node2
-        - node3
+# ---
+# - name: Copy file to other nodes
+#   hosts: node1
+#   tasks:
+#     - name: Copy file to node2 and node3
+#       ansible.builtin.copy:
+#         src: /path/to/source/file.txt
+#         dest: /path/to/destination/file.txt
+#       delegate_to: "{{ item }}"
+#       with_items:
+#         - node2
+#         - node3
