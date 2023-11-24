@@ -23,7 +23,7 @@
     remote_src: yes
 
 - name: Start Tomcat
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: tomcat
     state: started
     enabled: yes
