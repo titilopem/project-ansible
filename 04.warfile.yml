@@ -59,4 +59,5 @@
     - name: Remove existing *.war files from Ansible master folder
       ansible.builtin.shell:
         cmd: "find /tmp/ -name '*.war' -type f -delete"
+      become: yes
 ...
