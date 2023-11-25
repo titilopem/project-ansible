@@ -27,6 +27,11 @@
       ansible.builtin.shell:
         cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
       ignore_errors: yes
+      register: result
+      become: yes
+
+    - debug:
+        var: result
 
     - name: Find .war files on build server (n4c)
       ansible.builtin.find:
@@ -35,13 +40,13 @@
       register: warfile
       delegate_to: n4c
 
-    - name: Set ownership of /opt/tomcat/webapps/
-      ansible.builtin.file:
-        path: /opt/tomcat/webapps/
-        state: directory
-        owner: root
-        group: root
-      become: yes
+    # - name: Set ownership of /opt/tomcat/webapps/
+    #   ansible.builtin.file:
+    #     path: /opt/tomcat/webapps/
+    #     state: directory
+    #     owner: root
+    #     group: root
+    #   become: yes
 
     - name: Copy .war files to Tomcat webapps folder on target hosts
       ansible.builtin.copy:
@@ -50,4 +55,8 @@
       with_fileglob:
         - "/tmp/*.war"
       become: yes
+
+    - name: Remove existing *.war files from Ansible master folder
+      ansible.builtin.shell:
+        cmd: "find /tmp/ -name '*.war' -type f -delete"
 ...
