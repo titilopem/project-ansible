@@ -8,16 +8,16 @@ pipeline {
             }
         }
 
-        // stage('Install tools') {
-        //     agent { label 'n6c' }
-        //     steps {
-        //         echo 'Installing the required tools'
-        //         ansiblePlaybook(
-        //             playbook: '01.installations.yml',
-        //             inventory: 'hosts.ini'
-        //         )
-        //     }
-        // }
+        stage('Install tools') {
+            agent { label 'n6c' }
+            steps {
+                echo 'Installing the required tools'
+                ansiblePlaybook(
+                    playbook: '01.installations.yml',
+                    inventory: 'hosts.ini'
+                )
+            }
+        }
 
         stage('Build') {
             agent { label 'n6c' }
@@ -63,16 +63,6 @@ pipeline {
             }
         }
 
-        // stage('Clean Workspace') {
-        //     agent { label 'n6c' }
-        //     steps {
-        //         echo 'Clean out workspace'
-        //         ansiblePlaybook(
-        //             playbook: '06.clean.yml',
-        //             inventory: 'hosts.ini'
-        //         )
-        //     }
-        // }
     }
 
     post {
