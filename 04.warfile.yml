@@ -25,7 +25,7 @@
   tasks:
     - name: Remove existing *.war files from webapps folder
       ansible.builtin.shell:
-        cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ - name '*.war' -type f -delete"
+        cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
       ignore_errors: yes
 
     - name: Find .war files on build server (n4c)
@@ -45,7 +45,7 @@
 
     - name: Copy .war files to Tomcat webapps folder on target hosts
       ansible.builtin.copy:
-        src: "/tmp/{{ item.path | basename }}"
+        src: "/tmp/{{ item | basename }}"
         dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
       with_fileglob:
         - "/tmp/*.war"
