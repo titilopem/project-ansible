@@ -1,12 +1,53 @@
 ---
-- name: Copy files from build server to tomcat servers
+- name: Fetch and Deploy Artifacts into Tomcat on Nodes in group1
   hosts: n4c
   become: true
+
   tasks:
-    - name: Copy files to other servers
-      synchronize:
-        src: "/home/centos/ansibleproject/target/*.war"
-        dest:  "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
-      delegate_to: "{{ item }}"
-      with_items: "{{ groups['group1'] }}"
+    - name: Find .war files on build server (n4c)
+      ansible.builtin.find:
+        paths: "/home/centos/ansibleproject/target/"
+        patterns: "*.war"
+      register: warfile
+
+    - name: Copy WAR files to Ansible Controller
+      ansible.builtin.fetch:
+        src: "{{ item.path }}"
+        dest: "/tmp/"
+        flat: yes
+      with_items: "{{ warfile.files }}"
+      become: yes
+
+- name: Fetch and Deploy Artifacts into Tomcat on Nodes in group1
+  hosts: group1
+  become: true
+
+  tasks:
+    - name: Remove existing *.war files from webapps folder
+      ansible.builtin.shell:
+        cmd: "find /usr/local/bin/apache-tomcat-10.1.16/webapps/ -name '*.war' -type f -delete"
+      ignore_errors: yes
+
+    - name: Find .war files on build server (n4c)
+      ansible.builtin.find:
+        paths: "/home/centos/ansibleproject/target/"
+        patterns: "*.war"
+      register: warfile
+      delegate_to: n4c
+
+    - name: Set ownership of /opt/tomcat/webapps/
+      ansible.builtin.file:
+        path: /opt/tomcat/webapps/
+        state: directory
+        owner: root
+        group: root
+      become: yes
+
+    - name: Copy .war files to Tomcat webapps folder on target hosts
+      ansible.builtin.copy:
+        src: "/tmp/{{ item.path | basename }}"
+        dest: "/usr/local/bin/apache-tomcat-10.1.16/webapps/"
+      with_fileglob:
+        - "/tmp/*.war"
+      become: yes
 ...
