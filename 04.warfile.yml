@@ -40,14 +40,6 @@
       register: warfile
       delegate_to: n4c
 
-    # - name: Set ownership of /opt/tomcat/webapps/
-    #   ansible.builtin.file:
-    #     path: /opt/tomcat/webapps/
-    #     state: directory
-    #     owner: root
-    #     group: root
-    #   become: yes
-
     - name: Copy .war files to Tomcat webapps folder on target hosts
       ansible.builtin.copy:
         src: "/tmp/{{ item | basename }}"
