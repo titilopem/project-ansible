@@ -1,2 +1,4 @@
 # roles/tomcat/vars/main.yml
-catalina_home: "/usr/local/bin/apache-tomcat-10.1.16"
+java_packages:
+  - openjdk-11-jdk
+

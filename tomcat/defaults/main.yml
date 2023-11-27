@@ -1,2 +1,6 @@
 ---
 # defaults file for tomcat
+
+tomcat_install_user: tomcat
+tomcat_install_version: 10.1.16
+tomcat_install_download_url: "https://dlcdn.apache.org/tomcat/tomcat-{{ tomcat_install_version }}/bin/apache-tomcat-{{ tomcat_install_version }}.tar.gz"
