@@ -39,9 +39,9 @@
           Description=Tomcat Service
           Requires=network.target
           After=network.target
+
           [Service]
           Type=forking
-          User=tomcat
           Environment="CATALINA_PID=/opt/tomcat/logs/tomcat.pid"
           Environment="CATALINA_BASE=/opt/tomcat"
           Environment="CATALINA_HOME=/opt/tomcat"
@@ -49,6 +49,7 @@
           ExecStart=/opt/tomcat/bin/startup.sh
           ExecStop=/opt/tomcat/bin/shutdown.sh
           Restart=on-abnormal
+
           [Install]
           WantedBy=multi-user.target
         dest: /etc/systemd/system/tomcat.service
