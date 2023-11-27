@@ -56,10 +56,3 @@
       become: yes
       systemd:
         daemon-reload: yes
-
-  handlers:
-    - name: Restart Tomcat
-      become: yes
-      systemd:
-        name: tomcat
-        state: restarted
