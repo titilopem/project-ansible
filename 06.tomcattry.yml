@@ -23,6 +23,8 @@
     - name: Move files to the /opt/tomcat directory
       become: yes
       shell: "mv -un /opt/tomcat/apache-tomcat-10.1.16/* /opt/tomcat/"
+      notify:
+        - Restart Tomcat
 
     - name: Install Tomcat init script
       ansible.builtin.copy:
@@ -53,16 +55,18 @@
           [Install]
           WantedBy=multi-user.target
         dest: /etc/systemd/system/tomcat.service
+      notify:
+        - Restart Tomcat
 
     - name: Reload systemd
       become: yes
       systemd:
         daemon-reload: yes
 
-    - name: Enable the tomcat service and start
+  handlers:
+    - name: Restart Tomcat
       become: yes
       systemd:
         name: tomcat
-        enabled: yes
-        state: started
+        state: restarted
 ...
