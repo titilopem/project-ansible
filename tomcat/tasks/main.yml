@@ -1,10 +1,4 @@
 # deploy_tomcat_single_playbook.yml
----
-- name: Deploy Tomcat
-  hosts: group1
-  become: yes
-
-  tasks:
     - name: Gather Facts
       ansible.builtin.setup:
 
@@ -69,4 +63,3 @@
       systemd:
         name: tomcat
         state: restarted
-...
