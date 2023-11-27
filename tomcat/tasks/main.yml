@@ -1,5 +1,72 @@
+# deploy_tomcat_single_playbook.yml
 ---
-# tasks file for tomcat
-- include_tasks: install.yml
+- name: Deploy Tomcat
+  hosts: group1
+  become: yes
 
-- include_tasks: restart.yml
+  tasks:
+    - name: Gather Facts
+      ansible.builtin.setup:
+
+    - name: Create a Directory /opt/tomcat
+      become: yes
+      file:
+        path: /opt/tomcat
+        state: directory
+
+    - name: Extract Tomcat
+      ansible.builtin.unarchive:
+        src: "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.16/bin/apache-tomcat-10.1.16.tar.gz"
+        dest: /opt/tomcat
+        remote_src: yes
+
+    - name: Move files to the /opt/tomcat directory
+      become: yes
+      shell: "mv -un /opt/tomcat/apache-tomcat-10.1.16/* /opt/tomcat/"
+      notify:
+        - Restart Tomcat
+
+    - name: Install Tomcat init script
+      ansible.builtin.copy:
+        src: "/opt/tomcat/bin/catalina.sh"
+        dest: "/etc/init.d/tomcat"
+        mode: '0755'
+        remote_src: yes
+
+    - name: Creating a service file
+      become: yes
+      copy:
+        content: |
+          [Unit]
+          Description=Tomcat Service
+          Requires=network.target
+          After=network.target
+
+          [Service]
+          Type=forking
+          Environment="CATALINA_PID=/opt/tomcat/logs/tomcat.pid"
+          Environment="CATALINA_BASE=/opt/tomcat"
+          Environment="CATALINA_HOME=/opt/tomcat"
+          Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+          ExecStart=/opt/tomcat/bin/startup.sh
+          ExecStop=/opt/tomcat/bin/shutdown.sh
+          Restart=on-abnormal
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/tomcat.service
+      notify:
+        - Restart Tomcat
+
+    - name: Reload systemd
+      become: yes
+      systemd:
+        daemon-reload: yes
+
+  handlers:
+    - name: Restart Tomcat
+      become: yes
+      systemd:
+        name: tomcat
+        state: restarted
+...
