@@ -6,7 +6,7 @@
 
   tasks:
     - name: Gather Facts
-      ansible.builtin.setup
+      ansible.builtin.setup:
 
     - name: Create a Directory /opt/tomcat
       become: yes
