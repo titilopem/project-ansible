@@ -22,7 +22,7 @@
 
     - name: Move files to the /opt/tomcat directory
       become: yes
-      shell: "mv /opt/tomcat/apache*/* /opt/tomcat"
+      shell: "mv -u /opt/tomcat/apache-tomcat-10.1.16/* /opt/tomcat/"
 
     - name: Install Tomcat init script
       ansible.builtin.copy:
